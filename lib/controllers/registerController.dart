@@ -7,27 +7,32 @@ class RegisterController extends GetxController {
   final UserService userService = Get.put(UserService());
 
   final TextEditingController nameController = TextEditingController();
-   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   final TextEditingController mailController = TextEditingController();
   final TextEditingController commentController = TextEditingController();
 
   var isLoading = false.obs;
   var errorMessage = ''.obs;
-
-  
+  int perfil = -1;
 
   void signUp() async {
     // Validación de campos vacíos
-    if (nameController.text.isEmpty || passwordController.text.isEmpty || mailController.text.isEmpty || commentController.text.isEmpty) {
+    if (nameController.text.isEmpty ||
+        passwordController.text.isEmpty ||
+        mailController.text.isEmpty ||
+        commentController.text.isEmpty ||
+        perfil == -1) {
       errorMessage.value = 'Campos vacíos';
-      Get.snackbar('Error', errorMessage.value, snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Error', errorMessage.value,
+          snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
     // Validación de formato de correo electrónico
     if (!GetUtils.isEmail(mailController.text)) {
       errorMessage.value = 'Correo electrónico no válido';
-      Get.snackbar('Error', errorMessage.value, snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Error', errorMessage.value,
+          snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
@@ -35,26 +40,33 @@ class RegisterController extends GetxController {
 
     try {
       UserModel newUser = UserModel(
-        name: nameController.text,
-        password: passwordController.text,
-        mail: mailController.text,
-        comment: commentController.text
-      );
+          name: nameController.text,
+          password: passwordController.text,
+          mail: mailController.text,
+          comment: commentController.text,
+          perfil: perfil == 0 ? 'Alumno' : 'Profesor');
 
       final response = await userService.createUser(newUser);
 
-      if (response != null && response== 201) {
+      if (response != null && response == 201) {
         Get.snackbar('Éxito', 'Usuario creado exitosamente');
         Get.toNamed('/login');
       } else {
         errorMessage.value = 'Error: Este E-Mail o Teléfono ya están en uso';
-        Get.snackbar('Error', errorMessage.value, snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar('Error', errorMessage.value,
+            snackPosition: SnackPosition.BOTTOM);
       }
     } catch (e) {
       errorMessage.value = 'Error al registrar usuario';
-      Get.snackbar('Error', errorMessage.value, snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Error', errorMessage.value,
+          snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void setPerfil(int value) {
+    perfil = value;
+    update();
   }
 }
