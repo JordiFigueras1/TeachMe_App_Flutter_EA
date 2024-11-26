@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_application_1/Widgets/bottomNavigationBar.dart';
-import 'package:flutter_application_1/screen/experiencies.dart';
 import 'package:flutter_application_1/screen/logIn.dart';
 import 'package:flutter_application_1/screen/perfil.dart';
 import 'package:flutter_application_1/screen/register.dart';
@@ -43,10 +42,7 @@ class MyApp extends StatelessWidget {
           name: '/usuarios',
           page: () => BottomNavScaffold(child: UserPage()),
         ),
-        GetPage(
-          name: '/experiencies',
-          page: () => BottomNavScaffold(child: ExperienciesPage()),
-        ),
+        
         GetPage(
           name: '/perfil',
           page: () => BottomNavScaffold(child: PerfilPage()),
