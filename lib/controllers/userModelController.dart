@@ -7,13 +7,14 @@ class UserModelController extends GetxController {
     mail: 'No especificado',
     password: 'Sin contraseña',
     comment: 'Sin comentarios',
+    perfil: 'Perfil desconocido',
   ).obs;
 
   // Método para actualizar los datos del usuario
-  void setUser(String name, String mail, String password, String comment) {
+  void setUser(String name, String mail, String password, String comment,String perfil) {
     user.update((val) {
       if (val != null) {
-        val.setUser(name, mail, password, comment);
+        val.setUser(name, mail, password, comment,perfil);
       }
     });
   }
