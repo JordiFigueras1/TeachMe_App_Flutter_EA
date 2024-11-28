@@ -4,7 +4,8 @@ import '../models/asignaturaModel.dart';
 
 
 class UserService {
-  final String baseUrl = "http://localhost:3000/api/usuarios";
+  //final String baseUrl = "http://localhost:3000/api/usuarios";
+  final String baseUrl = 'http://10.0.2.2:3000/api/usuarios';
   final Dio dio = Dio();
 
   Future<int> createUser(UserModel newUser) async {
