@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../models/userModel.dart';
+import '../models/asignaturaModel.dart';
 
-class UserCard extends StatelessWidget {
-  final UserModel user;
+class AsignaturaCard extends StatelessWidget {
+  final AsignaturaModel asignatura;
 
-  const UserCard({Key? key, required this.user}) : super(key: key);
+  const AsignaturaCard({Key? key, required this.asignatura}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,11 +16,11 @@ class UserCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              user.name,
+              asignatura.nombre,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8),
-            Text(user.mail),
+            const SizedBox(height: 8),
+            Text(asignatura.descripcion),
           ],
         ),
       ),

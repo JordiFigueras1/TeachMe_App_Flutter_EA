@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/controllers/userModelController.dart';
 import 'package:get/get.dart';
-
+import '../controllers/authController.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -32,21 +32,32 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     Get.put(UserModelController());
+    final AuthController authController = Get.find<AuthController>();
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: const Text('Home'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              authController.setUserId(''); // Limpia el userId
+              Get.offAllNamed('/login'); // Redirige al Login y elimina el historial de navegación
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(20),
-              margin: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.all(20),
+              margin: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(15),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black26,
                     blurRadius: 10,
@@ -72,7 +83,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     builder: (context, child) {
                       return Transform.scale(
                         scale: _animation.value,
-                        child: Icon(
+                        child: const Icon(
                           Icons.favorite,
                           color: Colors.red,
                           size: 100,

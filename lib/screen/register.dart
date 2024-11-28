@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_application_1/controllers/registerController.dart';
+import '../controllers/registerController.dart';
 
 class RegisterPage extends StatelessWidget {
   final RegisterController registerController = Get.put(RegisterController());
@@ -20,60 +20,29 @@ class RegisterPage extends StatelessWidget {
                 SizedBox(height: 26),
                 TextField(
                   controller: registerController.nameController,
-                  decoration: InputDecoration(labelText: 'Usuario'),
+                  decoration: InputDecoration(labelText: 'Nombre'),
                 ),
                 TextField(
                   controller: registerController.mailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(labelText: 'Correo Electrónico'),
+                  decoration: InputDecoration(labelText: 'Correo electrónico'),
+                ),
+                TextField(
+                  controller: registerController.ageController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Edad'),
                 ),
                 TextField(
                   controller: registerController.passwordController,
                   decoration: InputDecoration(labelText: 'Contraseña'),
                   obscureText: true,
                 ),
-                SizedBox(height: 20),
-                Text('Seleccione el tipo de perfil'),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 30,
-                  ),
-                  child: GetBuilder<RegisterController>(builder: (controller) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Radio(
-                          activeColor: Colors.blue,
-                          value: 0,
-                          groupValue: controller.perfil,
-                          onChanged: (value) {
-                            controller.setPerfil(value!);
-                          },
-                        ),
-                        const Text(
-                          'Alumno',
-                        ),
-                        Radio(
-                          activeColor: Colors.blue,
-                          value: 1,
-                          groupValue: controller.perfil,
-                          onChanged: (value) {
-                            controller.setPerfil(value!);
-                          },
-                        ),
-                        const Text(
-                          'Profesor',
-                        ),
-                      ],
-                    );
-                  }),
-                ),
                 TextField(
-                  controller: registerController.commentController,
-                  decoration: InputDecoration(labelText: 'Comentario'),
+                  controller: registerController.confirmPasswordController,
+                  decoration: InputDecoration(labelText: 'Confirmar contraseña'),
+                  obscureText: true,
                 ),
                 SizedBox(height: 16),
-                // Mostrar CircularProgressIndicator o botón de registro según el estado de carga
                 Obx(() {
                   if (registerController.isLoading.value) {
                     return CircularProgressIndicator();
@@ -84,8 +53,6 @@ class RegisterPage extends StatelessWidget {
                     );
                   }
                 }),
-
-                // Mostrar mensaje de error si existe
                 Obx(() {
                   if (registerController.errorMessage.isNotEmpty) {
                     return Padding(
@@ -99,13 +66,10 @@ class RegisterPage extends StatelessWidget {
                     return Container();
                   }
                 }),
-
                 SizedBox(height: 16),
-
-                // Botón para volver a la página de inicio de sesión
-                ElevatedButton(
+                TextButton(
                   onPressed: () => Get.toNamed('/login'),
-                  child: Text('Volver'),
+                  child: Text('¿Ya tienes una cuenta? Inicia sesión'),
                 ),
               ],
             ),

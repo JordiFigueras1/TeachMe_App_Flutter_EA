@@ -1,37 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_application_1/controllers/navigationController.dart';
+import '../controllers/authController.dart'; // Importa el controlador
 
 class BottomNavScaffold extends StatelessWidget {
   final Widget child;
-  final NavigationController navController = Get.put(NavigationController());
+  static final RxInt selectedIndex = 0.obs; // Variable estática para mantener el estado
 
-  BottomNavScaffold({required this.child});
+  const BottomNavScaffold({required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: Obx(() => BottomNavigationBar(
-            currentIndex: navController.selectedIndex.value,
-            onTap: navController.navigateTo,
-            selectedItemColor: const Color.fromARGB(255, 92, 14, 105),
-            unselectedItemColor: Colors.black,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Usuarios',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.local_activity),
-                label: 'Experiencias',
-              ),
-            ],
-          )),
-    );
+    final AuthController authController = Get.find<AuthController>();
+
+    return Obx(() {
+      return Scaffold(
+        body: child,
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: selectedIndex.value,
+          onTap: (index) {
+            // Cambiar solo si el índice es diferente
+            if (selectedIndex.value != index) {
+              selectedIndex.value = index;
+
+              switch (index) {
+                case 0:
+                  Get.offNamed('/home'); // Navega al Home
+                  break;
+                case 1:
+                  Get.offNamed(
+                    '/usuarios',
+                    arguments: {'userId': authController.userId.value}, // Usa el userId
+                  );
+                  break;
+              }
+            }
+          },
+          selectedItemColor: const Color.fromARGB(255, 92, 14, 105),
+          unselectedItemColor: Colors.black,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Usuarios',
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_application_1/controllers/userController.dart';
+import '../controllers/userController.dart';
+import '../controllers/authController.dart';
 
 class LogInPage extends StatelessWidget {
-  // Inyectar el controlador para que esté disponible en esta página
   final UserController userController = Get.put(UserController());
+  final AuthController authController = Get.find<AuthController>(); // Encuentra el AuthController
 
   @override
   Widget build(BuildContext context) {
@@ -27,22 +28,18 @@ class LogInPage extends StatelessWidget {
               obscureText: true,
             ),
             SizedBox(height: 16),
-
-            // Mostrar CircularProgressIndicator o el botón, según el estado de carga
             Obx(() {
               if (userController.isLoading.value) {
                 return CircularProgressIndicator();
               } else {
                 return ElevatedButton(
                   onPressed: () {
-                    userController.logIn();
+                    userController.logIn(); // Llama a la función que ya maneja todo internamente
                   },
                   child: Text('Iniciar Sesión'),
                 );
               }
             }),
-
-            // Mostrar mensaje de error si existe
             Obx(() {
               if (userController.errorMessage.isNotEmpty) {
                 return Padding(
@@ -56,13 +53,10 @@ class LogInPage extends StatelessWidget {
                 return Container();
               }
             }),
-
             SizedBox(height: 16),
-
-            // Botón para navegar a la página de registro
-            ElevatedButton(
+            TextButton(
               onPressed: () => Get.toNamed('/register'),
-              child: Text('Registrarse'),
+              child: Text('¿No tienes cuenta? Regístrate'),
             ),
           ],
         ),

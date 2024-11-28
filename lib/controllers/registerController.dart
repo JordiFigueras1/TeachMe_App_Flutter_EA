@@ -1,34 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_application_1/services/user.dart';
-import 'package:flutter_application_1/models/userModel.dart';
+import '../models/userModel.dart';
+import '../services/user.dart';
 
 class RegisterController extends GetxController {
   final UserService userService = Get.put(UserService());
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController mailController = TextEditingController();
-  final TextEditingController commentController = TextEditingController();
+  final nameController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController(); // Nuevo controlador
+  final mailController = TextEditingController();
+  final ageController = TextEditingController();
 
   var isLoading = false.obs;
   var errorMessage = ''.obs;
-  int perfil = -1;
 
   void signUp() async {
-    // Validación de campos vacíos
     if (nameController.text.isEmpty ||
         passwordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty || // Nueva validación
         mailController.text.isEmpty ||
-        commentController.text.isEmpty ||
-        perfil == -1) {
-      errorMessage.value = 'Campos vacíos';
+        ageController.text.isEmpty) {
+      errorMessage.value = 'Todos los campos son obligatorios';
       Get.snackbar('Error', errorMessage.value,
           snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
-    // Validación de formato de correo electrónico
+    if (passwordController.text != confirmPasswordController.text) {
+      errorMessage.value = 'Las contraseñas no coinciden';
+      Get.snackbar('Error', errorMessage.value,
+          snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+
     if (!GetUtils.isEmail(mailController.text)) {
       errorMessage.value = 'Correo electrónico no válido';
       Get.snackbar('Error', errorMessage.value,
@@ -40,33 +45,42 @@ class RegisterController extends GetxController {
 
     try {
       UserModel newUser = UserModel(
-          name: nameController.text,
-          password: passwordController.text,
-          mail: mailController.text,
-          comment: commentController.text,
-          perfil: perfil == 0 ? 'Alumno' : 'Profesor');
+        name: nameController.text,
+        password: passwordController.text,
+        mail: mailController.text,
+        age: int.parse(ageController.text),
+        isProfesor: false,
+        isAlumno: false,
+        isAdmin: true,
+      );
 
       final response = await userService.createUser(newUser);
 
-      if (response != null && response == 201) {
-        Get.snackbar('Éxito', 'Usuario creado exitosamente');
+      if (response == 201 || response == 204) {
+        Get.snackbar('Éxito', 'Usuario registrado correctamente',
+            snackPosition: SnackPosition.BOTTOM);
         Get.toNamed('/login');
+      } else if (response == 400) {
+        errorMessage.value = 'Datos inválidos. Revisa los campos.';
+        Get.snackbar('Error', errorMessage.value,
+            snackPosition: SnackPosition.BOTTOM);
+      } else if (response == 500) {
+        errorMessage.value =
+            'Error interno del servidor. Inténtalo más tarde.';
+        Get.snackbar('Error', errorMessage.value,
+            snackPosition: SnackPosition.BOTTOM);
       } else {
-        errorMessage.value = 'Error: Este E-Mail o Teléfono ya están en uso';
+        errorMessage.value = 'Ocurrió un error desconocido.';
         Get.snackbar('Error', errorMessage.value,
             snackPosition: SnackPosition.BOTTOM);
       }
     } catch (e) {
-      errorMessage.value = 'Error al registrar usuario';
+      print("Error en signUp: $e");
+      errorMessage.value = 'No se pudo conectar con el servidor.';
       Get.snackbar('Error', errorMessage.value,
           snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }
-  }
-
-  void setPerfil(int value) {
-    perfil = value;
-    update();
   }
 }

@@ -1,20 +1,22 @@
 import 'package:get/get.dart';
-import 'package:flutter_application_1/models/userModel.dart';
+import '../models/userModel.dart';
 
 class UserModelController extends GetxController {
   final user = UserModel(
     name: 'Usuario desconocido',
     mail: 'No especificado',
     password: 'Sin contraseña',
-    comment: 'Sin comentarios',
-    perfil: 'Perfil desconocido',
+    age: 0, // Agregado: valor predeterminado para `age`
+    isProfesor: false,
+    isAlumno: false,
+    isAdmin: false,
   ).obs;
 
   // Método para actualizar los datos del usuario
-  void setUser(String name, String mail, String password, String comment,String perfil) {
+  void setUser(String name, String mail, String password, int age, bool isProfesor, bool isAlumno, bool isAdmin) {
     user.update((val) {
       if (val != null) {
-        val.setUser(name, mail, password, comment,perfil);
+        val.setUser(name, mail, password, age, isProfesor, isAlumno, isAdmin);
       }
     });
   }

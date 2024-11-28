@@ -1,205 +1,91 @@
-import 'dart:convert';
-import 'dart:developer';
-import 'package:flutter_application_1/models/userModel.dart';
 import 'package:dio/dio.dart';
+import '../models/userModel.dart';
+import '../models/asignaturaModel.dart';
+
 
 class UserService {
-  final String baseUrl =
-      "http://10.0.2.2:3000"; // URL de tu backend Web
-  //final String baseUrl = "http://10.0.2.2:3000"; // URL de tu backend Android
-  final Dio dio = Dio(); // Usa el prefijo 'Dio' para referenciar la clase Dio
-  var statusCode;
-  var data;
+  final String baseUrl = "http://localhost:3000/api/usuarios";
+  final Dio dio = Dio();
 
-  //Función createUser
   Future<int> createUser(UserModel newUser) async {
     try {
-      log(newUser.toJson().toString());
-      print('createUser');
-      print('try');
-      //Aquí llamamos a la función request
-      print('request');
-      // Utilizar Dio para enviar la solicitud POST a http://127.0.0.1:3000/user
-      Response response =
-          await dio.post('$baseUrl/user/newUser', data: newUser.toJson());
-      print('response');
-      //En response guardamos lo que recibimos como respuesta
-      //Printeamos los datos recibidos
+      print(newUser.toJson().toString()); // Reemplaza log con print
+      Response response = await dio.post('$baseUrl', data: newUser.toJson());
 
-      data = response.data.toString();
-      print('Data: $data');
-      //Printeamos el status code recibido por el backend
+      int statusCode = response.statusCode ?? 500; // Obtén el statusCode de la respuesta
 
-      statusCode = response.statusCode;
-      print('Status code: $statusCode');
-
-      if (statusCode == 201 ) {
-        // Si el usuario se crea correctamente, retornamos el código 201
-        print('201');
-        return 201;
+      if (statusCode == 204 || statusCode == 201 || statusCode == 200) {
+        return statusCode;
       } else if (statusCode == 400) {
-        // Si hay campos faltantes, retornamos el código 400
-        print('400');
-
         return 400;
       } else if (statusCode == 500) {
-        // Si hay un error interno del servidor, retornamos el código 500
-        print('500');
-
         return 500;
       } else {
-        // Otro caso no manejado
-        print('-1');
-
-        return -1;
+        return -1; // Error desconocido
       }
     } catch (e) {
+      print("Error en createUser: $e");
       return 500;
+    }
+  }
+
+  Future<List<AsignaturaModel>> getAsignaturasByUser(String userId) async {
+    try {
+      Response response = await dio.get('$baseUrl/$userId/asignaturas');
+      List<dynamic> data = response.data;
+      return data.map((json) => AsignaturaModel.fromJson(json)).toList();
+    } catch (e) {
+      print("Error en getAsignaturasByUser: $e");
+      throw Exception('Error al obtener asignaturas');
     }
   }
 
   Future<List<UserModel>> getUsers() async {
-    print('getUsers');
     try {
-      var res = await dio.get('$baseUrl/user');
-      List<dynamic> responseData =
-          res.data; // Obtener los datos de la respuesta
-
-      // Convertir los datos en una lista de objetos Place
-      List<UserModel> users =
-          responseData.map((data) => UserModel.fromJson(data)).toList();
-
-      return users; // Devolver la lista de lugares
+      Response response = await dio.get('$baseUrl');
+      List<dynamic> responseData = response.data;
+      List<UserModel> users = responseData.map((data) => UserModel.fromJson(data)).toList();
+      return users;
     } catch (e) {
-      // Manejar cualquier error que pueda ocurrir durante la solicitud
-      print('Error fetching data: $e');
-      throw e; // Relanzar el error para que el llamador pueda manejarlo
+      print("Error en getUsers: $e");
+      throw Exception('Error al obtener usuarios');
     }
   }
 
-  Future<int> EditUser(UserModel newUser, String id) async {
-    print('createUser');
-    print('try');
-    //Aquí llamamos a la función request
-    print('request');
-
-    // Utilizar Dio para enviar la solicitud POST a http://127.0.0.1:3000/user
-    Response response =
-        await dio.put('$baseUrl/user/$id', data: newUser.toJson());
-    //En response guardamos lo que recibimos como respuesta
-    //Printeamos los datos recibidos
-
-    data = response.data.toString();
-    print('Data: $data');
-    //Printeamos el status code recibido por el backend
-
-    statusCode = response.statusCode;
-    print('Status code: $statusCode');
-
-    if (statusCode == 201) {
-      // Si el usuario se crea correctamente, retornamos el código 201
-      print('201');
-      return 201;
-    } else if (statusCode == 400) {
-      // Si hay campos faltantes, retornamos el código 400
-      print('400');
-
-      return 400;
-    } else if (statusCode == 500) {
-      // Si hay un error interno del servidor, retornamos el código 500
-      print('500');
-
-      return 500;
+Future<Response> logIn(Map<String, String> credentials) async {
+  try {
+    Response response = await dio.post('$baseUrl/login', data: credentials);
+    if (response.statusCode == 200 && response.data != null) {
+      return response; // Devuelve el objeto Response si es válido
+    } else if (response.statusCode == 204) {
+      throw Exception('Login fallido: Sin contenido en la respuesta');
     } else {
-      // Otro caso no manejado
-      print('-1');
-
-      return -1;
+      throw Exception('Error inesperado: ${response.statusCode}');
     }
+  } catch (e) {
+    print("Error en logIn: $e");
+    rethrow;
   }
+}
+
 
   Future<int> deleteUser(String id) async {
-    print('createUser');
-    print('try');
-    //Aquí llamamos a la función request
-    print('request');
+    try {
+      Response response = await dio.delete('$baseUrl/$id');
+      int statusCode = response.statusCode ?? 500;
 
-    // Utilizar Dio para enviar la solicitud POST a http://127.0.0.1:3000/user
-    Response response = await dio.delete('$baseUrl/user/$id');
-    //En response guardamos lo que recibimos como respuesta
-    //Printeamos los datos recibidos
-
-    data = response.data.toString();
-    print('Data: $data');
-    //Printeamos el status code recibido por el backend
-
-    statusCode = response.statusCode;
-    print('Status code: $statusCode');
-
-    if (statusCode == 201) {
-      // Si el usuario se crea correctamente, retornamos el código 201
-      print('201');
-      return 201;
-    } else if (statusCode == 400) {
-      // Si hay campos faltantes, retornamos el código 400
-      print('400');
-
-      return 400;
-    } else if (statusCode == 500) {
-      // Si hay un error interno del servidor, retornamos el código 500
-      print('500');
-
+      if (statusCode == 204 || statusCode == 200) {
+        return statusCode;
+      } else if (statusCode == 400) {
+        return 400;
+      } else if (statusCode == 500) {
+        return 500;
+      } else {
+        return -1; // Error desconocido
+      }
+    } catch (e) {
+      print("Error en deleteUser: $e");
       return 500;
-    } else {
-      // Otro caso no manejado
-      print('-1');
-
-      return -1;
     }
-  }
-
-  Future<int> logIn(logIn) async {
-    print('LogIn');
-    print('try');
-    //Aquí llamamos a la función request
-    print('request');
-
-    print('el login es:${logIn}');
-
-    Response response =
-        await dio.post('$baseUrl/user/logIn', data: logInToJson(logIn));
-    //En response guardamos lo que recibimos como respuesta
-    //Printeamos los datos recibidos
-
-    data = response.data.toString();
-    print('Data: $data');
-    //Printeamos el status code recibido por el backend
-
-    statusCode = response.statusCode;
-    print('Status code: $statusCode');
-
-    if (statusCode == 200) {
-      print('200');
-      return 201;
-    } else if (statusCode == 400) {
-      // Si hay campos faltantes, retornamos el código 400
-      print('400');
-
-      return 400;
-    } else if (statusCode == 500) {
-      // Si hay un error interno del servidor, retornamos el código 500
-      print('500');
-
-      return 500;
-    } else {
-      // Otro caso no manejado
-      print('-1');
-
-      return -1;
-    }
-  }
-
-  Map<String, dynamic> logInToJson(logIn) {
-    return {'mail': logIn.mail, 'password': logIn.password};
   }
 }

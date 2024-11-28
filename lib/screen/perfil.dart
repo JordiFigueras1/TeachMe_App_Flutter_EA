@@ -18,7 +18,6 @@ class PerfilPage extends StatelessWidget {
             children: [
               Text('Nombre: ${user.name}'),
               Text('Email: ${user.mail}'),
-              Text('Comentario: ${user.comment}'),
               SizedBox(height: 20),
               Card(
                 clipBehavior: Clip.antiAlias,
@@ -62,8 +61,6 @@ class PerfilPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    /* Image.asset('assets/card-sample-image.jpg'),
-                    Image.asset('assets/card-sample-image-2.jpg'), */
                   ],
                 ),
               ),

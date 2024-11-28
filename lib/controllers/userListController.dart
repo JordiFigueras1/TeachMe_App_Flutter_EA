@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_application_1/services/user.dart';
-import 'package:flutter_application_1/models/userModel.dart';
+import '../models/userModel.dart';
+import '../services/user.dart';
 
 class UserListController extends GetxController {
   var isLoading = true.obs;
