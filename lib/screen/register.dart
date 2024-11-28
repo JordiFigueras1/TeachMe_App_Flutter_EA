@@ -8,7 +8,7 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Registrarse')),
+      appBar: AppBar(title: const Text('Registrarse')),
       body: SizedBox.expand(
         child: SingleChildScrollView(
           child: Padding(
@@ -17,27 +17,31 @@ class RegisterPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(height: 26),
+                const SizedBox(height: 26),
+                // **Campo de usuario**
                 TextField(
                   controller: registerController.nameController,
-                  decoration: InputDecoration(labelText: 'Usuario'),
+                  decoration: const InputDecoration(labelText: 'Usuario'),
                 ),
+                const SizedBox(height: 16), // Espacio entre los campos
+                // **Campo de correo electrónico**
                 TextField(
                   controller: registerController.mailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(labelText: 'Correo Electrónico'),
+                  decoration: const InputDecoration(labelText: 'Correo Electrónico'),
                 ),
+                const SizedBox(height: 16), // Espacio entre los campos
+                // **Campo de contraseña**
                 TextField(
                   controller: registerController.passwordController,
-                  decoration: InputDecoration(labelText: 'Contraseña'),
+                  decoration: const InputDecoration(labelText: 'Contraseña'),
                   obscureText: true,
                 ),
-                SizedBox(height: 20),
-                Text('Seleccione el tipo de perfil'),
+                const SizedBox(height: 20), // Espacio entre los campos
+                // **Seleccionar tipo de perfil**
+                const Text('Seleccione el tipo de perfil'),
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 30,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: GetBuilder<RegisterController>(builder: (controller) {
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -50,9 +54,7 @@ class RegisterPage extends StatelessWidget {
                             controller.setPerfil(value!);
                           },
                         ),
-                        const Text(
-                          'Alumno',
-                        ),
+                        const Text('Alumno'),
                         Radio(
                           activeColor: Colors.blue,
                           value: 1,
@@ -61,51 +63,63 @@ class RegisterPage extends StatelessWidget {
                             controller.setPerfil(value!);
                           },
                         ),
-                        const Text(
-                          'Profesor',
-                        ),
+                        const Text('Profesor'),
                       ],
                     );
                   }),
                 ),
+                const SizedBox(height: 16), // Espacio después de la selección
+                // **Comentario**
                 TextField(
                   controller: registerController.commentController,
-                  decoration: InputDecoration(labelText: 'Comentario'),
+                  decoration: const InputDecoration(labelText: 'Comentario'),
                 ),
-                SizedBox(height: 16),
-                // Mostrar CircularProgressIndicator o botón de registro según el estado de carga
+                const SizedBox(height: 16), // Espacio adicional
+                // **Botón de registrarse**
                 Obx(() {
                   if (registerController.isLoading.value) {
-                    return CircularProgressIndicator();
+                    return const CircularProgressIndicator();
                   } else {
                     return ElevatedButton(
                       onPressed: registerController.signUp,
-                      child: Text('Registrarse'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFDEC2A6), // Fondo beige
+                      ),
+                      child: const Text(
+                        'Registrarse',
+                        style: TextStyle(color: Color(0xFF4A2C12)), // Texto marrón
+                      ),
                     );
                   }
                 }),
 
-                // Mostrar mensaje de error si existe
+                // **Mensaje de error**
                 Obx(() {
                   if (registerController.errorMessage.isNotEmpty) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
                         registerController.errorMessage.value,
-                        style: TextStyle(color: Colors.red),
+                        style: const TextStyle(color: Colors.red),
                       ),
                     );
                   } else {
-                    return Container();
+                    return const SizedBox.shrink();
                   }
                 }),
 
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-                // Botón para volver a la página de inicio de sesión
+                // **Botón para volver al login**
                 ElevatedButton(
                   onPressed: () => Get.toNamed('/login'),
-                  child: Text('Volver'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFDEC2A6), // Fondo beige
+                  ),
+                  child: const Text(
+                    'Volver',
+                    style: TextStyle(color: Color(0xFF4A2C12)), // Texto marrón
+                  ),
                 ),
               ],
             ),
