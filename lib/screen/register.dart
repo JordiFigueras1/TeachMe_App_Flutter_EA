@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/registerController.dart';
+import '../controllers/themeController.dart';
 
 class RegisterPage extends StatelessWidget {
   final RegisterController registerController = Get.put(RegisterController());
+  final ThemeController themeController = Get.find<ThemeController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Registrarse')),
+      appBar: AppBar(
+        title: Text('Registrarse'),
+        actions: [
+          IconButton(
+            icon: Obx(() => Icon(
+                  themeController.themeMode.value == ThemeMode.light
+                      ? Icons.dark_mode
+                      : Icons.light_mode,
+                )),
+            onPressed: themeController.toggleTheme,
+          ),
+        ],
+      ),
       body: SizedBox.expand(
         child: SingleChildScrollView(
           child: Padding(
@@ -79,3 +93,4 @@ class RegisterPage extends StatelessWidget {
     );
   }
 }
+

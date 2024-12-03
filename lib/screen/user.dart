@@ -5,8 +5,7 @@ import '../controllers/userListController.dart';
 import '../controllers/asignaturaController.dart';
 import '../Widgets/userCard.dart';
 import '../Widgets/asignaturaCard.dart';
-import '../models/asignaturaModel.dart';
-
+import '../controllers/themeController.dart';
 
 class UserPage extends StatefulWidget {
   @override
@@ -17,21 +16,18 @@ class _UserPageState extends State<UserPage> {
   final UserService _userService = UserService();
   final UserListController userController = Get.put(UserListController());
   final AsignaturaController asignaturaController = Get.put(AsignaturaController());
+  final ThemeController themeController = Get.find<ThemeController>();
 
-  late String userId; // ID del usuario logueado
+  late String userId;
 
   @override
   void initState() {
     super.initState();
-
-    // Obtener el userId desde los argumentos pasados al navegar a esta pantalla
     userId = Get.arguments?['userId'] ?? '';
 
     if (userId.isNotEmpty) {
-      // Llamar al método para obtener las asignaturas del usuario logueado
       asignaturaController.fetchAsignaturas(userId);
     } else {
-      // Manejar el caso donde el userId no se proporcionó
       print("Error: No se proporcionó un userId válido");
     }
   }
@@ -39,12 +35,23 @@ class _UserPageState extends State<UserPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Gestión de Usuarios')),
+      appBar: AppBar(
+        title: Text('Gestión de Usuarios'),
+        actions: [
+          IconButton(
+            icon: Obx(() => Icon(
+                  themeController.themeMode.value == ThemeMode.light
+                      ? Icons.dark_mode
+                      : Icons.light_mode,
+                )),
+            onPressed: themeController.toggleTheme,
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            // Listado de usuarios (lado izquierdo)
             Expanded(
               child: Obx(() {
                 if (userController.isLoading.value) {
@@ -62,7 +69,6 @@ class _UserPageState extends State<UserPage> {
               }),
             ),
             SizedBox(width: 20),
-            // Lista de asignaturas del usuario logueado (lado derecho)
             Expanded(
               flex: 2,
               child: Obx(() {

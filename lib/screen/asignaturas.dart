@@ -2,18 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/asignaturaController.dart';
 import '../Widgets/asignaturaCard.dart';
+import '../controllers/themeController.dart';
 
 class AsignaturasPage extends StatelessWidget {
   final AsignaturaController asignaturaController = Get.put(AsignaturaController());
+  final ThemeController themeController = Get.find<ThemeController>();
 
   @override
   Widget build(BuildContext context) {
-    final String userId = Get.parameters['userId'] ?? ''; // Se espera pasar el `userId` como parámetro
+    final String userId = Get.parameters['userId'] ?? '';
 
     asignaturaController.fetchAsignaturas(userId);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Asignaturas del Usuario')),
+      appBar: AppBar(
+        title: Text('Asignaturas del Usuario'),
+        actions: [
+          IconButton(
+            icon: Obx(() => Icon(
+                  themeController.themeMode.value == ThemeMode.light
+                      ? Icons.dark_mode
+                      : Icons.light_mode,
+                )),
+            onPressed: themeController.toggleTheme,
+          ),
+        ],
+      ),
       body: Obx(() {
         if (asignaturaController.isLoading.value) {
           return Center(child: CircularProgressIndicator());
