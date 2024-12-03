@@ -13,8 +13,9 @@ class LogInPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Iniciar Sesión'),
+        title: const Text('Iniciar Sesión'),
         actions: [
+          // Botón para alternar entre temas
           IconButton(
             icon: Obx(() => Icon(
                   themeController.themeMode.value == ThemeMode.light
@@ -32,23 +33,21 @@ class LogInPage extends StatelessWidget {
           children: [
             TextField(
               controller: userController.mailController,
-              decoration: InputDecoration(labelText: 'Correo Electrónico'),
+              decoration: const InputDecoration(labelText: 'Correo Electrónico'),
             ),
             TextField(
               controller: userController.passwordController,
-              decoration: InputDecoration(labelText: 'Contraseña'),
+              decoration: const InputDecoration(labelText: 'Contraseña'),
               obscureText: true,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Obx(() {
               if (userController.isLoading.value) {
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
               } else {
                 return ElevatedButton(
-                  onPressed: () {
-                    userController.logIn();
-                  },
-                  child: Text('Iniciar Sesión'),
+                  onPressed: userController.logIn,
+                  child: const Text('Iniciar Sesión'),
                 );
               }
             }),
@@ -58,17 +57,17 @@ class LogInPage extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
                     userController.errorMessage.value,
-                    style: TextStyle(color: Colors.red),
+                    style: const TextStyle(color: Colors.red),
                   ),
                 );
               } else {
                 return Container();
               }
             }),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextButton(
               onPressed: () => Get.toNamed('/register'),
-              child: Text('¿No tienes cuenta? Regístrate'),
+              child: const Text('¿No tienes cuenta? Regístrate'),
             ),
           ],
         ),

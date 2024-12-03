@@ -13,12 +13,16 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
+          // Botón para alternar entre temas
           IconButton(
-            icon: const Icon(Icons.brightness_6), // Icono de modo nocturno/diurno
-            onPressed: () {
-              themeController.toggleTheme(); // Alterna el tema
-            },
+            icon: Obx(() => Icon(
+                  themeController.themeMode.value == ThemeMode.light
+                      ? Icons.dark_mode
+                      : Icons.light_mode,
+                )),
+            onPressed: themeController.toggleTheme,
           ),
+          // Botón para cerrar sesión
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
@@ -29,7 +33,12 @@ class HomePage extends StatelessWidget {
         ],
       ),
       body: Center(
-        child: const Text('Bienvenido a HomePage'),
+        child: Obx(() {
+          final userId = authController.userId.value;
+          return Text(userId.isEmpty
+              ? 'Bienvenido a HomePage'
+              : 'Bienvenido, Usuario $userId');
+        }),
       ),
     );
   }
