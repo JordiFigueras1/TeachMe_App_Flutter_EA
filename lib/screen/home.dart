@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/authController.dart';
-import '../services/webSocketService.dart';
+//import '../services/webSocketService.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class HomePage extends StatefulWidget {
   @override
@@ -12,7 +13,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   late AnimationController _controller;
   late Animation<double> _animation;
 
-  final WebSocketService webSocketService = Get.find<WebSocketService>();
+  //final WebSocketService webSocketService = Get.find<WebSocketService>();
   final AuthController authController = Get.find<AuthController>();
   List<String> connectedUsers = [];
 
@@ -27,11 +28,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     _animation = Tween<double>(begin: 1.0, end: 1.5).animate(_controller);
 
     // Escuchar usuarios conectados
-    webSocketService.listenToConnectedUsers((users) {
+    /*webSocketService.listenToConnectedUsers((users) {
       setState(() {
         connectedUsers = users;
       });
+    });*/
+    IO.Socket socket = IO.io('http://localhost:3000');
+    socket.onConnect((_) {
+    print('connect');
+    socket.emit('user-connected', 'iusadfhadsuuyasdi');
+    socket.emit('message', 'test');
     });
+    socket.on('event', (data) => print(data));
+    socket.onDisconnect((_) => print('disconnect'));
+    socket.on('fromServer', (_) => print(_));
   }
 
   @override
@@ -49,7 +59,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              webSocketService.disconnect(authController.getUserId);
+              //webSocketService.disconnect(authController.getUserId);
               authController.setUserId('');
               Get.offAllNamed('/login');
             },

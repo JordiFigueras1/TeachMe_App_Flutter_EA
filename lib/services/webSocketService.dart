@@ -9,9 +9,10 @@ class WebSocketService {
   void connect(String userId, String token) {
     if (isConnected) return;
 
-    channel = WebSocketChannel.connect(
-      Uri.parse('ws://localhost:3000'), // Cambia a la URI del backend
-    );
+  channel = WebSocketChannel.connect(
+    Uri.parse('ws://localhost:3000?auth-token=$token'),
+  );
+
 
     isConnected = true;
 

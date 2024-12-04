@@ -10,7 +10,7 @@ import '../controllers/authController.dart';
 
 void main() {
   Get.put(AuthController());
-  Get.put(WebSocketService());
+  //Get.put(WebSocketService());
   runApp(MyApp());
 }
 

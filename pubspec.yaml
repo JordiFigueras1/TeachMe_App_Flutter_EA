@@ -18,6 +18,8 @@ dependencies:
   flutter_lints: ^2.0.1 # Reglas de linting
   json_annotation: ^4.8.1 # Para manejar JSON en modelos
   logger: ^1.1.0 # Para depuración y registro de logs
+  web_socket_channel: ^2.3.0
+  socket_io_client: ^3.0.2
 
 dev_dependencies:
   flutter_test:
