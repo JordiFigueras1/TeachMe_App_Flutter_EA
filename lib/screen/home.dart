@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/authController.dart';
-//import '../services/webSocketService.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class HomePage extends StatefulWidget {
@@ -12,8 +11,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  late IO.Socket socket; // Socket declarado como no-nullable
 
-  //final WebSocketService webSocketService = Get.find<WebSocketService>();
   final AuthController authController = Get.find<AuthController>();
   List<String> connectedUsers = [];
 
@@ -27,26 +26,67 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     _animation = Tween<double>(begin: 1.0, end: 1.5).animate(_controller);
 
-    // Escuchar usuarios conectados
-    /*webSocketService.listenToConnectedUsers((users) {
-      setState(() {
-        connectedUsers = users;
-      });
-    });*/
-    IO.Socket socket = IO.io('http://localhost:3000');
+    _initializeSocket();
+  }
+
+  void _initializeSocket() {
+    // Asegurarse de inicializar el socket solo si no está conectado
+    if (Get.isRegistered<IO.Socket>()) {
+      socket = Get.find<IO.Socket>();
+    } else {
+      socket = IO.io(
+        'http://localhost:3000',
+        IO.OptionBuilder()
+            .setTransports(['websocket']) // Usar solo transporte WebSocket
+            .build(),
+      );
+      Get.put(socket); // Registrar el socket como global
+    }
+
     socket.onConnect((_) {
-    print('connect');
-    socket.emit('user-connected', 'iusadfhadsuuyasdi');
-    socket.emit('message', 'test');
+      print('Conectado al servidor WebSocket');
+
+      // Emitir que el usuario está conectado
+      socket.emit('user-connected', {'userId': authController.getUserId});
+
+      // Escuchar el evento 'user-connected' con la lista inicial de usuarios
+      socket.on('user-connected', (data) {
+        print('Usuarios conectados recibidos: $data');
+        setState(() {
+          connectedUsers = List<String>.from(data);
+        });
+      });
+
+      // Escuchar actualizaciones del estado de usuarios
+      socket.on('update-user-status', (data) {
+        print('Actualización del estado de usuarios: $data');
+        setState(() {
+          connectedUsers = List<String>.from(data);
+        });
+      });
     });
-    socket.on('event', (data) => print(data));
-    socket.onDisconnect((_) => print('disconnect'));
-    socket.on('fromServer', (_) => print(_));
+
+    socket.onDisconnect((_) {
+      print('Desconectado del servidor WebSocket');
+    });
+
+    socket.onError((error) {
+      print('Error en el socket: $error');
+    });
+  }
+
+  void _disconnectSocket() {
+    if (socket.connected) {
+      socket.emit('user-disconnected', {'userId': authController.getUserId});
+      socket.disconnect();
+      print('Usuario desconectado del WebSocket');
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    // No desconectar el socket aquí, para que persista entre pantallas
     super.dispose();
   }
 
@@ -59,8 +99,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              //webSocketService.disconnect(authController.getUserId);
+              // Desconectar el usuario del WebSocket
+              _disconnectSocket();
+
+              // Limpiar el estado del usuario
               authController.setUserId('');
+              connectedUsers.clear();
+
+              // Navegar al login
               Get.offAllNamed('/login');
             },
           ),
