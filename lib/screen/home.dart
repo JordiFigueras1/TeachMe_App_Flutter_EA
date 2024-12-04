@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/controllers/userModelController.dart';
 import 'package:get/get.dart';
 import '../controllers/authController.dart';
+import '../services/webSocketService.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -12,6 +12,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   late AnimationController _controller;
   late Animation<double> _animation;
 
+  final WebSocketService webSocketService = Get.find<WebSocketService>();
+  final AuthController authController = Get.find<AuthController>();
+  List<String> connectedUsers = [];
+
   @override
   void initState() {
     super.initState();
@@ -21,6 +25,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     )..repeat(reverse: true);
 
     _animation = Tween<double>(begin: 1.0, end: 1.5).animate(_controller);
+
+    // Escuchar usuarios conectados
+    webSocketService.listenToConnectedUsers((users) {
+      setState(() {
+        connectedUsers = users;
+      });
+    });
   }
 
   @override
@@ -31,9 +42,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    Get.put(UserModelController());
-    final AuthController authController = Get.find<AuthController>();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
@@ -41,61 +49,46 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              authController.setUserId(''); // Limpia el userId
-              Get.offAllNamed('/login'); // Redirige al Login y elimina el historial de navegación
+              webSocketService.disconnect(authController.getUserId);
+              authController.setUserId('');
+              Get.offAllNamed('/login');
             },
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    offset: Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  const Text(
-                    'Gracias por empezar a programar en Flutter BB',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  // Corazón animado
-                  AnimatedBuilder(
-                    animation: _animation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _animation.value,
-                        child: const Icon(
-                          Icons.favorite,
-                          color: Colors.red,
-                          size: 100,
-                        ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Animación
+          AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _animation.value,
+                child: const Icon(
+                  Icons.favorite,
+                  color: Colors.red,
+                  size: 100,
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+          // Lista de usuarios conectados
+          Expanded(
+            child: connectedUsers.isEmpty
+                ? const Center(child: Text('No hay usuarios conectados.'))
+                : ListView.builder(
+                    itemCount: connectedUsers.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        leading: const Icon(Icons.person, color: Colors.green),
+                        title: Text('Usuario ID: ${connectedUsers[index]}'),
                       );
                     },
                   ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

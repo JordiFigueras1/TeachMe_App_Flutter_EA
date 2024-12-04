@@ -5,16 +5,13 @@ import '../screen/logIn.dart';
 import '../screen/register.dart';
 import '../screen/user.dart';
 import '../screen/home.dart';
-import '../models/asignaturaModel.dart';
-import 'package:flutter_application_1/controllers/authController.dart';
-
+import '../services/webSocketService.dart';
+import '../controllers/authController.dart';
 
 void main() {
-  
-  Get.put(AuthController()); // Registra el controlador globalmente
-  runApp(
-    MyApp(),
-  );
+  Get.put(AuthController());
+  Get.put(WebSocketService());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -39,7 +36,7 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/usuarios',
           page: () => BottomNavScaffold(
-            child: UserPage(), // Pasar userId desde el controlador o mediante argumentos Get
+            child: UserPage(),
           ),
         ),
       ],

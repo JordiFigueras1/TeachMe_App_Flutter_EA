@@ -1,14 +1,20 @@
 import 'package:get/get.dart';
 
 class AuthController extends GetxController {
-  // Variable para almacenar el userId
+  // Variables para almacenar token y userId
+  var token = ''.obs;
   var userId = ''.obs;
 
-  // Método para establecer el userId
+  // Métodos para establecer token y userId
+  void setToken(String newToken) {
+    token.value = newToken;
+  }
+
   void setUserId(String id) {
     userId.value = id;
   }
 
-  // Método para obtener el userId
+  // Métodos para obtener token y userId
+  String get getToken => token.value;
   String get getUserId => userId.value;
 }

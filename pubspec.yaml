@@ -17,6 +17,7 @@ dependencies:
   dio: ^5.2.0 # Cliente HTTP más avanzado
   flutter_lints: ^2.0.1 # Reglas de linting
   json_annotation: ^4.8.1 # Para manejar JSON en modelos
+  logger: ^1.1.0 # Para depuración y registro de logs
 
 dev_dependencies:
   flutter_test:
