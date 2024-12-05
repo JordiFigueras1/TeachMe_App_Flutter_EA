@@ -3,10 +3,12 @@ import 'package:get/get.dart';
 import '../services/user.dart';
 import '../services/webSocketService.dart';
 import '../controllers/authController.dart';
+import '../controllers/userModelController.dart';
 
 class UserController extends GetxController {
   final UserService userService = Get.put(UserService());
   final WebSocketService webSocketService = Get.put(WebSocketService());
+  final UserModelController userModelController = Get.find<UserModelController>();
 
   final TextEditingController mailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -44,9 +46,19 @@ class UserController extends GetxController {
         authController.setUserId(userId);
         authController.setToken(token);
 
-        // Conectar al WebSocket
-        webSocketService.connect(userId, token);
+        // Llamar a `setUser` en `UserModelController`
 
+        userModelController.setUser(
+        response.data['usuario']['id'] ?? '0', // Asegurar que 'id' tenga un valor por defecto
+        response.data['usuario']['nombre'] ?? 'Desconocido',
+        response.data['usuario']['email'] ?? 'No especificado',
+        '', // No enviar la contraseña
+        response.data['usuario']['edad'] ?? 0, // Valor predeterminado
+        response.data['usuario']['isProfesor'] ?? false,
+        response.data['usuario']['isAlumno'] ?? false,
+        response.data['usuario']['isAdmin'] ?? false,
+        true, // Establecer 'conectado' como 'true'
+      );
         // Navegar al Home
         Get.offNamed('/home', arguments: {'userId': userId});
       } else {

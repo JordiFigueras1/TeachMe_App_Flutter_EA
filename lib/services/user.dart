@@ -104,37 +104,24 @@ class UserService {
     }
   }
 
-  Future<void> simulateConnection(String userId) async {
-    try {
-      final dio.Response response = await dioClient.post('$baseUrl/simular-conexion', data: {
-        "userId": userId,
-      });
+Future<List<UserModel>> searchUsers(String nombre, String token) async {
+  try {
+    final response = await dioClient.get(
+      '$baseUrl/buscar',
+      queryParameters: {'nombre': nombre},
+      options: dio.Options(
+        headers: {'auth-token': token},
+      ),
+    );
 
-      if (response.statusCode == 200) {
-        print("Conexión simulada para el usuario $userId exitosa");
-      } else {
-        print("Error al simular la conexión: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error al simular la conexión: $e");
-      throw Exception('Error al simular la conexión');
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data;
+      return data.map((json) => UserModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Error al buscar usuarios');
     }
+  } catch (e) {
+    throw Exception('Error al conectar con el servidor: $e');
   }
-
-  Future<void> simulateDisconnection(String userId) async {
-    try {
-      final dio.Response response = await dioClient.post('$baseUrl/simular-desconexion', data: {
-        "userId": userId,
-      });
-
-      if (response.statusCode == 200) {
-        print("Desconexión simulada para el usuario $userId exitosa");
-      } else {
-        print("Error al simular la desconexión: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error al simular la desconexión: $e");
-      throw Exception('Error al simular la desconexión');
-    }
-  }
+}
 }

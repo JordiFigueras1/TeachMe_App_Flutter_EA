@@ -45,6 +45,7 @@ class RegisterController extends GetxController {
 
     try {
       UserModel newUser = UserModel(
+        id: '0', // ID temporal; esto debería actualizarse con el ID real tras la creación
         name: nameController.text,
         password: passwordController.text,
         mail: mailController.text,
@@ -53,7 +54,6 @@ class RegisterController extends GetxController {
         isAlumno: false,
         isAdmin: true,
       );
-
       final response = await userService.createUser(newUser);
 
       if (response == 201 || response == 204) {

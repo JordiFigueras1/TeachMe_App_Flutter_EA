@@ -97,6 +97,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         title: const Text('Home'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () {
+              // Navegar al perfil
+              Get.toNamed('/perfil');
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
               // Desconectar el usuario del WebSocket

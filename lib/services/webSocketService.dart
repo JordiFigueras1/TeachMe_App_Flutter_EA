@@ -67,9 +67,10 @@ class WebSocketService {
   void listenToConnectedUsers(Function(List<String>) onUpdate) {
     stream.listen((message) {
       try {
-        final parsedMessage = jsonDecode(message) as Map<String, dynamic>;
+        final parsedMessage = jsonDecode(message);
         if (parsedMessage['event'] == 'update-user-status') {
-          onUpdate(List<String>.from(parsedMessage['data']));
+          final users = List<String>.from(parsedMessage['data']);
+          onUpdate(users);
         }
       } catch (e) {
         print('Error al procesar mensaje WebSocket: $e');
