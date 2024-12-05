@@ -65,6 +65,10 @@ class WebSocketService {
   }
 
   void listenToConnectedUsers(Function(List<String>) onUpdate) {
+    if (!_stream.isBroadcast) {
+      throw Exception("WebSocket no está conectado o el stream no está configurado.");
+    }
+
     stream.listen((message) {
       try {
         final parsedMessage = jsonDecode(message);

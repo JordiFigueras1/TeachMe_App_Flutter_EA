@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/authController.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import '../controllers/connectedUsersController.dart'; // Importar el controlador global
 
 class HomePage extends StatefulWidget {
   @override
@@ -14,7 +15,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   late IO.Socket socket; // Socket declarado como no-nullable
 
   final AuthController authController = Get.find<AuthController>();
-  List<String> connectedUsers = [];
+  final ConnectedUsersController connectedUsersController =
+      Get.find<ConnectedUsersController>(); // Obtener el controlador global
 
   @override
   void initState() {
@@ -49,20 +51,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       // Emitir que el usuario está conectado
       socket.emit('user-connected', {'userId': authController.getUserId});
 
-      // Escuchar el evento 'user-connected' con la lista inicial de usuarios
-      socket.on('user-connected', (data) {
-        print('Usuarios conectados recibidos: $data');
-        setState(() {
-          connectedUsers = List<String>.from(data);
-        });
-      });
-
       // Escuchar actualizaciones del estado de usuarios
       socket.on('update-user-status', (data) {
         print('Actualización del estado de usuarios: $data');
-        setState(() {
-          connectedUsers = List<String>.from(data);
-        });
+        connectedUsersController.updateConnectedUsers(List<String>.from(data));
       });
     });
 
@@ -111,7 +103,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
               // Limpiar el estado del usuario
               authController.setUserId('');
-              connectedUsers.clear();
+
+              // Limpiar la lista global de usuarios conectados
+              connectedUsersController.updateConnectedUsers([]);
 
               // Navegar al login
               Get.offAllNamed('/login');
@@ -139,17 +133,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           const SizedBox(height: 20),
           // Lista de usuarios conectados
           Expanded(
-            child: connectedUsers.isEmpty
-                ? const Center(child: Text('No hay usuarios conectados.'))
-                : ListView.builder(
-                    itemCount: connectedUsers.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        leading: const Icon(Icons.person, color: Colors.green),
-                        title: Text('Usuario ID: ${connectedUsers[index]}'),
-                      );
-                    },
-                  ),
+            child: Obx(() {
+              if (connectedUsersController.connectedUsers.isEmpty) {
+                return const Center(child: Text('No hay usuarios conectados.'));
+              }
+
+              return ListView.builder(
+                itemCount: connectedUsersController.connectedUsers.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    leading: const Icon(Icons.person, color: Colors.green),
+                    title: Text(
+                        'Usuario ID: ${connectedUsersController.connectedUsers[index]}'),
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),

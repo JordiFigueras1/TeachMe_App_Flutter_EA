@@ -42,9 +42,9 @@ class UserListController extends GetxController {
   }
 
   void handleWebSocketUpdates(List<String> connectedUsers) {
-  for (var user in userList) {
-    user.conectado = connectedUsers.contains(user.id);
-  }
-  userList.refresh();
+    for (var user in userList) {
+      user.conectado = connectedUsers.contains(user.id);
+    }
+    userList.refresh(); // Asegúrate de refrescar la lista
   }
 }

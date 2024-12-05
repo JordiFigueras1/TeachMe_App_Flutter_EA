@@ -37,22 +37,22 @@ class UserModel with ChangeNotifier {
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json['id'] ?? '', // Extraer el id
-      name: json['nombre'] ?? '',
-      mail: json['email'] ?? '',
-      password: json['password'] ?? '',
-      age: json['edad'] ?? 0,
-      isProfesor: json['isProfesor'] ?? false,
-      isAlumno: json['isAlumno'] ?? false,
-      isAdmin: json['isAdmin'] ?? true,
-      conectado: json['conectado'] ?? false, // Extraer estado de conexión
-    );
-  }
+  return UserModel(
+    id: json['_id'] ?? '', // Cambiar 'id' a '_id'
+    name: json['nombre'] ?? '',
+    mail: json['email'] ?? '',
+    password: json['password'] ?? '',
+    age: json['edad'] ?? 0,
+    isProfesor: json['isProfesor'] ?? false,
+    isAlumno: json['isAlumno'] ?? false,
+    isAdmin: json['isAdmin'] ?? true,
+    conectado: json['conectado'] ?? false,
+  );
+}
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id, // Incluir el id
+      '_id': id, // Cambiar 'id' a '_id'
       'nombre': name,
       'email': mail,
       'password': password,
@@ -60,7 +60,7 @@ class UserModel with ChangeNotifier {
       'isProfesor': isProfesor,
       'isAlumno': isAlumno,
       'isAdmin': isAdmin,
-      'conectado': conectado, // Incluir estado de conexión
+      'conectado': conectado,
     };
   }
 }

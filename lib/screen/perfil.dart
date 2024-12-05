@@ -1,26 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_application_1/controllers/userModelController.dart';
 import '../controllers/userListController.dart';
 import '../controllers/authController.dart';
-import '../services/webSocketService.dart';
+import '../controllers/connectedUsersController.dart';
 
 class PerfilPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userController = Get.find<UserListController>();
     final authController = Get.find<AuthController>();
-    final webSocketService = Get.find<WebSocketService>(); // Usa el mismo servicio global
+    final connectedUsersController = Get.find<ConnectedUsersController>();
 
     final TextEditingController searchController = TextEditingController();
-
-    // Conectar al WebSocket
-    webSocketService.connect(authController.getUserId, authController.getToken);
-
-    // Escuchar eventos de usuarios conectados
-    webSocketService.listenToConnectedUsers((connectedUsers) {
-      userController.handleWebSocketUpdates(connectedUsers);
-    });
 
     return Scaffold(
       appBar: AppBar(title: Text('Buscar Usuarios')),
@@ -55,15 +46,21 @@ class PerfilPage extends StatelessWidget {
                 itemCount: userController.searchResults.length,
                 itemBuilder: (context, index) {
                   final user = userController.searchResults[index];
+                  // Verificar si el usuario está conectado
+                  final isConnected = connectedUsersController.connectedUsers.contains(user.id);
+
+                  // Log temporal para depuración
+                  print('Usuario encontrado: ${user.id}, Conectado: $isConnected');
+                  print('Usuarios conectados actualmente: ${connectedUsersController.connectedUsers}');
+
                   return ListTile(
                     leading: Icon(
                       Icons.circle,
-                      color: user.conectado ? Colors.green : Colors.grey,
+                      color: isConnected ? Colors.green : Colors.grey,
                     ),
                     title: Text(user.name),
                     subtitle: Text(user.mail),
                     onTap: () {
-                      // Acción al seleccionar un usuario
                       print('Usuario seleccionado: ${user.name}');
                     },
                   );
