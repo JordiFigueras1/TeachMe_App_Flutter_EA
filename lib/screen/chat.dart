@@ -31,13 +31,16 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _listenForMessages() {
+    socketController.clearListeners('receive-message'); // Limpiar listeners previos
     socketController.socket.on('receive-message', (data) {
-      setState(() {
-        messages.add({
-          'senderId': data['senderId'] ?? '',
-          'messageContent': data['messageContent'] ?? '',
+      if (data['receiverId'] == authController.getUserId) {
+        setState(() {
+          messages.add({
+            'senderId': data['senderId'] ?? '',
+            'messageContent': data['messageContent'] ?? '',
+          });
         });
-      });
+      }
     });
   }
 

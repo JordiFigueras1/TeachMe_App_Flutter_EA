@@ -52,4 +52,8 @@ class SocketController extends GetxController {
       'timestamp': DateTime.now().toIso8601String(),
     });
   }
+
+  void clearListeners(String eventName) {
+    socket.off(eventName);
+  }
 }
