@@ -3,14 +3,17 @@ import 'package:get/get.dart';
 import '../controllers/userListController.dart';
 import '../controllers/authController.dart';
 import '../controllers/connectedUsersController.dart';
+import '../controllers/socketController.dart';
+import '../screen/chat.dart';
 
 class PerfilPage extends StatelessWidget {
+  final SocketController socketController = Get.find<SocketController>();
+
   @override
   Widget build(BuildContext context) {
     final userController = Get.find<UserListController>();
     final authController = Get.find<AuthController>();
     final connectedUsersController = Get.find<ConnectedUsersController>();
-
     final TextEditingController searchController = TextEditingController();
 
     return Scaffold(
@@ -46,12 +49,7 @@ class PerfilPage extends StatelessWidget {
                 itemCount: userController.searchResults.length,
                 itemBuilder: (context, index) {
                   final user = userController.searchResults[index];
-                  // Verificar si el usuario está conectado
                   final isConnected = connectedUsersController.connectedUsers.contains(user.id);
-
-                  // Log temporal para depuración
-                  print('Usuario encontrado: ${user.id}, Conectado: $isConnected');
-                  print('Usuarios conectados actualmente: ${connectedUsersController.connectedUsers}');
 
                   return ListTile(
                     leading: Icon(
@@ -61,7 +59,10 @@ class PerfilPage extends StatelessWidget {
                     title: Text(user.name),
                     subtitle: Text(user.mail),
                     onTap: () {
-                      print('Usuario seleccionado: ${user.name}');
+                      Get.to(() => ChatPage(
+                            receiverId: user.id,
+                            receiverName: user.name,
+                          ));
                     },
                   );
                 },

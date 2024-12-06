@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/authController.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
-import '../controllers/connectedUsersController.dart'; // Importar el controlador global
+import '../controllers/socketController.dart';
+import '../controllers/connectedUsersController.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -12,11 +12,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  late IO.Socket socket; // Socket declarado como no-nullable
-
+  final SocketController socketController = Get.find<SocketController>();
   final AuthController authController = Get.find<AuthController>();
-  final ConnectedUsersController connectedUsersController =
-      Get.find<ConnectedUsersController>(); // Obtener el controlador global
+  final ConnectedUsersController connectedUsersController = Get.find<ConnectedUsersController>();
 
   @override
   void initState() {
@@ -28,57 +26,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     _animation = Tween<double>(begin: 1.0, end: 1.5).animate(_controller);
 
-    _initializeSocket();
-  }
+    // Conectar el socket
+    socketController.socket.emit('user-connected', {'userId': authController.getUserId});
 
-  void _initializeSocket() {
-    // Asegurarse de inicializar el socket solo si no está conectado
-    if (Get.isRegistered<IO.Socket>()) {
-      socket = Get.find<IO.Socket>();
-    } else {
-      socket = IO.io(
-        'http://localhost:3000',
-        IO.OptionBuilder()
-            .setTransports(['websocket']) // Usar solo transporte WebSocket
-            .build(),
-      );
-      Get.put(socket); // Registrar el socket como global
-    }
-
-    socket.onConnect((_) {
-      print('Conectado al servidor WebSocket');
-
-      // Emitir que el usuario está conectado
-      socket.emit('user-connected', {'userId': authController.getUserId});
-
-      // Escuchar actualizaciones del estado de usuarios
-      socket.on('update-user-status', (data) {
-        print('Actualización del estado de usuarios: $data');
-        connectedUsersController.updateConnectedUsers(List<String>.from(data));
-      });
+    // Escuchar actualizaciones del estado de usuarios
+    socketController.socket.on('update-user-status', (data) {
+      print('Actualización del estado de usuarios: $data');
+      connectedUsersController.updateConnectedUsers(List<String>.from(data));
     });
-
-    socket.onDisconnect((_) {
-      print('Desconectado del servidor WebSocket');
-    });
-
-    socket.onError((error) {
-      print('Error en el socket: $error');
-    });
-  }
-
-  void _disconnectSocket() {
-    if (socket.connected) {
-      socket.emit('user-disconnected', {'userId': authController.getUserId});
-      socket.disconnect();
-      print('Usuario desconectado del WebSocket');
-    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    // No desconectar el socket aquí, para que persista entre pantallas
     super.dispose();
   }
 
@@ -91,7 +51,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           IconButton(
             icon: const Icon(Icons.account_circle),
             onPressed: () {
-              // Navegar al perfil
               Get.toNamed('/perfil');
             },
           ),
@@ -99,15 +58,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             icon: const Icon(Icons.logout),
             onPressed: () {
               // Desconectar el usuario del WebSocket
-              _disconnectSocket();
+              socketController.socket.emit('user-disconnected', {'userId': authController.getUserId});
 
               // Limpiar el estado del usuario
               authController.setUserId('');
-
-              // Limpiar la lista global de usuarios conectados
               connectedUsersController.updateConnectedUsers([]);
 
-              // Navegar al login
               Get.offAllNamed('/login');
             },
           ),
@@ -137,14 +93,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               if (connectedUsersController.connectedUsers.isEmpty) {
                 return const Center(child: Text('No hay usuarios conectados.'));
               }
-
               return ListView.builder(
                 itemCount: connectedUsersController.connectedUsers.length,
                 itemBuilder: (context, index) {
                   return ListTile(
                     leading: const Icon(Icons.person, color: Colors.green),
-                    title: Text(
-                        'Usuario ID: ${connectedUsersController.connectedUsers[index]}'),
+                    title: Text('Usuario ID: ${connectedUsersController.connectedUsers[index]}'),
                   );
                 },
               );

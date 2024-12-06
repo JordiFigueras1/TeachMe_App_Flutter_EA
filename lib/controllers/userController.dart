@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/user.dart';
-import '../services/webSocketService.dart';
 import '../controllers/authController.dart';
 import '../controllers/userModelController.dart';
 
 class UserController extends GetxController {
   final UserService userService = Get.put(UserService());
-  final WebSocketService webSocketService = Get.put(WebSocketService());
   final UserModelController userModelController = Get.find<UserModelController>();
 
   final TextEditingController mailController = TextEditingController();
