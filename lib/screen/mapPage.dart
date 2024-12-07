@@ -3,9 +3,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:get/get.dart';
 import '../controllers/userListController.dart';
+import '../controllers/userModelController.dart';
 
 class MapPage extends StatelessWidget {
   final UserListController userListController = Get.put(UserListController());
+  final UserModelController userModelController = Get.find<UserModelController>();
 
   @override
   Widget build(BuildContext context) {
@@ -25,17 +27,22 @@ class MapPage extends StatelessWidget {
           return const Center(child: Text('No hay usuarios con coordenadas disponibles.'));
         }
 
-        // Calcular el centro dinámico basado en las coordenadas de los usuarios
-        final latitudes = userListController.userList.map((user) => user.lat).toList();
-        final longitudes = userListController.userList.map((user) => user.lng).toList();
+        // Obtener las coordenadas del usuario logueado
+        final userLoggedInLat = userModelController.user.value.lat;
+        final userLoggedInLng = userModelController.user.value.lng;
 
-        double centerLatitude = 41.3879; // Valor predeterminado (Barcelona)
-        double centerLongitude = 2.16992; // Valor predeterminado (Barcelona)
-
-        if (latitudes.isNotEmpty && longitudes.isNotEmpty) {
-          centerLatitude = latitudes.reduce((a, b) => a + b) / latitudes.length;
-          centerLongitude = longitudes.reduce((a, b) => a + b) / longitudes.length;
+        // Validar que el usuario logueado tiene coordenadas válidas
+        if (userLoggedInLat == 0.0 || userLoggedInLng == 0.0) {
+          return const Center(
+            child: Text(
+              'No se puede centrar el mapa porque las coordenadas del usuario no están disponibles.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.red),
+            ),
+          );
         }
+
+        print("Centro del mapa: Lat: $userLoggedInLat, Lng: $userLoggedInLng");
 
         // Crear los marcadores para cada usuario
         final markers = userListController.userList.map((user) {
@@ -70,7 +77,7 @@ class MapPage extends StatelessWidget {
 
         return FlutterMap(
           options: MapOptions(
-            center: LatLng(centerLatitude, centerLongitude), // Centro dinámico
+            center: LatLng(userLoggedInLat, userLoggedInLng), // Centro dinámico
             zoom: 13.0,
           ),
           children: [
