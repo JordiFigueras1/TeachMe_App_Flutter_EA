@@ -18,27 +18,47 @@ class SocketController extends GetxController {
         'http://localhost:3000',
         IO.OptionBuilder()
             .setTransports(['websocket'])
+            .disableAutoConnect() // No conectar automáticamente
             .build(),
       );
       Get.put(socket);
     }
+  }
 
+    void connectSocket(String userId) {
     if (!socket.connected) {
-      socket.connect();
+        socket.connect();
     }
 
     socket.onConnect((_) {
-      print('Conectado al servidor WebSocket');
+        print('Conectado al servidor WebSocket');
+        if (userId.isNotEmpty) {
+        socket.emit('user-connected', {'userId': userId});
+        }
+    });
+
+    socket.on('update-user-status', (data) {
+        print('Actualización del estado de usuarios: $data');
     });
 
     socket.onDisconnect((_) {
-      print('Desconectado del servidor WebSocket');
+        print('Desconectado del servidor WebSocket');
     });
 
     socket.onError((error) {
-      print('Error en el socket: $error');
+        print('Error en el socket: $error');
     });
-  }
+    }
+
+    void disconnectUser(String userId) {
+    if (userId.isNotEmpty) {
+        socket.emit('user-disconnected', {'userId': userId});
+        clearListeners('update-user-status');
+        socket.disconnect();
+        print('Usuario desconectado manualmente.');
+    }
+    }
+
 
   void joinChat(String senderId, String receiverId) {
     socket.emit('join-chat', {'senderId': senderId, 'receiverId': receiverId});

@@ -26,14 +26,30 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     _animation = Tween<double>(begin: 1.0, end: 1.5).animate(_controller);
 
-    // Conectar el socket
-    socketController.socket.emit('user-connected', {'userId': authController.getUserId});
+    // Conectar el socket si hay un usuario logueado
+    if (authController.getUserId.isNotEmpty) {
+      socketController.connectSocket(authController.getUserId);
 
-    // Escuchar actualizaciones del estado de usuarios
-    socketController.socket.on('update-user-status', (data) {
-      print('Actualización del estado de usuarios: $data');
-      connectedUsersController.updateConnectedUsers(List<String>.from(data));
-    });
+      // Escuchar actualizaciones del estado de usuarios
+      socketController.socket.on('update-user-status', (data) {
+        print('Actualización del estado de usuarios: $data');
+        connectedUsersController.updateConnectedUsers(List<String>.from(data));
+      });
+    }
+  }
+
+  void _logout() {
+    if (authController.getUserId.isNotEmpty) {
+      // Emitir desconexión
+      socketController.disconnectUser(authController.getUserId);
+
+      // Limpiar el estado del usuario
+      authController.setUserId('');
+      connectedUsersController.updateConnectedUsers([]);
+    }
+
+    // Navegar al login
+    Get.offAllNamed('/login');
   }
 
   @override
@@ -56,16 +72,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              // Desconectar el usuario del WebSocket
-              socketController.socket.emit('user-disconnected', {'userId': authController.getUserId});
-
-              // Limpiar el estado del usuario
-              authController.setUserId('');
-              connectedUsersController.updateConnectedUsers([]);
-
-              Get.offAllNamed('/login');
-            },
+            onPressed: _logout,
           ),
         ],
       ),
