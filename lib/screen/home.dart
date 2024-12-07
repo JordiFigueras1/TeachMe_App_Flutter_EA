@@ -113,6 +113,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Get.toNamed('/map'), // Navegar a la pantalla de mapas
+        child: const Icon(Icons.map),
+        tooltip: 'Ver Mapa',
+      ),
     );
   }
 }

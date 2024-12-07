@@ -14,29 +14,33 @@ class UserModelController extends GetxController {
   ).obs;
 
   // Método para actualizar los datos del usuario
-  void setUser(
-    String id,
-    String name,
-    String mail,
-    String password,
-    int age,
-    bool isProfesor,
-    bool isAlumno,
-    bool isAdmin,
-    bool conectado,
-  ) {
+  void setUser({
+    required String id,
+    required String name,
+    required String mail,
+    required String password,
+    required int age,
+    required bool isProfesor,
+    required bool isAlumno,
+    required bool isAdmin,
+    required bool conectado,
+    double? lat, // Opcional
+    double? lng, // Opcional
+  }) {
     user.update((val) {
       if (val != null) {
         val.setUser(
-          id.isNotEmpty ? id : '0', // Asegurar que id nunca sea nulo
-          name.isNotEmpty ? name : 'Usuario desconocido', // Valor predeterminado
-          mail.isNotEmpty ? mail : 'No especificado', // Valor predeterminado
-          password, // Contraseña vacía está bien
-          age > 0 ? age : 0, // Si edad no está presente, usar 0
-          isProfesor,
-          isAlumno,
-          isAdmin,
-          conectado,
+          id: id.isNotEmpty ? id : '0', // Asegurar que id nunca sea nulo
+          name: name.isNotEmpty ? name : 'Usuario desconocido', // Valor predeterminado
+          mail: mail.isNotEmpty ? mail : 'No especificado', // Valor predeterminado
+          password: password, // Contraseña vacía está bien
+          age: age > 0 ? age : 0, // Si edad no está presente, usar 0
+          isProfesor: isProfesor,
+          isAlumno: isAlumno,
+          isAdmin: isAdmin,
+          conectado: conectado,
+          lat: lat, // Nuevas coordenadas, si están presentes
+          lng: lng, // Nuevas coordenadas, si están presentes
         );
       }
     });

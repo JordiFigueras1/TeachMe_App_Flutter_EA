@@ -1,8 +1,10 @@
 import 'package:get/get.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import '../controllers/authController.dart';
 
 class SocketController extends GetxController {
   late IO.Socket socket;
+  final AuthController authController = Get.find<AuthController>();
 
   @override
   void onInit() {
@@ -19,49 +21,59 @@ class SocketController extends GetxController {
         IO.OptionBuilder()
             .setTransports(['websocket'])
             .disableAutoConnect() // No conectar automáticamente
+            .setExtraHeaders({'auth-token': authController.getToken}) // Añade el token en las cabeceras
             .build(),
       );
       Get.put(socket);
     }
   }
 
-    void connectSocket(String userId) {
+  void connectSocket(String userId) {
     if (!socket.connected) {
-        socket.connect();
+      socket.connect();
     }
 
     socket.onConnect((_) {
-        print('Conectado al servidor WebSocket');
-        if (userId.isNotEmpty) {
-        socket.emit('user-connected', {'userId': userId});
-        }
+      print('Conectado al servidor WebSocket');
+      if (userId.isNotEmpty) {
+        socket.emit('user-connected', {
+          'userId': userId,
+          'auth-token': authController.getToken, // Enviar token al conectar
+        });
+      }
     });
 
     socket.on('update-user-status', (data) {
-        print('Actualización del estado de usuarios: $data');
+      print('Actualización del estado de usuarios: $data');
     });
 
     socket.onDisconnect((_) {
-        print('Desconectado del servidor WebSocket');
+      print('Desconectado del servidor WebSocket');
     });
 
     socket.onError((error) {
-        print('Error en el socket: $error');
+      print('Error en el socket: $error');
     });
-    }
+  }
 
-    void disconnectUser(String userId) {
+  void disconnectUser(String userId) {
     if (userId.isNotEmpty) {
-        socket.emit('user-disconnected', {'userId': userId});
-        clearListeners('update-user-status');
-        socket.disconnect();
-        print('Usuario desconectado manualmente.');
+      socket.emit('user-disconnected', {
+        'userId': userId,
+        'auth-token': authController.getToken, // Enviar token al desconectar
+      });
+      clearListeners('update-user-status');
+      socket.disconnect();
+      print('Usuario desconectado manualmente.');
     }
-    }
-
+  }
 
   void joinChat(String senderId, String receiverId) {
-    socket.emit('join-chat', {'senderId': senderId, 'receiverId': receiverId});
+    socket.emit('join-chat', {
+      'senderId': senderId,
+      'receiverId': receiverId,
+      'auth-token': authController.getToken, // Enviar token en el chat
+    });
   }
 
   void sendMessage(String senderId, String receiverId, String messageContent) {
@@ -70,6 +82,7 @@ class SocketController extends GetxController {
       'receiverId': receiverId,
       'messageContent': messageContent,
       'timestamp': DateTime.now().toIso8601String(),
+      'auth-token': authController.getToken, // Enviar token al enviar mensajes
     });
   }
 

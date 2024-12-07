@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../services/user.dart';
 import '../controllers/authController.dart';
 import '../controllers/userModelController.dart';
+import 'package:geolocator/geolocator.dart';
 
 class UserController extends GetxController {
   final UserService userService = Get.put(UserService());
@@ -30,9 +31,30 @@ class UserController extends GetxController {
     isLoading.value = true;
 
     try {
+      // Verificar permisos de ubicación
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Permisos de ubicación denegados.');
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception(
+            'Permisos de ubicación denegados permanentemente. Habilítelos en la configuración.');
+      }
+
+      // Obtener las coordenadas del dispositivo con mayor precisión disponible
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
+      );
+
       final response = await userService.logIn({
         'email': mailController.text,
         'password': passwordController.text,
+        'lat': position.latitude.toString(), // Coordenada de latitud
+        'lng': position.longitude.toString(), // Coordenada de longitud
       });
 
       if (response.statusCode == 200) {
@@ -44,19 +66,21 @@ class UserController extends GetxController {
         authController.setUserId(userId);
         authController.setToken(token);
 
-        // Llamar a `setUser` en `UserModelController`
-
+        // Llamar a `setUser` en `UserModelController` con argumentos nombrados
         userModelController.setUser(
-        response.data['usuario']['id'] ?? '0', // Asegurar que 'id' tenga un valor por defecto
-        response.data['usuario']['nombre'] ?? 'Desconocido',
-        response.data['usuario']['email'] ?? 'No especificado',
-        '', // No enviar la contraseña
-        response.data['usuario']['edad'] ?? 0, // Valor predeterminado
-        response.data['usuario']['isProfesor'] ?? false,
-        response.data['usuario']['isAlumno'] ?? false,
-        response.data['usuario']['isAdmin'] ?? false,
-        true, // Establecer 'conectado' como 'true'
-      );
+          id: response.data['usuario']['id'] ?? '0', // Asegurar que 'id' tenga un valor por defecto
+          name: response.data['usuario']['nombre'] ?? 'Desconocido',
+          mail: response.data['usuario']['email'] ?? 'No especificado',
+          password: '', // No enviar la contraseña
+          age: response.data['usuario']['edad'] ?? 0, // Valor predeterminado
+          isProfesor: response.data['usuario']['isProfesor'] ?? false,
+          isAlumno: response.data['usuario']['isAlumno'] ?? false,
+          isAdmin: response.data['usuario']['isAdmin'] ?? false,
+          conectado: true, // Establecer 'conectado' como 'true'
+          lat: position.latitude, // Agregar coordenada de latitud
+          lng: position.longitude, // Agregar coordenada de longitud
+        );
+
         // Navegar al Home
         Get.offNamed('/home', arguments: {'userId': userId});
       } else {

@@ -12,6 +12,8 @@ import '../controllers/userModelController.dart';
 import '../controllers/connectedUsersController.dart';
 import '../screen/chat.dart';
 import 'controllers/socketController.dart';
+import 'package:geolocator/geolocator.dart';
+import '../screen/mapPage.dart';
 
 void main() {
   Get.put(AuthController());
@@ -58,6 +60,10 @@ class MyApp extends StatelessWidget {
             receiverId: Get.arguments['receiverId'],
             receiverName: Get.arguments['receiverName'],
           ),
+        ),
+        GetPage(
+          name: '/map',
+          page: () => MapPage(),
         ),
       ],
     );

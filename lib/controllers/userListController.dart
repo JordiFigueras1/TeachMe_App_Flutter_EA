@@ -47,4 +47,17 @@ class UserListController extends GetxController {
     }
     userList.refresh(); // Asegúrate de refrescar la lista
   }
+
+  Future<void> fetchUserCoordinates() async {
+    try {
+      isLoading(true);
+      final response = await userService.getUserCoordinates();
+      print('Datos recibidos desde el backend: $response'); // Debug
+      userList.assignAll(response);
+    } catch (e) {
+      print('Error al obtener coordenadas: $e');
+    } finally {
+      isLoading(false);
+    }
+  }
 }
