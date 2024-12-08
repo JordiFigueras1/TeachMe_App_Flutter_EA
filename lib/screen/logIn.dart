@@ -1,62 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/userController.dart';
-import '../controllers/authController.dart';
 
 class LogInPage extends StatelessWidget {
   final UserController userController = Get.put(UserController());
-  final AuthController authController = Get.find<AuthController>(); // Encuentra el AuthController
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Iniciar Sesión'),
+        title: const Text('Iniciar Sesión'),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 83, 98, 186),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
               controller: userController.mailController,
-              decoration: InputDecoration(labelText: 'Correo Electrónico'),
+              decoration: const InputDecoration(
+                labelText: 'Correo Electrónico',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const SizedBox(height: 16),
             TextField(
               controller: userController.passwordController,
-              decoration: InputDecoration(labelText: 'Contraseña'),
+              decoration: const InputDecoration(
+                labelText: 'Contraseña',
+                border: OutlineInputBorder(),
+              ),
               obscureText: true,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 20),
             Obx(() {
               if (userController.isLoading.value) {
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
               } else {
                 return ElevatedButton(
-                  onPressed: () {
-                    userController.logIn(); // Llama a la función que ya maneja todo internamente
-                  },
-                  child: Text('Iniciar Sesión'),
+                  onPressed: userController.logIn,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 83, 98, 186),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  ),
+                  child: const Text(
+                    'Iniciar Sesión',
+                    style: TextStyle(color: Colors.black), // Letras en negro
+                  ),
                 );
               }
             }),
+            const SizedBox(height: 10),
             Obx(() {
               if (userController.errorMessage.isNotEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    userController.errorMessage.value,
-                    style: TextStyle(color: Colors.red),
-                  ),
+                return Text(
+                  userController.errorMessage.value,
+                  style: const TextStyle(color: Colors.red),
                 );
               } else {
                 return Container();
               }
             }),
-            SizedBox(height: 16),
+            const SizedBox(height: 10),
             TextButton(
               onPressed: () => Get.toNamed('/register'),
-              child: Text('¿No tienes cuenta? Regístrate'),
+              child: const Text('¿No tienes cuenta? Regístrate'),
             ),
           ],
         ),

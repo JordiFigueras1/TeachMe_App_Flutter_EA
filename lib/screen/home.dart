@@ -24,15 +24,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       vsync: this,
     )..repeat(reverse: true);
 
-    _animation = Tween<double>(begin: 1.0, end: 1.5).animate(_controller);
+    _animation = Tween<double>(begin: 1.0, end: 1.2).animate(_controller);
 
-    // Conectar el socket si hay un usuario logueado
     if (authController.getUserId.isNotEmpty) {
       socketController.connectSocket(authController.getUserId);
-
-      // Escuchar actualizaciones del estado de usuarios
       socketController.socket.on('update-user-status', (data) {
-        print('Actualización del estado de usuarios: $data');
         connectedUsersController.updateConnectedUsers(List<String>.from(data));
       });
     }
@@ -40,15 +36,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   void _logout() {
     if (authController.getUserId.isNotEmpty) {
-      // Emitir desconexión
       socketController.disconnectUser(authController.getUserId);
-
-      // Limpiar el estado del usuario
       authController.setUserId('');
       connectedUsersController.updateConnectedUsers([]);
     }
-
-    // Navegar al login
     Get.offAllNamed('/login');
   }
 
@@ -63,12 +54,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 83, 98, 186),
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle),
-            onPressed: () {
-              Get.toNamed('/perfil');
-            },
+            onPressed: () => Get.toNamed('/perfil'),
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -79,7 +70,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Animación
           AnimatedBuilder(
             animation: _animation,
             builder: (context, child) {
@@ -87,25 +77,34 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 scale: _animation.value,
                 child: const Icon(
                   Icons.favorite,
-                  color: Colors.red,
+                  color: Colors.pinkAccent,
                   size: 100,
                 ),
               );
             },
           ),
           const SizedBox(height: 20),
-          // Lista de usuarios conectados
+          const Text(
+            'Usuarios Conectados:',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
           Expanded(
             child: Obx(() {
               if (connectedUsersController.connectedUsers.isEmpty) {
-                return const Center(child: Text('No hay usuarios conectados.'));
+                return const Center(
+                  child: Text('No hay usuarios conectados.', style: TextStyle(fontSize: 16)),
+                );
               }
               return ListView.builder(
                 itemCount: connectedUsersController.connectedUsers.length,
                 itemBuilder: (context, index) {
                   return ListTile(
                     leading: const Icon(Icons.person, color: Colors.green),
-                    title: Text('Usuario ID: ${connectedUsersController.connectedUsers[index]}'),
+                    title: Text(
+                      'Usuario ID: ${connectedUsersController.connectedUsers[index]}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   );
                 },
               );

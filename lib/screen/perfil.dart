@@ -1,6 +1,8 @@
+import 'dart:convert'; // Para convertir los eventos a JSON y viceversa
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PerfilPage extends StatefulWidget {
   @override
@@ -8,12 +10,16 @@ class PerfilPage extends StatefulWidget {
 }
 
 class _PerfilPageState extends State<PerfilPage> {
-  // Variables del calendario
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay = DateTime.now();
-  Map<DateTime, List<String>> _events = {}; // Mapa para almacenar eventos
+  Map<DateTime, List<String>> _events = {};
 
-  // Método para agregar eventos
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents(); // Cargar los eventos cuando se inicialice el estado
+  }
+
   void _addEvent(String event) {
     if (event.isNotEmpty) {
       setState(() {
@@ -23,16 +29,46 @@ class _PerfilPageState extends State<PerfilPage> {
           _events[_selectedDay!] = [event];
         }
       });
+      _saveEvents(); // Guardar los eventos después de agregar uno
     }
+  }
+
+  Future<void> _loadEvents() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? eventsString = prefs.getString('events');
+    if (eventsString != null) {
+      final Map<String, dynamic> eventsMap = jsonDecode(eventsString);
+      setState(() {
+        _events = eventsMap.map((key, value) {
+          final date = DateTime.parse(key);
+          return MapEntry(date, List<String>.from(value));
+        });
+      });
+    }
+  }
+
+  Future<void> _saveEvents() async {
+    final prefs = await SharedPreferences.getInstance();
+    final Map<String, List<String>> eventsMap = _events.map((key, value) {
+      return MapEntry(key.toIso8601String(), value);
+    });
+    final String eventsString = jsonEncode(eventsMap);
+    prefs.setString('events', eventsString);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Agendar Clases')),
+      appBar: AppBar(
+        title: const Text(
+          'Agendar Clases',
+          style: TextStyle(fontSize: 20),
+        ),
+        backgroundColor: const Color.fromARGB(255, 83, 98, 186),
+        centerTitle: true,
+      ),
       body: Column(
         children: [
-          // Calendario
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TableCalendar(
@@ -48,36 +84,36 @@ class _PerfilPageState extends State<PerfilPage> {
                   _focusedDay = focusedDay;
                 });
               },
-              eventLoader: (day) {
-                return _events[day] ?? [];
-              },
+              eventLoader: (day) => _events[day] ?? [],
               calendarStyle: CalendarStyle(
                 selectedDecoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: Colors.blueAccent,
                   shape: BoxShape.circle,
                 ),
                 todayDecoration: BoxDecoration(
-                  color: Colors.orange,
+                  color: Colors.orangeAccent,
                   shape: BoxShape.circle,
                 ),
                 markerDecoration: BoxDecoration(
-                  color: Colors.red,
+                  color: Colors.redAccent,
                   shape: BoxShape.circle,
                 ),
               ),
-              headerStyle: HeaderStyle(
+              headerStyle: const HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true,
+                titleTextStyle: TextStyle(fontSize: 18),
               ),
             ),
           ),
-
-          // Lista de clases programadas para el día seleccionado
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
               'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Expanded(
@@ -86,7 +122,7 @@ class _PerfilPageState extends State<PerfilPage> {
                   .map((event) => ListTile(
                         title: Text(event),
                         trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
+                          icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () {
                             setState(() {
                               _events[_selectedDay]?.remove(event);
@@ -94,21 +130,27 @@ class _PerfilPageState extends State<PerfilPage> {
                                 _events.remove(_selectedDay);
                               }
                             });
+                            _saveEvents(); // Guardar los eventos después de eliminar uno
                           },
                         ),
                       ))
                   .toList(),
             ),
           ),
-
-          // Botón para agregar nueva clase
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
+            child: ElevatedButton.icon(
               onPressed: () {
                 _showAddEventDialog(context);
               },
-              child: Text('Agregar Clase'),
+              icon: const Icon(Icons.add),
+              label: const Text('Agregar Clase'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
           ),
         ],
@@ -116,31 +158,30 @@ class _PerfilPageState extends State<PerfilPage> {
     );
   }
 
-  // Dialog para añadir una nueva clase
   void _showAddEventDialog(BuildContext context) {
     final TextEditingController eventController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Agregar Clase'),
+        title: const Text('Agregar Clase'),
         content: TextField(
           controller: eventController,
-          decoration: InputDecoration(labelText: 'Nombre de la Clase'),
+          decoration: const InputDecoration(labelText: 'Nombre de la Clase'),
         ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text('Cancelar'),
+            child: const Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () {
               _addEvent(eventController.text);
               Navigator.pop(context);
             },
-            child: Text('Guardar'),
+            child: const Text('Guardar'),
           ),
         ],
       ),

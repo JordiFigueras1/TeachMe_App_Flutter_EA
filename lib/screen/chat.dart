@@ -31,7 +31,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _listenForMessages() {
-    socketController.clearListeners('receive-message'); // Limpiar listeners previos
+    socketController.clearListeners('receive-message');
     socketController.socket.on('receive-message', (data) {
       if (data['receiverId'] == authController.getUserId) {
         setState(() {
@@ -77,7 +77,8 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat con ${widget.receiverName}'),
+        title: Text('Chat con ${widget.receiverName}', style: const TextStyle(fontSize: 20)),
+        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -92,14 +93,17 @@ class _ChatPageState extends State<ChatPage> {
                   alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isMe ? Colors.blueAccent : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       message['messageContent'] ?? '',
-                      style: const TextStyle(color: Colors.black),
+                      style: TextStyle(
+                        color: isMe ? Colors.white : Colors.black87,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 );
@@ -113,16 +117,24 @@ class _ChatPageState extends State<ChatPage> {
                 Expanded(
                   child: TextField(
                     controller: messageController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Escribe un mensaje...',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _sendMessage,
-                  child: const Text('Enviar'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Icon(Icons.send),
                 ),
               ],
             ),

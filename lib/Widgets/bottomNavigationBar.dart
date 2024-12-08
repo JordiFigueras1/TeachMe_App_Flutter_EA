@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/authController.dart'; // Importa el controlador
+import '../controllers/authController.dart';
 
 class BottomNavScaffold extends StatelessWidget {
   final Widget child;
-  static final RxInt selectedIndex = 0.obs; // Variable estática para mantener el estado
+  static final RxInt selectedIndex = 0.obs;
 
   const BottomNavScaffold({required this.child});
 
@@ -18,29 +18,30 @@ class BottomNavScaffold extends StatelessWidget {
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: selectedIndex.value,
           onTap: (index) {
-            // Cambiar solo si el índice es diferente
             if (selectedIndex.value != index) {
               selectedIndex.value = index;
 
               switch (index) {
                 case 0:
-                  Get.offNamed('/home'); // Navega al Home
+                  Get.offNamed('/home');
                   break;
                 case 1:
                   Get.offNamed(
                     '/usuarios',
-                    arguments: {'userId': authController.userId.value}, // Usa el userId
+                    arguments: {'userId': authController.userId.value},
                   );
                   break;
               }
             }
           },
-          selectedItemColor: const Color.fromARGB(255, 92, 14, 105),
-          unselectedItemColor: Colors.black,
+          selectedItemColor: const Color(0xFF5C0E69),
+          unselectedItemColor: Colors.black54,
+          showUnselectedLabels: true,
+          type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              label: 'Home',
+              label: 'Inicio',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),

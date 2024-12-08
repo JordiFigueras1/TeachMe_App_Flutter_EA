@@ -5,8 +5,6 @@ import '../controllers/userListController.dart';
 import '../controllers/asignaturaController.dart';
 import '../Widgets/userCard.dart';
 import '../Widgets/asignaturaCard.dart';
-import '../models/asignaturaModel.dart';
-
 
 class UserPage extends StatefulWidget {
   @override
@@ -18,20 +16,15 @@ class _UserPageState extends State<UserPage> {
   final UserListController userController = Get.put(UserListController());
   final AsignaturaController asignaturaController = Get.put(AsignaturaController());
 
-  late String userId; // ID del usuario logueado
+  late String userId;
 
   @override
   void initState() {
     super.initState();
-
-    // Obtener el userId desde los argumentos pasados al navegar a esta pantalla
     userId = Get.arguments?['userId'] ?? '';
-
     if (userId.isNotEmpty) {
-      // Llamar al método para obtener las asignaturas del usuario logueado
       asignaturaController.fetchAsignaturas(userId);
     } else {
-      // Manejar el caso donde el userId no se proporcionó
       print("Error: No se proporcionó un userId válido");
     }
   }
@@ -39,7 +32,14 @@ class _UserPageState extends State<UserPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Gestión de Usuarios')),
+      appBar: AppBar(
+        title: const Text(
+          'Gestión de Usuarios',
+          style: TextStyle(fontSize: 20),
+        ),
+        backgroundColor: const Color.fromARGB(255, 83, 98, 186),
+        centerTitle: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -48,9 +48,14 @@ class _UserPageState extends State<UserPage> {
             Expanded(
               child: Obx(() {
                 if (userController.isLoading.value) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (userController.userList.isEmpty) {
-                  return Center(child: Text("No hay usuarios disponibles"));
+                  return const Center(
+                    child: Text(
+                      "No hay usuarios disponibles",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  );
                 } else {
                   return ListView.builder(
                     itemCount: userController.userList.length,
@@ -61,24 +66,29 @@ class _UserPageState extends State<UserPage> {
                 }
               }),
             ),
-            SizedBox(width: 20),
+            const SizedBox(width: 20),
             // Lista de asignaturas del usuario logueado (lado derecho)
             Expanded(
               flex: 2,
               child: Obx(() {
                 if (asignaturaController.isLoading.value) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (asignaturaController.asignaturas.isEmpty) {
-                  return Center(child: Text("No tienes asignaturas asignadas"));
+                  return const Center(
+                    child: Text(
+                      "No tienes asignaturas asignadas",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  );
                 } else {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Mis Asignaturas',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Expanded(
                         child: ListView.builder(
                           itemCount: asignaturaController.asignaturas.length,
@@ -96,6 +106,12 @@ class _UserPageState extends State<UserPage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Get.toNamed('/addAsignatura', arguments: {'userId': userId}),
+        icon: const Icon(Icons.add),
+        label: const Text('Nueva Asignatura'),
+        backgroundColor: Colors.blueAccent,
       ),
     );
   }
