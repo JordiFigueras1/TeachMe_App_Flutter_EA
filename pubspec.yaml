@@ -24,7 +24,7 @@ dependencies:
   geolocator: ^9.0.2 # Para obtener coordenadas
   flutter_map: ^4.0.0
   latlong2: ^0.8.1 # Necesario para las coordenadas
-  
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/authController.dart';
 import '../controllers/socketController.dart';
 import '../controllers/connectedUsersController.dart';
+import '../controllers/theme_controller.dart'; // Importa el controlador del tema
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,6 +16,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final SocketController socketController = Get.find<SocketController>();
   final AuthController authController = Get.find<AuthController>();
   final ConnectedUsersController connectedUsersController = Get.find<ConnectedUsersController>();
+  final ThemeController themeController = Get.find<ThemeController>(); // Controlador del tema
 
   @override
   void initState() {
@@ -64,6 +66,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
+          IconButton(
+            icon: Icon(
+              themeController.themeMode.value == ThemeMode.dark
+                  ? Icons.light_mode // Si el tema es oscuro, cambiar a claro
+                  : Icons.dark_mode,  // Si el tema es claro, cambiar a oscuro
+            ),
+            onPressed: () {
+              themeController.toggleTheme(); // Alternar entre temas
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.account_circle),
             onPressed: () {

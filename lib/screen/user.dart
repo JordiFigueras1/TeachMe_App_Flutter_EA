@@ -6,7 +6,7 @@ import '../controllers/asignaturaController.dart';
 import '../Widgets/userCard.dart';
 import '../Widgets/asignaturaCard.dart';
 import '../models/asignaturaModel.dart';
-
+import '../controllers/theme_controller.dart'; // Asegúrate de tener este controlador
 
 class UserPage extends StatefulWidget {
   @override
@@ -17,6 +17,7 @@ class _UserPageState extends State<UserPage> {
   final UserService _userService = UserService();
   final UserListController userController = Get.put(UserListController());
   final AsignaturaController asignaturaController = Get.put(AsignaturaController());
+  final ThemeController themeController = Get.find<ThemeController>(); // Controlador de tema
 
   late String userId; // ID del usuario logueado
 
@@ -38,8 +39,14 @@ class _UserPageState extends State<UserPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Verificar si el tema es oscuro
+    final isDarkMode = themeController.themeMode.value == ThemeMode.dark;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Gestión de Usuarios')),
+      appBar: AppBar(
+        title: const Text('Gestión de Usuarios'),
+        backgroundColor: isDarkMode ? Colors.black : Colors.blue, // Cambiar color de la AppBar según el tema
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -48,9 +55,9 @@ class _UserPageState extends State<UserPage> {
             Expanded(
               child: Obx(() {
                 if (userController.isLoading.value) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (userController.userList.isEmpty) {
-                  return Center(child: Text("No hay usuarios disponibles"));
+                  return const Center(child: Text("No hay usuarios disponibles"));
                 } else {
                   return ListView.builder(
                     itemCount: userController.userList.length,
@@ -61,24 +68,28 @@ class _UserPageState extends State<UserPage> {
                 }
               }),
             ),
-            SizedBox(width: 20),
+            const SizedBox(width: 20),
             // Lista de asignaturas del usuario logueado (lado derecho)
             Expanded(
               flex: 2,
               child: Obx(() {
                 if (asignaturaController.isLoading.value) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (asignaturaController.asignaturas.isEmpty) {
-                  return Center(child: Text("No tienes asignaturas asignadas"));
+                  return const Center(child: Text("No tienes asignaturas asignadas"));
                 } else {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Mis Asignaturas',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black, // Cambiar color del texto
+                        ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Expanded(
                         child: ListView.builder(
                           itemCount: asignaturaController.asignaturas.length,

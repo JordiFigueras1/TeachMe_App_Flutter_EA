@@ -5,9 +5,11 @@ import '../controllers/authController.dart';
 import '../controllers/connectedUsersController.dart';
 import '../controllers/socketController.dart';
 import '../screen/chat.dart';
+import '../controllers/theme_controller.dart'; // Asegúrate de tener el controlador de tema
 
 class PerfilPage extends StatelessWidget {
   final SocketController socketController = Get.find<SocketController>();
+  final ThemeController themeController = Get.find<ThemeController>(); // Controlador de tema
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +18,24 @@ class PerfilPage extends StatelessWidget {
     final connectedUsersController = Get.find<ConnectedUsersController>();
     final TextEditingController searchController = TextEditingController();
 
+    // Verificar si el tema es oscuro
+    final isDarkMode = themeController.themeMode.value == ThemeMode.dark;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Buscar Usuarios')),
+      appBar: AppBar(
+        title: const Text('Buscar Usuarios'),
+        backgroundColor: isDarkMode ? Colors.black : Colors.blue, // Cambiar el color de la AppBar según el tema
+        actions: [
+          IconButton(
+            icon: Icon(
+              isDarkMode ? Icons.light_mode : Icons.dark_mode,
+            ),
+            onPressed: () {
+              themeController.toggleTheme(); // Alternar entre modo oscuro y claro
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
@@ -26,8 +44,15 @@ class PerfilPage extends StatelessWidget {
               controller: searchController,
               decoration: InputDecoration(
                 labelText: 'Nombre del Usuario',
+                labelStyle: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black, // Cambiar color de la etiqueta
+                ),
                 border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: isDarkMode ? Colors.white : Colors.blue), // Color del borde al enfocar
+                ),
               ),
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black), // Color del texto
               onSubmitted: (value) {
                 if (value.isNotEmpty) {
                   userController.searchUsers(value, authController.getToken);
@@ -56,8 +81,18 @@ class PerfilPage extends StatelessWidget {
                       Icons.circle,
                       color: isConnected ? Colors.green : Colors.grey,
                     ),
-                    title: Text(user.name),
-                    subtitle: Text(user.mail),
+                    title: Text(
+                      user.name,
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black, // Color del texto según el tema
+                      ),
+                    ),
+                    subtitle: Text(
+                      user.mail,
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white70 : Colors.black87, // Color de subtítulo según el tema
+                      ),
+                    ),
                     onTap: () {
                       Get.to(() => ChatPage(
                             receiverId: user.id,

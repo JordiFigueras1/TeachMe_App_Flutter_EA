@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/authController.dart';
 import '../controllers/socketController.dart';
+import '../controllers/theme_controller.dart'; // Importamos el controlador del tema
 
 class ChatPage extends StatefulWidget {
   final String receiverId;
@@ -16,6 +17,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final SocketController socketController = Get.find<SocketController>();
   final AuthController authController = Get.find<AuthController>();
+  final ThemeController themeController = Get.find<ThemeController>(); // Agregamos el controlador del tema
   final TextEditingController messageController = TextEditingController();
   final List<Map<String, String>> messages = [];
 
@@ -78,6 +80,18 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Chat con ${widget.receiverName}'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              themeController.themeMode.value == ThemeMode.dark
+                  ? Icons.light_mode // Si el tema es oscuro, cambiar a claro
+                  : Icons.dark_mode,  // Si el tema es claro, cambiar a oscuro
+            ),
+            onPressed: () {
+              themeController.toggleTheme(); // Alternar entre temas
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -99,7 +113,9 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                     child: Text(
                       message['messageContent'] ?? '',
-                      style: const TextStyle(color: Colors.black),
+                      style: TextStyle(
+                        color: isMe ? Colors.white : Colors.black,
+                      ),
                     ),
                   ),
                 );
