@@ -76,11 +76,12 @@ class SocketController extends GetxController {
     });
   }
 
-  void sendMessage(String senderId, String receiverId, String messageContent) {
+  void sendMessage(String senderId, String receiverId, String messageContent, String senderName) {
     socket.emit('private-message', {
       'senderId': senderId,
       'receiverId': receiverId,
       'messageContent': messageContent,
+      'senderName': senderName, // Añadir el nombre del usuario
       'timestamp': DateTime.now().toIso8601String(),
       'auth-token': authController.getToken, // Enviar token al enviar mensajes
     });

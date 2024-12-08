@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/authController.dart';
 import '../controllers/socketController.dart';
+import 'package:intl/intl.dart'; // Para formatear la fecha
 
 class ChatPage extends StatefulWidget {
   final String receiverId;
@@ -17,7 +18,7 @@ class _ChatPageState extends State<ChatPage> {
   final SocketController socketController = Get.find<SocketController>();
   final AuthController authController = Get.find<AuthController>();
   final TextEditingController messageController = TextEditingController();
-  final List<Map<String, String>> messages = [];
+  final List<Map<String, dynamic>> messages = []; // Cambiar el tipo para incluir el timestamp
 
   @override
   void initState() {
@@ -38,6 +39,7 @@ class _ChatPageState extends State<ChatPage> {
           messages.add({
             'senderId': data['senderId'] ?? '',
             'messageContent': data['messageContent'] ?? '',
+            'timestamp': DateTime.parse(data['timestamp']) ?? DateTime.now(), // Convertir timestamp a DateTime
           });
         });
       }
@@ -45,24 +47,26 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _sendMessage() {
-    final messageContent = messageController.text.trim();
-    if (messageContent.isNotEmpty) {
-      socketController.sendMessage(
-        authController.getUserId,
-        widget.receiverId,
-        messageContent,
-      );
+  final messageContent = messageController.text.trim();
+  if (messageContent.isNotEmpty) {
+    socketController.sendMessage(
+      authController.getUserId,
+      widget.receiverId,
+      messageContent,
+      authController.getUserName, // Enviar también el nombre del usuario
+    );
 
-      setState(() {
-        messages.add({
-          'senderId': authController.getUserId,
-          'messageContent': messageContent,
-        });
+    setState(() {
+      messages.add({
+        'senderName': authController.getUserName, // Guardar el nombre del usuario
+        'messageContent': messageContent,
+        'timestamp': DateTime.now(),
       });
+    });
 
-      messageController.clear();
-    }
+    messageController.clear();
   }
+}
 
   @override
   void dispose() {
@@ -71,6 +75,10 @@ class _ChatPageState extends State<ChatPage> {
       'receiverId': widget.receiverId,
     });
     super.dispose();
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    return DateFormat('dd/MM/yyyy HH:mm').format(timestamp); // Formatear la fecha
   }
 
   @override
@@ -97,9 +105,25 @@ class _ChatPageState extends State<ChatPage> {
                       color: isMe ? Colors.blueAccent : Colors.grey[300],
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Text(
-                      message['messageContent'] ?? '',
-                      style: const TextStyle(color: Colors.black),
+                    child: Column(
+                      crossAxisAlignment: isMe
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${message['senderName']} - ${_formatTimestamp(message['timestamp'])}', // Mostrar autor y fecha
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          message['messageContent'] ?? '',
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                      ],
                     ),
                   ),
                 );
