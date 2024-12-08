@@ -20,6 +20,7 @@ dependencies:
   logger: ^1.1.0 # Para depuración y registro de logs
   web_socket_channel: ^2.3.0
   socket_io_client: ^3.0.2
+  table_calendar: ^3.0.9 # ¡Añadido el paquete para el calendario!
 
 dev_dependencies:
   flutter_test:
@@ -30,3 +31,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
