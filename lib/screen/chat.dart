@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/authController.dart';
 import '../controllers/socketController.dart';
-<<<<<<< HEAD
 import '../controllers/theme_controller.dart'; // Importamos el controlador del tema
-=======
 import 'package:intl/intl.dart'; // Para formatear la fecha
->>>>>>> f35abc05c1f65864f6a6519f929a4e01b141d231
 
 class ChatPage extends StatefulWidget {
   final String receiverId;
