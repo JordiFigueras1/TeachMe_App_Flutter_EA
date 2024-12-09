@@ -15,7 +15,7 @@ class UserController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
-  Future<void> logIn() async {
+    Future<void> logIn() async {
     if (mailController.text.isEmpty || passwordController.text.isEmpty) {
       Get.snackbar('Error', 'Todos los campos son obligatorios',
           snackPosition: SnackPosition.BOTTOM);
@@ -45,10 +45,14 @@ class UserController extends GetxController {
             'Permisos de ubicación denegados permanentemente. Habilítelos en la configuración.');
       }
 
-      // Obtener las coordenadas del dispositivo con mayor precisión disponible
+      // Obtener las coordenadas del dispositivo con mayor precisión
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation,
+        timeLimit: const Duration(seconds: 10), // Aumenta el tiempo de espera
       );
+
+      print("Coordenadas obtenidas: (${position.latitude}, ${position.longitude})");
+      print("Precisión: ${position.accuracy} metros");
 
       final response = await userService.logIn({
         'email': mailController.text,
