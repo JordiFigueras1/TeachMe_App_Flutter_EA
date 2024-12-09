@@ -18,7 +18,8 @@ class _ChatPageState extends State<ChatPage> {
   final SocketController socketController = Get.find<SocketController>();
   final AuthController authController = Get.find<AuthController>();
   final TextEditingController messageController = TextEditingController();
-  final List<Map<String, dynamic>> messages = []; // Cambiar el tipo para incluir el timestamp
+  final List<Map<String, dynamic>> messages = [];
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -34,39 +35,62 @@ class _ChatPageState extends State<ChatPage> {
   void _listenForMessages() {
     socketController.clearListeners('receive-message'); // Limpiar listeners previos
     socketController.socket.on('receive-message', (data) {
-      if (data['receiverId'] == authController.getUserId) {
-        setState(() {
-          messages.add({
-            'senderId': data['senderId'] ?? '',
-            'messageContent': data['messageContent'] ?? '',
-            'timestamp': DateTime.parse(data['timestamp']) ?? DateTime.now(), // Convertir timestamp a DateTime
+      if (data['receiverId'] == authController.getUserId ||
+          data['senderId'] == authController.getUserId) {
+        final isDuplicate = messages.any((msg) =>
+            msg['senderId'] == data['senderId'] &&
+            msg['messageContent'] == data['messageContent'] &&
+            msg['timestamp'] == data['timestamp']);
+        if (!isDuplicate) {
+          setState(() {
+            messages.add({
+              'senderId': data['senderId'] ?? '',
+              'senderName': data['senderId'] == authController.getUserId
+                  ? "Tú"
+                  : data['senderName'] ?? 'Anónimo', // Mostrar "Tú" para mensajes del emisor
+              'messageContent': data['messageContent'] ?? '',
+              'timestamp': DateTime.parse(data['timestamp']),
+            });
           });
-        });
+          _scrollToBottom(); // Asegurar el scroll al final
+        }
       }
     });
   }
 
   void _sendMessage() {
-  final messageContent = messageController.text.trim();
-  if (messageContent.isNotEmpty) {
-    socketController.sendMessage(
-      authController.getUserId,
-      widget.receiverId,
-      messageContent,
-      authController.getUserName, // Enviar también el nombre del usuario
-    );
-
-    setState(() {
-      messages.add({
-        'senderName': authController.getUserName, // Guardar el nombre del usuario
+    final messageContent = messageController.text.trim();
+    if (messageContent.isNotEmpty) {
+      final messageData = {
+        'senderId': authController.getUserId,
+        'senderName': "Tú", // Guardar "Tú" como nombre del emisor
         'messageContent': messageContent,
         'timestamp': DateTime.now(),
-      });
-    });
+      };
 
-    messageController.clear();
+      setState(() {
+        messages.add(messageData);
+      });
+
+      socketController.sendMessage(
+        authController.getUserId,
+        widget.receiverId,
+        messageContent,
+        authController.getUserName,
+      );
+
+      messageController.clear();
+      _scrollToBottom(); // Desplazar al final después de enviar
+    }
   }
-}
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -74,11 +98,13 @@ class _ChatPageState extends State<ChatPage> {
       'senderId': authController.getUserId,
       'receiverId': widget.receiverId,
     });
+    messageController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   String _formatTimestamp(DateTime timestamp) {
-    return DateFormat('dd/MM/yyyy HH:mm').format(timestamp); // Formatear la fecha
+    return DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
   }
 
   @override
@@ -91,6 +117,7 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 final message = messages[index];
@@ -106,19 +133,18 @@ class _ChatPageState extends State<ChatPage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
-                      crossAxisAlignment: isMe
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${message['senderName']} - ${_formatTimestamp(message['timestamp'])}', // Mostrar autor y fecha
+                          '${message['senderName']} - ${_formatTimestamp(message['timestamp'])}',
                           style: TextStyle(
                             fontSize: 12,
                             fontStyle: FontStyle.italic,
                             color: Colors.black87,
                           ),
                         ),
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         Text(
                           message['messageContent'] ?? '',
                           style: const TextStyle(color: Colors.black),
