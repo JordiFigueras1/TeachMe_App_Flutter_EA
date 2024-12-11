@@ -11,8 +11,8 @@ import '../controllers/userListController.dart';
 import '../controllers/userModelController.dart';
 import '../controllers/connectedUsersController.dart';
 import '../screen/chat.dart';
-import 'controllers/socketController.dart';
-import '../controllers/theme_controller.dart'; // Importa el controlador del tema
+import '../controllers/socketController.dart';
+import '../controllers/theme_controller.dart';
 import '../screen/mapPage.dart';
 
 void main() {
@@ -34,9 +34,25 @@ class MyApp extends StatelessWidget {
     return Obx(() {
       return GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: '/login', // Establece la ruta inicial
-        theme: ThemeData.light(), // Tema claro
-        darkTheme: ThemeData.dark(), // Tema oscuro
+        initialRoute: '/login',
+        theme: ThemeData(
+          brightness: Brightness.light,
+          primaryColor: Colors.blue,
+          scaffoldBackgroundColor: Colors.white,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.blue,
+            titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ), // Tema claro
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+          primaryColor: const Color(0xFF1C1C1E),
+          scaffoldBackgroundColor: const Color(0xFF1C1C1E),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color(0xFF2C2C2E),
+            titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ), // Tema oscuro
         themeMode: themeController.themeMode.value, // Controlador del tema reactivo
         getPages: [
           GetPage(

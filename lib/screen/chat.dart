@@ -18,7 +18,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final SocketController socketController = Get.find<SocketController>();
   final AuthController authController = Get.find<AuthController>();
-  final ThemeController themeController = Get.find<ThemeController>(); // Agregamos el controlador del tema
+  final ThemeController themeController = Get.find<ThemeController>();
   final TextEditingController messageController = TextEditingController();
   final List<Map<String, dynamic>> messages = [];
   final ScrollController _scrollController = ScrollController();
@@ -35,7 +35,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _listenForMessages() {
-    socketController.clearListeners('receive-message'); // Limpiar listeners previos
+    socketController.clearListeners('receive-message');
     socketController.socket.on('receive-message', (data) {
       if (data['receiverId'] == authController.getUserId ||
           data['senderId'] == authController.getUserId) {
@@ -49,12 +49,12 @@ class _ChatPageState extends State<ChatPage> {
               'senderId': data['senderId'] ?? '',
               'senderName': data['senderId'] == authController.getUserId
                   ? "Tú"
-                  : data['senderName'] ?? 'Anónimo', // Mostrar "Tú" para mensajes del emisor
+                  : data['senderName'] ?? 'Anónimo',
               'messageContent': data['messageContent'] ?? '',
               'timestamp': DateTime.parse(data['timestamp']),
             });
           });
-          _scrollToBottom(); // Asegurar el scroll al final
+          _scrollToBottom();
         }
       }
     });
@@ -65,7 +65,7 @@ class _ChatPageState extends State<ChatPage> {
     if (messageContent.isNotEmpty) {
       final messageData = {
         'senderId': authController.getUserId,
-        'senderName': "Tú", // Guardar "Tú" como nombre del emisor
+        'senderName': "Tú",
         'messageContent': messageContent,
         'timestamp': DateTime.now(),
       };
@@ -82,7 +82,7 @@ class _ChatPageState extends State<ChatPage> {
       );
 
       messageController.clear();
-      _scrollToBottom(); // Desplazar al final después de enviar
+      _scrollToBottom();
     }
   }
 
@@ -111,19 +111,22 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = themeController.themeMode.value == ThemeMode.dark;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text('Chat con ${widget.receiverName}'),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        elevation: 0,
         actions: [
           IconButton(
             icon: Icon(
-              themeController.themeMode.value == ThemeMode.dark
-                  ? Icons.light_mode // Si el tema es oscuro, cambiar a claro
-                  : Icons.dark_mode,  // Si el tema es claro, cambiar a oscuro
+              isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              color: theme.iconTheme.color,
             ),
-            onPressed: () {
-              themeController.toggleTheme(); // Alternar entre temas
-            },
+            onPressed: themeController.toggleTheme,
           ),
         ],
       ),
@@ -141,10 +144,17 @@ class _ChatPageState extends State<ChatPage> {
                   alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isMe ? Colors.blueAccent : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(10),
+                      color: isMe
+                          ? (isDarkMode ? Colors.blueAccent[700] : Colors.blueAccent)
+                          : (isDarkMode ? Colors.grey[800] : Colors.grey[300]),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                        bottomLeft: isMe ? Radius.circular(12) : Radius.zero,
+                        bottomRight: isMe ? Radius.zero : Radius.circular(12),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment:
@@ -152,16 +162,17 @@ class _ChatPageState extends State<ChatPage> {
                       children: [
                         Text(
                           '${message['senderName']} - ${_formatTimestamp(message['timestamp'])}',
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: theme.textTheme.bodySmall?.copyWith(
                             fontStyle: FontStyle.italic,
-                            color: Colors.black87,
+                            color: isMe ? Colors.white70 : Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 5),
                         Text(
                           message['messageContent'] ?? '',
-                          style: const TextStyle(color: Colors.black),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isMe ? Colors.white : Colors.black87,
+                          ),
                         ),
                       ],
                     ),
@@ -177,16 +188,34 @@ class _ChatPageState extends State<ChatPage> {
                 Expanded(
                   child: TextField(
                     controller: messageController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Escribe un mensaje...',
-                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: theme.cardColor,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.primaryColor),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                     ),
+                    style: theme.textTheme.bodyMedium,
                   ),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _sendMessage,
-                  child: const Text('Enviar'),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    backgroundColor: theme.primaryColor,
+                  ),
+                  child: const Icon(Icons.send, color: Colors.white),
                 ),
               ],
             ),

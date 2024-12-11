@@ -5,8 +5,7 @@ import '../controllers/userListController.dart';
 import '../controllers/asignaturaController.dart';
 import '../Widgets/userCard.dart';
 import '../Widgets/asignaturaCard.dart';
-import '../models/asignaturaModel.dart';
-import '../controllers/theme_controller.dart'; // Asegúrate de tener este controlador
+import '../controllers/theme_controller.dart';
 
 class UserPage extends StatefulWidget {
   @override
@@ -17,9 +16,9 @@ class _UserPageState extends State<UserPage> {
   final UserService _userService = UserService();
   final UserListController userController = Get.put(UserListController());
   final AsignaturaController asignaturaController = Get.put(AsignaturaController());
-  final ThemeController themeController = Get.find<ThemeController>(); // Controlador de tema
+  final ThemeController themeController = Get.find<ThemeController>();
 
-  late String userId; // ID del usuario logueado
+  late String userId;
 
   @override
   void initState() {
@@ -29,23 +28,33 @@ class _UserPageState extends State<UserPage> {
     userId = Get.arguments?['userId'] ?? '';
 
     if (userId.isNotEmpty) {
-      // Llamar al método para obtener las asignaturas del usuario logueado
       asignaturaController.fetchAsignaturas(userId);
     } else {
-      // Manejar el caso donde el userId no se proporcionó
       print("Error: No se proporcionó un userId válido");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Verificar si el tema es oscuro
-    final isDarkMode = themeController.themeMode.value == ThemeMode.dark;
+    final ThemeData theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Gestión de Usuarios'),
-        backgroundColor: isDarkMode ? Colors.black : Colors.blue, // Cambiar color de la AppBar según el tema
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(
+              themeController.themeMode.value == ThemeMode.dark
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+              color: theme.iconTheme.color,
+            ),
+            onPressed: themeController.toggleTheme,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -57,13 +66,28 @@ class _UserPageState extends State<UserPage> {
                 if (userController.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (userController.userList.isEmpty) {
-                  return const Center(child: Text("No hay usuarios disponibles"));
+                  return Center(
+                    child: Text(
+                      "No hay usuarios disponibles",
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  );
                 } else {
-                  return ListView.builder(
-                    itemCount: userController.userList.length,
-                    itemBuilder: (context, index) {
-                      return UserCard(user: userController.userList[index]);
-                    },
+                  return Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(8.0),
+                      itemCount: userController.userList.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: UserCard(user: userController.userList[index]),
+                        );
+                      },
+                    ),
                   );
                 }
               }),
@@ -76,31 +100,47 @@ class _UserPageState extends State<UserPage> {
                 if (asignaturaController.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (asignaturaController.asignaturas.isEmpty) {
-                  return const Center(child: Text("No tienes asignaturas asignadas"));
+                  return Center(
+                    child: Text(
+                      "No tienes asignaturas asignadas",
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  );
                 } else {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Mis Asignaturas',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : Colors.black, // Cambiar color del texto
-                        ),
+                  return Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Mis Asignaturas',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Expanded(
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(8.0),
+                              itemCount: asignaturaController.asignaturas.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: AsignaturaCard(
+                                    asignatura: asignaturaController.asignaturas[index],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: asignaturaController.asignaturas.length,
-                          itemBuilder: (context, index) {
-                            return AsignaturaCard(
-                              asignatura: asignaturaController.asignaturas[index],
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                    ),
                   );
                 }
               }),

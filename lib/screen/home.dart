@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/authController.dart';
 import '../controllers/socketController.dart';
 import '../controllers/connectedUsersController.dart';
-import '../controllers/theme_controller.dart'; // Importa el controlador del tema
+import '../controllers/theme_controller.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -16,7 +16,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final SocketController socketController = Get.find<SocketController>();
   final AuthController authController = Get.find<AuthController>();
   final ConnectedUsersController connectedUsersController = Get.find<ConnectedUsersController>();
-  final ThemeController themeController = Get.find<ThemeController>(); // Controlador del tema
+  final ThemeController themeController = Get.find<ThemeController>();
 
   @override
   void initState() {
@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       vsync: this,
     )..repeat(reverse: true);
 
-    _animation = Tween<double>(begin: 1.0, end: 1.5).animate(_controller);
+    _animation = Tween<double>(begin: 0.8, end: 1.2).animate(_controller);
 
     // Conectar el socket si hay un usuario logueado
     if (authController.getUserId.isNotEmpty) {
@@ -62,19 +62,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Home'),
+        backgroundColor: theme.appBarTheme.backgroundColor,
         actions: [
           IconButton(
             icon: Icon(
               themeController.themeMode.value == ThemeMode.dark
-                  ? Icons.light_mode // Si el tema es oscuro, cambiar a claro
-                  : Icons.dark_mode,  // Si el tema es claro, cambiar a oscuro
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+              color: theme.iconTheme.color,
             ),
-            onPressed: () {
-              themeController.toggleTheme(); // Alternar entre temas
-            },
+            onPressed: themeController.toggleTheme,
           ),
           IconButton(
             icon: const Icon(Icons.account_circle),
@@ -97,10 +100,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             builder: (context, child) {
               return Transform.scale(
                 scale: _animation.value,
-                child: const Icon(
+                child: Icon(
                   Icons.favorite,
-                  color: Colors.red,
-                  size: 100,
+                  color: theme.primaryColor.withOpacity(themeController.themeMode.value == ThemeMode.dark ? 0.9 : 0.7),
+                  size: 80,
                 ),
               );
             },
@@ -110,14 +113,47 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           Expanded(
             child: Obx(() {
               if (connectedUsersController.connectedUsers.isEmpty) {
-                return const Center(child: Text('No hay usuarios conectados.'));
+                return Center(
+                  child: Text(
+                    'No hay usuarios conectados.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                );
               }
               return ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                 itemCount: connectedUsersController.connectedUsers.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: const Icon(Icons.person, color: Colors.green),
-                    title: Text('Usuario ID: ${connectedUsersController.connectedUsers[index]}'),
+                  final userId = connectedUsersController.connectedUsers[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: theme.colorScheme.secondary,
+                        child: Icon(
+                          Icons.person,
+                          color: theme.colorScheme.onSecondary,
+                        ),
+                      ),
+                      title: Text(
+                        'ID: $userId',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Estado: Conectado',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
                   );
                 },
               );
@@ -126,7 +162,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed('/map'), // Navegar a la pantalla de mapas
+        onPressed: () => Get.toNamed('/map'),
+        backgroundColor: theme.primaryColor,
         child: const Icon(Icons.map),
         tooltip: 'Ver Mapa',
       ),

@@ -6,10 +6,10 @@ class ThemeController extends GetxController {
   var themeMode = ThemeMode.light.obs; // Iniciar con tema claro
 
   // Alternar entre los modos de tema
-  void toggleTheme() {
-    // Alternar entre modo claro y oscuro
-    themeMode.value = themeMode.value == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-  }
+void toggleTheme() {
+  themeMode.value = themeMode.value == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+  print('Tema cambiado a: ${themeMode.value}');
+}
 
   // Establecer el modo del tema según la configuración del sistema
   void setSystemTheme() {

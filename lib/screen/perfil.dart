@@ -5,11 +5,11 @@ import '../controllers/authController.dart';
 import '../controllers/connectedUsersController.dart';
 import '../controllers/socketController.dart';
 import '../screen/chat.dart';
-import '../controllers/theme_controller.dart'; // Asegúrate de tener el controlador de tema
+import '../controllers/theme_controller.dart';
 
 class PerfilPage extends StatelessWidget {
   final SocketController socketController = Get.find<SocketController>();
-  final ThemeController themeController = Get.find<ThemeController>(); // Controlador de tema
+  final ThemeController themeController = Get.find<ThemeController>();
 
   @override
   Widget build(BuildContext context) {
@@ -17,22 +17,23 @@ class PerfilPage extends StatelessWidget {
     final authController = Get.find<AuthController>();
     final connectedUsersController = Get.find<ConnectedUsersController>();
     final TextEditingController searchController = TextEditingController();
-
-    // Verificar si el tema es oscuro
-    final isDarkMode = themeController.themeMode.value == ThemeMode.dark;
+    final ThemeData theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Buscar Usuarios'),
-        backgroundColor: isDarkMode ? Colors.black : Colors.blue, // Cambiar el color de la AppBar según el tema
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        elevation: 0,
         actions: [
           IconButton(
             icon: Icon(
-              isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              themeController.themeMode.value == ThemeMode.dark
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+              color: theme.iconTheme.color,
             ),
-            onPressed: () {
-              themeController.toggleTheme(); // Alternar entre modo oscuro y claro
-            },
+            onPressed: themeController.toggleTheme,
           ),
         ],
       ),
@@ -44,15 +45,20 @@ class PerfilPage extends StatelessWidget {
               controller: searchController,
               decoration: InputDecoration(
                 labelText: 'Nombre del Usuario',
-                labelStyle: TextStyle(
-                  color: isDarkMode ? Colors.white : Colors.black, // Cambiar color de la etiqueta
+                labelStyle: theme.textTheme.bodyLarge,
+                filled: true,
+                fillColor: theme.cardColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
-                border: OutlineInputBorder(),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: isDarkMode ? Colors.white : Colors.blue), // Color del borde al enfocar
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: theme.primaryColor),
                 ),
+                prefixIcon: Icon(Icons.search, color: theme.iconTheme.color),
               ),
-              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black), // Color del texto
+              style: theme.textTheme.bodyLarge,
               onSubmitted: (value) {
                 if (value.isNotEmpty) {
                   userController.searchUsers(value, authController.getToken);
@@ -63,42 +69,60 @@ class PerfilPage extends StatelessWidget {
           Expanded(
             child: Obx(() {
               if (userController.isLoading.value) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }
 
               if (userController.searchResults.isEmpty) {
-                return Center(child: Text('No se encontraron usuarios.'));
+                return Center(
+                  child: Text(
+                    'No se encontraron usuarios.',
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                );
               }
 
               return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemCount: userController.searchResults.length,
                 itemBuilder: (context, index) {
                   final user = userController.searchResults[index];
                   final isConnected = connectedUsersController.connectedUsers.contains(user.id);
 
-                  return ListTile(
-                    leading: Icon(
-                      Icons.circle,
-                      color: isConnected ? Colors.green : Colors.grey,
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    title: Text(
-                      user.name,
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.white : Colors.black, // Color del texto según el tema
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: isConnected ? Colors.green : Colors.grey,
+                        child: Icon(
+                          Icons.person,
+                          color: theme.colorScheme.onPrimary,
+                        ),
                       ),
-                    ),
-                    subtitle: Text(
-                      user.mail,
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.white70 : Colors.black87, // Color de subtítulo según el tema
+                      title: Text(
+                        user.name,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                      subtitle: Text(
+                        user.mail,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      trailing: Icon(
+                        Icons.chat,
+                        color: theme.colorScheme.secondary, // Color dinámico según el tema
+                      ),
+                      onTap: () {
+                        Get.to(() => ChatPage(
+                              receiverId: user.id,
+                              receiverName: user.name,
+                            ));
+                      },
                     ),
-                    onTap: () {
-                      Get.to(() => ChatPage(
-                            receiverId: user.id,
-                            receiverName: user.name,
-                          ));
-                    },
                   );
                 },
               );
