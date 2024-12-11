@@ -3,7 +3,7 @@ import '../models/asignaturaModel.dart';
 
 class AsignaturaService {
   final Dio dio = Dio();
-  final String baseUrl = 'http://localhost:3000/api/usuarios';
+  final String baseUrl = 'http://teachme-backend:3000/api/usuarios';
   //final String baseUrl = 'http://10.0.2.2:3000/api/usuarios';
 
 

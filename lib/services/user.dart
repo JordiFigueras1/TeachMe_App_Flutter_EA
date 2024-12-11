@@ -5,7 +5,7 @@ import '../models/asignaturaModel.dart';
 import '../controllers/authController.dart';
 
 class UserService {
-  final String baseUrl = 'http://localhost:3000/api/usuarios'; // Cambia si es necesario
+  final String baseUrl = 'http://teachme-backend:3000/api/usuarios'; // Cambia si es necesario
   //final String baseUrl = 'http://10.0.2.2:3000/api/usuarios';
   final dio.Dio dioClient = dio.Dio();
 
