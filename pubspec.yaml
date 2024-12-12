@@ -24,6 +24,9 @@ dependencies:
   geolocator: ^9.0.2 # Para obtener coordenadas
   flutter_map: ^4.0.0
   latlong2: ^0.8.1 # Necesario para las coordenadas
+  flutter_localizations:
+    sdk: flutter # Localización oficial de Flutter
+  intl: ^0.19.0 # Paquete para manejar traducciones
 
 dev_dependencies:
   flutter_test:
@@ -34,3 +37,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - lib/l10n/ # Carpeta donde estarán los archivos de localización

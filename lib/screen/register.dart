@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/registerController.dart';
 import '../controllers/theme_controller.dart';
+import '../controllers/localeController.dart';
+import '../l10n.dart';
 
 class RegisterPage extends StatelessWidget {
   final RegisterController registerController = Get.put(RegisterController());
   final ThemeController themeController = Get.find<ThemeController>();
+  final LocaleController localeController = Get.find<LocaleController>(); // Agregamos el controlador de idiomas
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +29,18 @@ class RegisterPage extends StatelessWidget {
               color: theme.textTheme.bodyLarge?.color,
             ),
             onPressed: themeController.toggleTheme,
+          ),
+          // Botón para cambiar de idioma
+          IconButton(
+            icon: Icon(Icons.language, color: theme.textTheme.bodyLarge?.color),
+            onPressed: () {
+              // Cambia el idioma entre inglés y español
+              if (localeController.currentLocale.value.languageCode == 'es') {
+                localeController.changeLanguage('en');
+              } else {
+                localeController.changeLanguage('es');
+              }
+            },
           ),
         ],
       ),
@@ -58,46 +73,56 @@ class RegisterPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
+            // Campo de nombre
             _buildTextField(
               controller: registerController.nameController,
-              label: 'Nombre',
+              label: AppLocalizations.of(context)?.translate('name') ?? 'Nombre',
               icon: Icons.person,
               theme: theme,
             ),
             const SizedBox(height: 12),
+
+            // Campo de correo electrónico
             _buildTextField(
               controller: registerController.mailController,
-              label: 'Correo Electrónico',
+              label: AppLocalizations.of(context)?.translate('email') ?? 'Correo Electrónico',
               icon: Icons.email,
               keyboardType: TextInputType.emailAddress,
               theme: theme,
             ),
             const SizedBox(height: 12),
+
+            // Campo de edad
             _buildTextField(
               controller: registerController.ageController,
-              label: 'Edad',
+              label: AppLocalizations.of(context)?.translate('age') ?? 'Edad',
               icon: Icons.cake,
               keyboardType: TextInputType.number,
               theme: theme,
             ),
             const SizedBox(height: 12),
+
+            // Campo de contraseña
             _buildTextField(
               controller: registerController.passwordController,
-              label: 'Contraseña',
+              label: AppLocalizations.of(context)?.translate('password') ?? 'Contraseña',
               icon: Icons.lock,
               obscureText: true,
               theme: theme,
             ),
             const SizedBox(height: 12),
+
+            // Campo de confirmación de contraseña
             _buildTextField(
               controller: registerController.confirmPasswordController,
-              label: 'Confirmar Contraseña',
+              label: AppLocalizations.of(context)?.translate('confirmPassword') ?? 'Confirmar Contraseña',
               icon: Icons.lock_outline,
               obscureText: true,
               theme: theme,
             ),
             const SizedBox(height: 24),
 
+            // Botón para registrarse
             Obx(() {
               if (registerController.isLoading.value) {
                 return const Center(
@@ -114,7 +139,7 @@ class RegisterPage extends StatelessWidget {
                     backgroundColor: theme.primaryColor,
                   ),
                   child: Text(
-                    'Registrarse',
+                    AppLocalizations.of(context)?.translate('registerButton') ?? 'Registrarse',
                     style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
                   ),
                 );
@@ -122,6 +147,7 @@ class RegisterPage extends StatelessWidget {
             }),
             const SizedBox(height: 16),
 
+            // Mensaje de error
             Obx(() {
               if (registerController.errorMessage.isNotEmpty) {
                 return Padding(
@@ -138,11 +164,12 @@ class RegisterPage extends StatelessWidget {
             }),
             const SizedBox(height: 16),
 
+            // Enlace para iniciar sesión
             Center(
               child: TextButton(
                 onPressed: () => Get.toNamed('/login'),
                 child: Text(
-                  '¿Ya tienes una cuenta? Inicia sesión',
+                  AppLocalizations.of(context)?.translate('haveAccount') ?? '¿Ya tienes una cuenta? Inicia sesión',
                   style: TextStyle(
                     fontSize: 14,
                     color: themeController.themeMode.value == ThemeMode.dark
@@ -158,6 +185,7 @@ class RegisterPage extends StatelessWidget {
     );
   }
 
+  // Método para construir los campos de texto
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,

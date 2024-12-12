@@ -13,15 +13,20 @@ import '../controllers/connectedUsersController.dart';
 import '../screen/chat.dart';
 import '../controllers/socketController.dart';
 import '../controllers/theme_controller.dart';
+import '../controllers/localeController.dart'; // Asegúrate de tener el LocaleController
 import '../screen/mapPage.dart';
+import 'l10n.dart'; // Asegúrate de tener esta clase generada
+import 'package:flutter_localizations/flutter_localizations.dart'; // Importa las localizaciones globales
 
 void main() {
+  // Inicializa los controladores
   Get.put(AuthController());
   Get.put<UserListController>(UserListController());
   Get.put<UserModelController>(UserModelController());
   Get.put(ConnectedUsersController());
   Get.put(SocketController());
   Get.put(ThemeController()); // Registrar el controlador del tema
+  Get.put(LocaleController()); // Registrar el controlador de locales
 
   runApp(MyApp());
 }
@@ -30,11 +35,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeController themeController = Get.find(); // Obtiene el controlador del tema
+    final LocaleController localeController = Get.find(); // Obtiene el controlador de locales
 
     return Obx(() {
       return GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: '/login',
+        initialRoute: '/login', // Página de inicio
         theme: ThemeData(
           brightness: Brightness.light,
           primaryColor: Colors.blue,
@@ -89,6 +95,18 @@ class MyApp extends StatelessWidget {
             page: () => MapPage(),
           ),
         ],
+
+        localizationsDelegates: [
+          AppLocalizations.delegate, // Delegado de traducciones generado por Flutter
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('en', ''), // Inglés
+          const Locale('es', ''), // Español
+        ],
+        locale: localeController.currentLocale.value, // Controlador para el idioma actual
       );
     });
   }

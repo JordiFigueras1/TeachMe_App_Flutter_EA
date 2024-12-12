@@ -3,11 +3,14 @@ import 'package:get/get.dart';
 import '../controllers/userController.dart';
 import '../controllers/authController.dart';
 import '../controllers/theme_controller.dart';
+import '../controllers/localeController.dart';  // Agregar controlador de idioma
+import '../l10n.dart';  // Asegúrate de tener esta clase que contiene las traducciones
 
 class LogInPage extends StatelessWidget {
   final UserController userController = Get.put(UserController());
   final AuthController authController = Get.find<AuthController>();
   final ThemeController themeController = Get.find<ThemeController>();
+  final LocaleController localeController = Get.find<LocaleController>(); // Controlador de idioma
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +19,7 @@ class LogInPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Iniciar Sesión'),
+        title: Text(AppLocalizations.of(context)?.translate('login') ?? 'Iniciar Sesión'),
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         actions: [
@@ -28,6 +31,18 @@ class LogInPage extends StatelessWidget {
               color: theme.textTheme.bodyLarge?.color,
             ),
             onPressed: themeController.toggleTheme,
+          ),
+          // Botón para cambiar de idioma
+          IconButton(
+            icon: Icon(Icons.language, color: theme.textTheme.bodyLarge?.color),
+            onPressed: () {
+              // Cambia el idioma entre inglés y español
+              if (localeController.currentLocale.value.languageCode == 'es') {
+                localeController.changeLanguage('en');
+              } else {
+                localeController.changeLanguage('es');
+              }
+            },
           ),
         ],
       ),
@@ -63,7 +78,7 @@ class LogInPage extends StatelessWidget {
             // Correo electrónico
             _buildTextField(
               controller: userController.mailController,
-              label: 'Correo Electrónico',
+              label: AppLocalizations.of(context)?.translate('email') ?? 'Correo Electrónico',
               icon: Icons.email,
               theme: theme,
             ),
@@ -72,7 +87,7 @@ class LogInPage extends StatelessWidget {
             // Contraseña
             _buildTextField(
               controller: userController.passwordController,
-              label: 'Contraseña',
+              label: AppLocalizations.of(context)?.translate('password') ?? 'Contraseña',
               icon: Icons.lock,
               obscureText: true,
               theme: theme,
@@ -94,7 +109,7 @@ class LogInPage extends StatelessWidget {
                     backgroundColor: theme.primaryColor,
                   ),
                   child: Text(
-                    'Iniciar Sesión',
+                    AppLocalizations.of(context)?.translate('loginButton') ?? 'Iniciar Sesión',
                     style: theme.textTheme.labelLarge,
                   ),
                 );
@@ -124,7 +139,7 @@ class LogInPage extends StatelessWidget {
               child: TextButton(
                 onPressed: () => Get.toNamed('/register'),
                 child: Text(
-                  '¿No tienes cuenta? Regístrate',
+                  AppLocalizations.of(context)?.translate('noAccount') ?? '¿No tienes cuenta? Regístrate',
                   style: TextStyle(
                     fontSize: 14,
                     color: themeController.themeMode.value == ThemeMode.dark
@@ -140,6 +155,7 @@ class LogInPage extends StatelessWidget {
     );
   }
 
+  // Método para construir los campos de texto
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
