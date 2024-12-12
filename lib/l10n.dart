@@ -17,12 +17,12 @@ class AppLocalizations {
       'loginButton': 'Login',
       'noAccount': 'Don\'t have an account? Sign Up',
       'register': 'Register',
-    'name': 'Name',
-    'email': 'Email',
-    'age': 'Age',
-    'password': 'Password',
-    'confirmPassword': 'Confirm Password',
-    'alreadyHaveAccount': 'Already have an account? Sign in',
+      'name': 'Name',
+      'age': 'Age',
+      'confirmPassword': 'Confirm Password',
+      'alreadyHaveAccount': 'Already have an account? Sign in',
+      'subjects': 'Subjects',  // Título de la página de asignaturas
+      'noSubjects': 'No subjects available.',  // Mensaje cuando no hay asignaturas
     },
     'es': {
       'helloWorld': 'Hola Mundo',
@@ -32,12 +32,12 @@ class AppLocalizations {
       'loginButton': 'Iniciar Sesión',
       'noAccount': '¿No tienes cuenta? Regístrate',
       'register': 'Registrarse',
-    'name': 'Nombre',
-    'email': 'Correo Electrónico',
-    'age': 'Edad',
-    'password': 'Contraseña',
-    'confirmPassword': 'Confirmar Contraseña',
-    'alreadyHaveAccount': '¿Ya tienes una cuenta? Inicia sesión',
+      'name': 'Nombre',
+      'age': 'Edad',
+      'confirmPassword': 'Confirmar Contraseña',
+      'alreadyHaveAccount': '¿Ya tienes una cuenta? Inicia sesión',
+      'subjects': 'Asignaturas',  // Título de la página de asignaturas
+      'noSubjects': 'No hay asignaturas disponibles.',  // Mensaje cuando no hay asignaturas
     },
   };
 
@@ -76,4 +76,3 @@ class _AppLocalizationsDelegate
   @override
   bool shouldReload(LocalizationsDelegate<AppLocalizations> old) => false;
 }
-

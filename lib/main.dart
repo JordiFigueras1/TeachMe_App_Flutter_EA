@@ -1,46 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../Widgets/bottomNavigationBar.dart';
-import '../screen/logIn.dart';
-import '../screen/register.dart';
-import '../screen/user.dart';
-import '../screen/home.dart';
-import '../controllers/authController.dart';
-import '../screen/perfil.dart';
-import '../controllers/userListController.dart';
-import '../controllers/userModelController.dart';
-import '../controllers/connectedUsersController.dart';
-import '../screen/chat.dart';
-import '../controllers/socketController.dart';
-import '../controllers/theme_controller.dart';
-import '../controllers/localeController.dart'; // Asegúrate de tener el LocaleController
-import '../screen/mapPage.dart';
-import 'l10n.dart'; // Asegúrate de tener esta clase generada
-import 'package:flutter_localizations/flutter_localizations.dart'; // Importa las localizaciones globales
+import 'controllers/localeController.dart'; // Importa el controlador
+import 'l10n.dart'; // Importa el archivo de localización
+import 'screen/asignaturas.dart';
+import 'screen/chat.dart';
+import 'screen/home.dart';
+import 'screen/logIn.dart';
+import 'screen/mapPage.dart';
+import 'screen/perfil.dart';
+import 'screen/register.dart';
+import 'screen/user.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+ 
 
 void main() {
-  // Inicializa los controladores
-  Get.put(AuthController());
-  Get.put<UserListController>(UserListController());
-  Get.put<UserModelController>(UserModelController());
-  Get.put(ConnectedUsersController());
-  Get.put(SocketController());
-  Get.put(ThemeController()); // Registrar el controlador del tema
-  Get.put(LocaleController()); // Registrar el controlador de locales
-
+  Get.put(LocaleController());  // Registrar el controlador de idioma
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final ThemeController themeController = Get.find(); // Obtiene el controlador del tema
-    final LocaleController localeController = Get.find(); // Obtiene el controlador de locales
+    final LocaleController localeController = Get.find();  // Obtener el controlador de idioma
 
     return Obx(() {
       return GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: '/login', // Página de inicio
+        initialRoute: '/login',
+        localizationsDelegates: [
+          AppLocalizations.delegate, // Delegado de traducciones
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('en', ''),  // Inglés
+          const Locale('es', ''),  // Español
+        ],
+        locale: localeController.currentLocale.value,  // Asignar el idioma actual
         theme: ThemeData(
           brightness: Brightness.light,
           primaryColor: Colors.blue,
@@ -49,7 +47,7 @@ class MyApp extends StatelessWidget {
             backgroundColor: Colors.blue,
             titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
           ),
-        ), // Tema claro
+        ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
           primaryColor: const Color(0xFF1C1C1E),
@@ -58,55 +56,12 @@ class MyApp extends StatelessWidget {
             backgroundColor: Color(0xFF2C2C2E),
             titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
           ),
-        ), // Tema oscuro
-        themeMode: themeController.themeMode.value, // Controlador del tema reactivo
+        ),
+        themeMode: ThemeMode.system,
         getPages: [
-          GetPage(
-            name: '/login',
-            page: () => LogInPage(),
-          ),
-          GetPage(
-            name: '/register',
-            page: () => RegisterPage(),
-          ),
-          GetPage(
-            name: '/home',
-            page: () => BottomNavScaffold(child: HomePage()),
-          ),
-          GetPage(
-            name: '/usuarios',
-            page: () => BottomNavScaffold(
-              child: UserPage(),
-            ),
-          ),
-          GetPage(
-            name: '/perfil',
-            page: () => PerfilPage(),
-          ),
-          GetPage(
-            name: '/chat',
-            page: () => ChatPage(
-              receiverId: Get.arguments['receiverId'],
-              receiverName: Get.arguments['receiverName'],
-            ),
-          ),
-          GetPage(
-            name: '/map',
-            page: () => MapPage(),
-          ),
+          GetPage(name: '/asignaturas', page: () => AsignaturasPage()),
+          // Agrega tus rutas aquí
         ],
-
-        localizationsDelegates: [
-          AppLocalizations.delegate, // Delegado de traducciones generado por Flutter
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: [
-          const Locale('en', ''), // Inglés
-          const Locale('es', ''), // Español
-        ],
-        locale: localeController.currentLocale.value, // Controlador para el idioma actual
       );
     });
   }

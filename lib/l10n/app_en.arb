@@ -6,6 +6,8 @@
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "alreadyHaveAccount": "Already have an account? Sign in",
+    "subjects": "Subjects",
+    "noSubjects": "No subjects available.",
     "@register": {
       "description": "Text for the register button",
       "type": "text"
@@ -32,6 +34,14 @@
     },
     "@alreadyHaveAccount": {
       "description": "Text for the sign-in link",
+      "type": "text"
+    },
+    "@subjects": {
+      "description": "Title of the subjects page",
+      "type": "text"
+    },
+    "@noSubjects": {
+      "description": "Message displayed when there are no subjects",
       "type": "text"
     }
   }

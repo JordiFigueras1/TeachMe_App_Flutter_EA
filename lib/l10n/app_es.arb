@@ -6,6 +6,8 @@
     "password": "Contraseña",
     "confirmPassword": "Confirmar Contraseña",
     "alreadyHaveAccount": "¿Ya tienes una cuenta? Inicia sesión",
+    "subjects": "Asignaturas",
+    "noSubjects": "No hay asignaturas disponibles.",
     "@register": {
       "description": "Texto del botón de registro",
       "type": "text"
@@ -32,6 +34,14 @@
     },
     "@alreadyHaveAccount": {
       "description": "Texto para el enlace de iniciar sesión",
+      "type": "text"
+    },
+    "@subjects": {
+      "description": "Título de la página de asignaturas",
+      "type": "text"
+    },
+    "@noSubjects": {
+      "description": "Mensaje mostrado cuando no hay asignaturas",
       "type": "text"
     }
   }
