@@ -5,6 +5,7 @@ import '../controllers/authController.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/localeController.dart';  // Agregar controlador de idioma
 import '../l10n.dart';  // Asegúrate de tener esta clase que contiene las traducciones
+import 'faq_screen.dart';  // Importar la pantalla de FAQ
 
 class LogInPage extends StatelessWidget {
   final UserController userController = Get.put(UserController());
@@ -151,6 +152,14 @@ class LogInPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Navegar a la pantalla de FAQ al presionar el botón flotante
+          Get.to(() => FAQScreen());
+        },
+        child: Icon(Icons.help),
+        backgroundColor: theme.primaryColor,
       ),
     );
   }
