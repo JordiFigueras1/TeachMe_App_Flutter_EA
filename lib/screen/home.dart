@@ -159,6 +159,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               );
             }),
           ),
+          // Botón para navegar a la pantalla de carga de imagen
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                Get.toNamed('/uploadImage'); // Navegar a la pantalla de subida de imágenes
+              },
+              child: Text('Subir Imagen a Cloudinary'),
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(

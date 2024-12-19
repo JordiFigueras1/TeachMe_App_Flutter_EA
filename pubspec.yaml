@@ -27,6 +27,13 @@ dependencies:
   flutter_localizations:
     sdk: flutter # Localización oficial de Flutter
   intl: ^0.19.0 # Paquete para manejar traducciones
+  image_picker: ^0.8.5
+  cloudinary_sdk: ^5.0.0+1
+  url_launcher: ^6.1.10
+  
+
+  
+
 
 dev_dependencies:
   flutter_test:

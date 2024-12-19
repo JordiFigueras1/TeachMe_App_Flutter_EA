@@ -17,6 +17,7 @@ import '../controllers/localeController.dart'; // Asegúrate de tener el LocaleC
 import '../screen/mapPage.dart';
 import 'l10n.dart'; // Asegúrate de tener esta clase generada
 import 'package:flutter_localizations/flutter_localizations.dart'; // Importa las localizaciones globales
+import '../screen/upload_image_screen.dart'; // Asegúrate de importar la pantalla de subida
 
 void main() {
   // Inicializa los controladores
@@ -93,6 +94,11 @@ class MyApp extends StatelessWidget {
           GetPage(
             name: '/map',
             page: () => MapPage(),
+          ),
+          // Nueva ruta para la pantalla de subida de imágenes
+          GetPage(
+            name: '/uploadImage',
+            page: () => UploadImageScreen(),
           ),
         ],
 
