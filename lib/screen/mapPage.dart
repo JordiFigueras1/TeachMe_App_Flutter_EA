@@ -34,82 +34,108 @@ class MapPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Obx(() {
-        if (userListController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (userListController.userList.isEmpty) {
-          return const Center(child: Text('No hay usuarios con coordenadas disponibles.'));
-        }
-
-        // Obtener las coordenadas del usuario logueado
-        final userLoggedInLat = userModelController.user.value.lat;
-        final userLoggedInLng = userModelController.user.value.lng;
-
-        // Validar que el usuario logueado tiene coordenadas válidas
-        if (userLoggedInLat == 0.0 || userLoggedInLng == 0.0) {
-          return const Center(
-            child: Text(
-              'No se puede centrar el mapa porque las coordenadas del usuario no están disponibles.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.red),
+      body: Column(
+        children: [
+          
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: DropdownButton<int>(
+              value: userListController.proximityRadius.value,
+              items: [
+                DropdownMenuItem(value: 1, child: Text('1 km')),
+                DropdownMenuItem(value: 5, child: Text('5 km')),
+                DropdownMenuItem(value: 10, child: Text('10 km')),
+                DropdownMenuItem(value: 20, child: Text('20 km')),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  userListController.setProximityRadius(value); 
+                  userListController.fetchUsersByProximity(); 
+                }
+              },
+              hint: const Text('Buscar por proximidad'),
             ),
-          );
-        }
-
-        print("Centro del mapa: Lat: $userLoggedInLat, Lng: $userLoggedInLng");
-
-        // Crear los marcadores para cada usuario
-        final markers = userListController.userList.map((user) {
-          final coordinates = user.lat != 0.0 && user.lng != 0.0
-              ? LatLng(user.lat, user.lng)
-              : null;
-
-          if (coordinates != null) {
-            print("Creando marcador para ${user.name} en (${user.lat}, ${user.lng})");
-            return Marker(
-              width: 100.0,
-              height: 100.0,
-              point: coordinates,
-              builder: (ctx) => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    color: isDarkMode ? Colors.blue : Colors.red, // Cambia el color del marcador según el tema
-                    size: 40.0,
-                  ),
-                  Text(
-                    user.name,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : Colors.black, // Texto de los nombres según el tema
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-          return null;
-        }).where((marker) => marker != null).toList();
-
-        return FlutterMap(
-          options: MapOptions(
-            center: LatLng(userLoggedInLat, userLoggedInLng), // Centro dinámico
-            zoom: 13.0,
           ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: ['a', 'b', 'c'],
-              // Se pueden ajustar los colores de las capas según el tema, si fuera necesario
-            ),
-            MarkerLayer(markers: markers.cast<Marker>()),
-          ],
-        );
-      }),
+          Expanded(
+            child: Obx(() {
+              if (userListController.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (userListController.userList.isEmpty) {
+                return const Center(child: Text('No hay usuarios con coordenadas disponibles.'));
+              }
+
+              // Obtener las coordenadas del usuario logueado
+              final userLoggedInLat = userModelController.user.value.lat;
+              final userLoggedInLng = userModelController.user.value.lng;
+
+              // Validar que el usuario logueado tiene coordenadas válidas
+              if (userLoggedInLat == 0.0 || userLoggedInLng == 0.0) {
+                return const Center(
+                  child: Text(
+                    'No se puede centrar el mapa porque las coordenadas del usuario no están disponibles.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.red),
+                  ),
+                );
+              }
+
+              print("Centro del mapa: Lat: $userLoggedInLat, Lng: $userLoggedInLng");
+
+              // Crear los marcadores para cada usuario
+              final markers = userListController.userList.map((user) {
+                final coordinates = user.lat != 0.0 && user.lng != 0.0
+                    ? LatLng(user.lat, user.lng)
+                    : null;
+
+                if (coordinates != null) {
+                  print("Creando marcador para ${user.name} en (${user.lat}, ${user.lng})");
+                  return Marker(
+                    width: 100.0,
+                    height: 100.0,
+                    point: coordinates,
+                    builder: (ctx) => Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          color: isDarkMode ? Colors.blue : Colors.red, // Cambia el color del marcador según el tema
+                          size: 40.0,
+                        ),
+                        Text(
+                          user.name,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white : Colors.black, // Texto de los nombres según el tema
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return null;
+              }).where((marker) => marker != null).toList();
+
+              return FlutterMap(
+                options: MapOptions(
+                  center: LatLng(userLoggedInLat, userLoggedInLng), // Centro dinámico
+                  zoom: 13.0,
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    subdomains: ['a', 'b', 'c'],
+                    // Se pueden ajustar los colores de las capas según el tema, si fuera necesario
+                  ),
+                  MarkerLayer(markers: markers.cast<Marker>()),
+                ],
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 }

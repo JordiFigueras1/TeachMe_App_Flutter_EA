@@ -14,7 +14,7 @@ dependencies:
   http: ^0.13.5 # Manejo de solicitudes HTTP
   provider: ^6.0.5 # Manejo de estado adicional
   cupertino_icons: ^1.0.5 # Íconos para diseño iOS
-  dio: ^5.2.0 # Cliente HTTP más avanzado
+  dio: ^5.7.0 # Cliente HTTP más avanzado
   flutter_lints: ^2.0.1 # Reglas de linting
   json_annotation: ^4.8.1 # Para manejar JSON en modelos
   logger: ^1.1.0 # Para depuración y registro de logs

@@ -60,4 +60,5 @@ class UserListController extends GetxController {
       isLoading(false);
     }
   }
-}
+} 
+ 

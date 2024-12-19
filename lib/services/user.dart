@@ -4,6 +4,8 @@ import '../models/userModel.dart';
 import '../models/asignaturaModel.dart';
 import '../controllers/authController.dart';
 
+
+
 class UserService {
   final String baseUrl = 'http://localhost:3000/api/usuarios'; // Cambia si es necesario
   //final String baseUrl = 'http://10.0.2.2:3000/api/usuarios';
@@ -141,4 +143,26 @@ class UserService {
       throw Exception('Error al conectar con el servidor: $e');
     }
   }
+  Future<List<UserModel>> getUsersCercanos() async {
+  try {
+    final authController = Get.find<AuthController>();
+    dioClient.options.headers['auth-token'] = authController.getToken; // Asegurarse de tener el token en la cabecera
+
+    // Realizar la solicitud GET para obtener los usuarios cercanos
+    final dio.Response response = await dioClient.get('$baseUrl/cercanos');
+
+    if (response.statusCode == 200) {
+      // Si la respuesta es exitosa, convertir los datos en objetos UserModel
+      List<dynamic> data = response.data;
+      return data.map((json) => UserModel.fromJson(json)).toList();
+    } else {
+      // Si la respuesta no es exitosa, lanzar una excepción
+      throw Exception('Error al obtener usuarios cercanos.');
+    }
+  } catch (e) {
+    // Si hay un error, imprimirlo y lanzar una excepción
+    print("Error en getUsersCercanos: $e");
+    throw Exception('Error al conectar con el servidor.');
+  }
+}
 }
