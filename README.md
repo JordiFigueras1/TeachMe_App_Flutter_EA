@@ -1,16 +1,5 @@
-# flutter_application_1
+MINIM 2 JORDI:
 
-A new Flutter project.
+Per accedir a la sala de chat global, cal anar a la "screen" perfil.dart on hi ha un buscador d'usuaris per nom. Es igual a quin dels usuaris es fagi Click i no importa si están connectats o no, ja que clickant a qualsevol usuari s'accedeix a la sala de chat global.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+S'ha creat un nou model messageModel que va alineat amb el chatTypes.ts del backend. S'ha modificat la lògica de SocketController per habilitar el roomId de la sala de chat global i les demés funcions necessàries.
