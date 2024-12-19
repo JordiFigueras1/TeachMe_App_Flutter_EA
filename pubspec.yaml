@@ -27,6 +27,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter # Localización oficial de Flutter
   intl: ^0.19.0 # Paquete para manejar traducciones
+  google_sign_in: ^5.4.0
+  
+
 
 dev_dependencies:
   flutter_test:
@@ -39,3 +42,4 @@ flutter:
   uses-material-design: true
   assets:
     - lib/l10n/ # Carpeta donde estarán los archivos de localización
+    - assets/google_icon.png

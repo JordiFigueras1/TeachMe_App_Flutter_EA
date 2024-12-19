@@ -147,6 +147,28 @@ class RegisterPage extends StatelessWidget {
             }),
             const SizedBox(height: 16),
 
+            // Botón de registro con Google
+            ElevatedButton.icon(
+              onPressed: registerController.signInWithGoogle,
+              icon: Image.asset(
+                'assets/google_icon.png', // Asegúrate de tener un ícono de Google en los assets
+                height: 24,
+                width: 24,
+              ),
+              label: Text(
+                AppLocalizations.of(context)?.translate('registerWithGoogle') ?? 'Registrarse con Google',
+                style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                backgroundColor: Colors.redAccent,
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Mensaje de error
             Obx(() {
               if (registerController.errorMessage.isNotEmpty) {
