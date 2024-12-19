@@ -19,6 +19,9 @@ class PerfilPage extends StatelessWidget {
     final TextEditingController searchController = TextEditingController();
     final ThemeData theme = Theme.of(context);
 
+    // ID de sala global
+    const String globalRoomId = 'global-chat-room';
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -117,9 +120,10 @@ class PerfilPage extends StatelessWidget {
                         color: theme.colorScheme.secondary, // Color dinámico según el tema
                       ),
                       onTap: () {
+                        socketController.joinRoom(globalRoomId);
                         Get.to(() => ChatPage(
-                              receiverId: user.id,
-                              receiverName: user.name,
+                              roomId: globalRoomId, // Usar roomId
+                              roomName: 'Sala Global', // Usar roomName
                             ));
                       },
                     ),

@@ -86,8 +86,8 @@ class MyApp extends StatelessWidget {
           GetPage(
             name: '/chat',
             page: () => ChatPage(
-              receiverId: Get.arguments['receiverId'],
-              receiverName: Get.arguments['receiverName'],
+              roomId: Get.arguments['roomId'], // Cambiado a roomId
+              roomName: Get.arguments['roomName'], // Cambiado a roomName
             ),
           ),
           GetPage(
