@@ -9,6 +9,7 @@ class AuthController extends GetxController {
   // Métodos para establecer token y userId
   void setToken(String newToken) {
     token.value = newToken;
+    print('Token establecido: $token');
   }
 
   void setUserId(String id) {

@@ -8,7 +8,7 @@ import '../l10n.dart';
 class RegisterPage extends StatelessWidget {
   final RegisterController registerController = Get.put(RegisterController());
   final ThemeController themeController = Get.find<ThemeController>();
-  final LocaleController localeController = Get.find<LocaleController>(); // Agregamos el controlador de idiomas
+  final LocaleController localeController = Get.find<LocaleController>();
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +30,9 @@ class RegisterPage extends StatelessWidget {
             ),
             onPressed: themeController.toggleTheme,
           ),
-          // Botón para cambiar de idioma
           IconButton(
             icon: Icon(Icons.language, color: theme.textTheme.bodyLarge?.color),
             onPressed: () {
-              // Cambia el idioma entre inglés y español
               if (localeController.currentLocale.value.languageCode == 'es') {
                 localeController.changeLanguage('en');
               } else {
@@ -49,7 +47,6 @@ class RegisterPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Logo
             Center(
               child: Container(
                 width: 100,
@@ -73,56 +70,76 @@ class RegisterPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Campo de nombre
+            // Campo Nombre Completo
             _buildTextField(
               controller: registerController.nameController,
-              label: AppLocalizations.of(context)?.translate('name') ?? 'Nombre',
+              label: 'Nombre Completo',
               icon: Icons.person,
               theme: theme,
             ),
             const SizedBox(height: 12),
 
-            // Campo de correo electrónico
+            // Campo Nombre de Usuario
+            _buildTextField(
+              controller: registerController.usernameController,
+              label: 'Nombre de Usuario',
+              icon: Icons.person_outline,
+              theme: theme,
+            ),
+            const SizedBox(height: 12),
+
+            // Campo Correo Electrónico
             _buildTextField(
               controller: registerController.mailController,
-              label: AppLocalizations.of(context)?.translate('email') ?? 'Correo Electrónico',
+              label: 'Correo Electrónico',
               icon: Icons.email,
               keyboardType: TextInputType.emailAddress,
               theme: theme,
             ),
             const SizedBox(height: 12),
 
-            // Campo de edad
-            _buildTextField(
-              controller: registerController.ageController,
-              label: AppLocalizations.of(context)?.translate('age') ?? 'Edad',
-              icon: Icons.cake,
-              keyboardType: TextInputType.number,
-              theme: theme,
+            // Selector de Fecha de Nacimiento
+            GestureDetector(
+              onTap: () => _selectDate(context),
+              child: AbsorbPointer(
+                child: TextField(
+                  controller: registerController.birthdateController,
+                  decoration: InputDecoration(
+                    labelText: 'Fecha de Nacimiento',
+                    prefixIcon: const Icon(Icons.calendar_today),
+                    filled: true,
+                    fillColor: theme.cardColor,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 12),
 
-            // Campo de contraseña
+            // Campo Contraseña
             _buildTextField(
               controller: registerController.passwordController,
-              label: AppLocalizations.of(context)?.translate('password') ?? 'Contraseña',
+              label: 'Contraseña',
               icon: Icons.lock,
               obscureText: true,
               theme: theme,
             ),
             const SizedBox(height: 12),
 
-            // Campo de confirmación de contraseña
+            // Campo Confirmar Contraseña
             _buildTextField(
               controller: registerController.confirmPasswordController,
-              label: AppLocalizations.of(context)?.translate('confirmPassword') ?? 'Confirmar Contraseña',
+              label: 'Confirmar Contraseña',
               icon: Icons.lock_outline,
               obscureText: true,
               theme: theme,
             ),
             const SizedBox(height: 24),
 
-            // Botón para registrarse
+            // Botón para Registrarse
             Obx(() {
               if (registerController.isLoading.value) {
                 return const Center(
@@ -138,54 +155,47 @@ class RegisterPage extends StatelessWidget {
                     ),
                     backgroundColor: theme.primaryColor,
                   ),
-                  child: Text(
-                    AppLocalizations.of(context)?.translate('registerButton') ?? 'Registrarse',
-                    style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
+                  child: const Text(
+                    'Registrarse',
+                    style: TextStyle(color: Colors.white),
                   ),
                 );
               }
             }),
             const SizedBox(height: 16),
-
-            // Mensaje de error
-            Obx(() {
-              if (registerController.errorMessage.isNotEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    registerController.errorMessage.value,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                );
-              } else {
-                return const SizedBox.shrink();
-              }
-            }),
-            const SizedBox(height: 16),
-
-            // Enlace para iniciar sesión
-            Center(
-              child: TextButton(
-                onPressed: () => Get.toNamed('/login'),
-                child: Text(
-                  AppLocalizations.of(context)?.translate('haveAccount') ?? '¿Ya tienes una cuenta? Inicia sesión',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: themeController.themeMode.value == ThemeMode.dark
-                        ? Colors.lightBlueAccent
-                        : theme.primaryColor,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  // Método para construir los campos de texto
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.blue,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      final formattedDate =
+          '${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}';
+      registerController.birthdateController.text = formattedDate;
+    }
+  }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,

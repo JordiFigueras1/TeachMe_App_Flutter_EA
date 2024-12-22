@@ -3,11 +3,12 @@ import '../models/userModel.dart';
 
 class UserModelController extends GetxController {
   final user = UserModel(
-    id: '0', // ID predeterminado
+    id: '0',
     name: 'Usuario desconocido',
+    username: 'Sin username',
     mail: 'No especificado',
     password: 'Sin contraseña',
-    age: 0, // Agregado: valor predeterminado para `age`
+    fechaNacimiento: 'Sin especificar',
     isProfesor: false,
     isAlumno: false,
     isAdmin: false,
@@ -17,31 +18,31 @@ class UserModelController extends GetxController {
   void setUser({
     required String id,
     required String name,
+    required String username,
     required String mail,
     required String password,
-    required int age,
+    required String fechaNacimiento,
     required bool isProfesor,
     required bool isAlumno,
     required bool isAdmin,
     required bool conectado,
-    double? lat, // Opcional
-    double? lng, // Opcional
+    double? lat,
+    double? lng,
   }) {
     user.update((val) {
       if (val != null) {
-        val.setUser(
-          id: id.isNotEmpty ? id : '0', // Asegurar que id nunca sea nulo
-          name: name.isNotEmpty ? name : 'Usuario desconocido', // Valor predeterminado
-          mail: mail.isNotEmpty ? mail : 'No especificado', // Valor predeterminado
-          password: password, // Contraseña vacía está bien
-          age: age > 0 ? age : 0, // Si edad no está presente, usar 0
-          isProfesor: isProfesor,
-          isAlumno: isAlumno,
-          isAdmin: isAdmin,
-          conectado: conectado,
-          lat: lat, // Nuevas coordenadas, si están presentes
-          lng: lng, // Nuevas coordenadas, si están presentes
-        );
+        val.id = id;
+        val.name = name;
+        val.username = username;
+        val.mail = mail;
+        val.password = password;
+        val.fechaNacimiento = fechaNacimiento;
+        val.isProfesor = isProfesor;
+        val.isAlumno = isAlumno;
+        val.isAdmin = isAdmin;
+        val.conectado = conectado;
+        if (lat != null) val.lat = lat;
+        if (lng != null) val.lng = lng;
       }
     });
   }

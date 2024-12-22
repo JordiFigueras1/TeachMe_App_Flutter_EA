@@ -41,18 +41,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   void _logout() {
-    if (authController.getUserId.isNotEmpty) {
-      // Emitir desconexión
-      socketController.disconnectUser(authController.getUserId);
+  if (authController.getUserId.isNotEmpty) {
+    // Emitir desconexión al backend
+    socketController.disconnectUser(authController.getUserId);
 
-      // Limpiar el estado del usuario
-      authController.setUserId('');
-      connectedUsersController.updateConnectedUsers([]);
-    }
-
-    // Navegar al login
-    Get.offAllNamed('/login');
+    // Limpiar el estado del usuario en AuthController
+    authController.setUserId('');
+    authController.setToken('');
+    connectedUsersController.updateConnectedUsers([]);
   }
+
+  // Navegar al login
+  Get.offAllNamed('/login');
+}
+
 
   @override
   void dispose() {

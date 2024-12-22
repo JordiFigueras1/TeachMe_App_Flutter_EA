@@ -15,6 +15,7 @@ import '../controllers/socketController.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/localeController.dart'; // Asegúrate de tener el LocaleController
 import '../screen/mapPage.dart';
+import '../screen/roleSelectionPage.dart'; // Importa tu pantalla de selección de rol
 import 'l10n.dart'; // Asegúrate de tener esta clase generada
 import 'package:flutter_localizations/flutter_localizations.dart'; // Importa las localizaciones globales
 
@@ -93,6 +94,10 @@ class MyApp extends StatelessWidget {
           GetPage(
             name: '/map',
             page: () => MapPage(),
+          ),
+          GetPage(
+            name: '/roleSelection',
+            page: () => RoleSelectionPage(), // Asegúrate de tener esta pantalla implementada
           ),
         ],
 

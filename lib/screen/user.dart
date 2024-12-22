@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../services/user.dart';
+import '../services/userService.dart';
 import '../controllers/userListController.dart';
 import '../controllers/asignaturaController.dart';
 import '../Widgets/userCard.dart';

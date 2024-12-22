@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../services/user.dart';
+import '../services/userService.dart';
 import '../controllers/authController.dart';
 import '../controllers/userModelController.dart';
 import 'package:geolocator/geolocator.dart';
@@ -15,15 +15,9 @@ class UserController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
-    Future<void> logIn() async {
+  Future<void> logIn() async {
     if (mailController.text.isEmpty || passwordController.text.isEmpty) {
       Get.snackbar('Error', 'Todos los campos son obligatorios',
-          snackPosition: SnackPosition.BOTTOM);
-      return;
-    }
-
-    if (!GetUtils.isEmail(mailController.text)) {
-      Get.snackbar('Error', 'Correo electrónico no válido',
           snackPosition: SnackPosition.BOTTOM);
       return;
     }
@@ -45,48 +39,64 @@ class UserController extends GetxController {
             'Permisos de ubicación denegados permanentemente. Habilítelos en la configuración.');
       }
 
-      // Obtener las coordenadas del dispositivo con mayor precisión
+      // Obtener las coordenadas del dispositivo
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation,
-        timeLimit: const Duration(seconds: 10), // Aumenta el tiempo de espera
+        timeLimit: const Duration(seconds: 10),
       );
 
       print("Coordenadas obtenidas: (${position.latitude}, ${position.longitude})");
-      print("Precisión: ${position.accuracy} metros");
 
       final response = await userService.logIn({
-        'email': mailController.text,
+        'identifier': mailController.text, // Correo o username
         'password': passwordController.text,
-        'lat': position.latitude.toString(), // Coordenada de latitud
-        'lng': position.longitude.toString(), // Coordenada de longitud
+        'lat': position.latitude.toString(),
+        'lng': position.longitude.toString(),
       });
 
       if (response.statusCode == 200) {
-        final userId = response.data['usuario']['id'];
-        final token = response.data['token'];
+        final userData = response.data['usuario'] ?? {};
+        final locationData = userData['location']?['coordinates'] ?? [0.0, 0.0];
+
+        final userId = userData['id'] ?? '0';
+        final token = response.data['token'] ?? '';
+
+        // Validar que los datos críticos estén presentes
+        if (userId == '0' || token.isEmpty) {
+          throw Exception('Datos críticos faltantes en la respuesta del servidor.');
+        }
 
         // Almacenar userId y token en el AuthController
         final authController = Get.find<AuthController>();
         authController.setUserId(userId);
         authController.setToken(token);
 
+        // Verificar que el token se haya configurado correctamente
+        if (authController.getToken.isEmpty) {
+          throw Exception('El token devuelto por el servidor es nulo o vacío.');
+        }
+        print("Token configurado correctamente: ${authController.getToken}");
+
         // Llamar a `setUser` en `UserModelController` con argumentos nombrados
         userModelController.setUser(
-          id: response.data['usuario']['id'] ?? '0', // Asegurar que 'id' tenga un valor por defecto
-          name: response.data['usuario']['nombre'] ?? 'Desconocido',
-          mail: response.data['usuario']['email'] ?? 'No especificado',
-          password: '', // No enviar la contraseña
-          age: response.data['usuario']['edad'] ?? 0, // Valor predeterminado
-          isProfesor: response.data['usuario']['isProfesor'] ?? false,
-          isAlumno: response.data['usuario']['isAlumno'] ?? false,
-          isAdmin: response.data['usuario']['isAdmin'] ?? false,
-          conectado: true, // Establecer 'conectado' como 'true'
-          lat: position.latitude, // Agregar coordenada de latitud
-          lng: position.longitude, // Agregar coordenada de longitud
+          id: userId,
+          name: userData['nombre'] ?? 'Desconocido',
+          username: userData['username'] ?? 'No especificado',
+          mail: userData['email'] ?? 'No especificado',
+          password: '', // Nunca asignamos la contraseña desde el backend
+          fechaNacimiento: userData['fechaNacimiento'] ?? 'Sin especificar',
+          isProfesor: userData['isProfesor'] ?? false,
+          isAlumno: userData['isAlumno'] ?? false,
+          isAdmin: userData['isAdmin'] ?? false,
+          conectado: true,
+          lat: locationData.length > 1 ? locationData[1] : 0.0,
+          lng: locationData.length > 0 ? locationData[0] : 0.0,
         );
 
-        // Navegar al Home
-        Get.offNamed('/home', arguments: {'userId': userId});
+        print("Datos asignados correctamente al modelo UserModel.");
+
+        // Comprobar rol y redirigir
+        checkRoleAndNavigate();
       } else {
         errorMessage.value =
             response.data['message'] ?? 'Credenciales incorrectas';
@@ -99,6 +109,55 @@ class UserController extends GetxController {
           snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void checkRoleAndNavigate() {
+    final user = userModelController.user.value;
+
+    // Agrega este print para verificar la ruta de navegación
+    print('Redirigiendo a: ${!user.isProfesor && !user.isAlumno ? "/roleSelection" : "/home"}');
+
+    if (!user.isProfesor && !user.isAlumno) {
+      // Primer inicio de sesión: Redirigir a RoleSelectionPage
+      Get.offAllNamed('/roleSelection');
+    } else {
+      // No es el primer inicio de sesión: Redirigir al Home
+      Get.offAllNamed('/home');
+    }
+  }
+
+  Future<void> assignRole(String role) async {
+    try {
+      final userId = Get.find<AuthController>().getUserId;
+      final isProfesor = role == "profesor";
+      final isAlumno = role == "alumno";
+
+      // Llamada al servicio para actualizar el rol
+      final response = await userService.updateRole(userId, isProfesor, isAlumno);
+
+      if (response.statusCode == 200) {
+        // Actualizar el modelo del usuario en el controlador
+        userModelController.setUser(
+          id: userModelController.user.value.id,
+          name: userModelController.user.value.name,
+          username: userModelController.user.value.username,
+          mail: userModelController.user.value.mail,
+          password: userModelController.user.value.password,
+          fechaNacimiento: userModelController.user.value.fechaNacimiento,
+          isProfesor: isProfesor,
+          isAlumno: isAlumno,
+          isAdmin: userModelController.user.value.isAdmin,
+          conectado: true,
+        );
+
+        // Navegar al Home después de asignar el rol
+        Get.offAllNamed('/home');
+      } else {
+        Get.snackbar("Error", "No se pudo asignar el rol. Inténtalo de nuevo.");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Ocurrió un problema: $e");
     }
   }
 }

@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import '../models/userModel.dart';
-import '../services/user.dart';
+import '../services/userService.dart';
 
 class UserListController extends GetxController {
   var isLoading = true.obs;

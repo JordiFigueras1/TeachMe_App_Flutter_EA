@@ -6,7 +6,6 @@ import '../controllers/authController.dart';
 
 class UserService {
   final String baseUrl = 'http://localhost:3000/api/usuarios'; // Cambia si es necesario
-  //final String baseUrl = 'http://10.0.2.2:3000/api/usuarios';
   final dio.Dio dioClient = dio.Dio();
 
   UserService() {
@@ -32,6 +31,62 @@ class UserService {
     } catch (e) {
       print("Error en createUser: $e");
       return 500;
+    }
+  }
+
+  Future<dio.Response> updateRole(String userId, bool isProfesor, bool isAlumno) async {
+    try {
+      final response = await dioClient.put( // Cambia PATCH por PUT
+        '$baseUrl/$userId/rol',
+        data: {
+          'isProfesor': isProfesor,
+          'isAlumno': isAlumno,
+        },
+      );
+      return response;
+    } catch (e) {
+      print("Error en updateRole: $e");
+      rethrow;
+    }
+  }
+
+
+  Future<dio.Response> logIn(Map<String, dynamic> credentials) async {
+    try {
+      dio.Response response = await dioClient.post(
+        '$baseUrl/login',
+        data: {
+          'identifier': credentials['identifier'], // Puede ser correo o username
+          'password': credentials['password'],
+          'lat': credentials['lat'], // Coordenada de latitud
+          'lng': credentials['lng'], // Coordenada de longitud
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final userData = response.data['usuario'] ?? {};
+        final token = response.data['token'] ?? '';
+
+        if (userData.isEmpty || token.isEmpty) {
+          throw Exception('Datos faltantes en la respuesta del servidor');
+        }
+
+        // Configura los datos en AuthController
+        final authController = Get.find<AuthController>();
+        authController.setUserId(userData['id']);
+        authController.setToken(token);
+
+        // Verifica si el token se configuró correctamente
+        print('Encabezado auth-token establecido: ${dioClient.options.headers['auth-token']}');
+        dioClient.options.headers['auth-token'] = token;
+
+        return response; // Devuelve la respuesta
+      } else {
+        throw Exception('Error inesperado: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error en logIn: $e");
+      rethrow;
     }
   }
 
@@ -73,31 +128,6 @@ class UserService {
     } catch (e) {
       print("Error en getUsers: $e");
       throw Exception('Error al obtener usuarios');
-    }
-  }
-
-  Future<dio.Response> logIn(Map<String, dynamic> credentials) async {
-    try {
-      dio.Response response = await dioClient.post(
-        '$baseUrl/login',
-        data: credentials, // Incluye email, password, lat, lng
-      );
-
-      if (response.statusCode == 200 && response.data != null) {
-        final authController = Get.find<AuthController>();
-        final userId = response.data['usuario']['id']; // Extraer ID
-        final token = response.data['token']; // Extraer Token JWT
-
-        authController.setUserId(userId);
-        authController.setToken(token);
-
-        return response; // Devuelve la respuesta
-      } else {
-        throw Exception('Error inesperado: ${response.statusCode}');
-      }
-    } catch (e) {
-      print("Error en logIn: $e");
-      rethrow;
     }
   }
 

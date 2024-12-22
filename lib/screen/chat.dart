@@ -35,7 +35,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _listenForMessages() {
-    socketController.clearListeners('receive-message');
+    socketController.socket.off('receive-message');
     socketController.socket.on('receive-message', (data) {
       if (data['receiverId'] == authController.getUserId ||
           data['senderId'] == authController.getUserId) {

@@ -3,14 +3,15 @@ import 'package:get/get.dart';
 import '../controllers/userController.dart';
 import '../controllers/authController.dart';
 import '../controllers/theme_controller.dart';
-import '../controllers/localeController.dart';  // Agregar controlador de idioma
-import '../l10n.dart';  // Asegúrate de tener esta clase que contiene las traducciones
+import '../controllers/localeController.dart';
+import '../screen/roleSelectionPage.dart';
+import '../l10n.dart';
 
 class LogInPage extends StatelessWidget {
   final UserController userController = Get.put(UserController());
   final AuthController authController = Get.find<AuthController>();
   final ThemeController themeController = Get.find<ThemeController>();
-  final LocaleController localeController = Get.find<LocaleController>(); // Controlador de idioma
+  final LocaleController localeController = Get.find<LocaleController>();
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +33,9 @@ class LogInPage extends StatelessWidget {
             ),
             onPressed: themeController.toggleTheme,
           ),
-          // Botón para cambiar de idioma
           IconButton(
             icon: Icon(Icons.language, color: theme.textTheme.bodyLarge?.color),
             onPressed: () {
-              // Cambia el idioma entre inglés y español
               if (localeController.currentLocale.value.languageCode == 'es') {
                 localeController.changeLanguage('en');
               } else {
@@ -51,7 +50,6 @@ class LogInPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Logo
             Center(
               child: Container(
                 width: 100,
@@ -74,17 +72,13 @@ class LogInPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Correo electrónico
             _buildTextField(
               controller: userController.mailController,
-              label: AppLocalizations.of(context)?.translate('email') ?? 'Correo Electrónico',
-              icon: Icons.email,
+              label: AppLocalizations.of(context)?.translate('identifier') ?? 'Correo o Nombre de Usuario',
+              icon: Icons.person,
               theme: theme,
             ),
             const SizedBox(height: 16),
-
-            // Contraseña
             _buildTextField(
               controller: userController.passwordController,
               label: AppLocalizations.of(context)?.translate('password') ?? 'Contraseña',
@@ -93,8 +87,6 @@ class LogInPage extends StatelessWidget {
               theme: theme,
             ),
             const SizedBox(height: 24),
-
-            // Botón de inicio de sesión
             Obx(() {
               if (userController.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
@@ -116,8 +108,6 @@ class LogInPage extends StatelessWidget {
               }
             }),
             const SizedBox(height: 16),
-
-            // Mensaje de error
             Obx(() {
               if (userController.errorMessage.isNotEmpty) {
                 return Padding(
@@ -125,16 +115,15 @@ class LogInPage extends StatelessWidget {
                   child: Text(
                     userController.errorMessage.value,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red),
+                    style: const TextStyle(color: Colors.red, fontSize: 16),
                   ),
                 );
               } else {
                 return const SizedBox.shrink();
               }
             }),
-            const SizedBox(height: 16),
 
-            // Botón para registrarse
+            const SizedBox(height: 16),
             Center(
               child: TextButton(
                 onPressed: () => Get.toNamed('/register'),
@@ -155,7 +144,6 @@ class LogInPage extends StatelessWidget {
     );
   }
 
-  // Método para construir los campos de texto
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,

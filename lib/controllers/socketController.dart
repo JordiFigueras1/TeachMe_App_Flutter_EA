@@ -38,7 +38,7 @@ class SocketController extends GetxController {
       if (userId.isNotEmpty) {
         socket.emit('user-connected', {
           'userId': userId,
-          'auth-token': authController.getToken, // Enviar token al conectar
+          'auth-token': authController.getToken,
         });
       }
     });
@@ -60,9 +60,9 @@ class SocketController extends GetxController {
     if (userId.isNotEmpty) {
       socket.emit('user-disconnected', {
         'userId': userId,
-        'auth-token': authController.getToken, // Enviar token al desconectar
+        'auth-token': authController.getToken, // Envía el token si es necesario
       });
-      clearListeners('update-user-status');
+      socket.clearListeners(); // Limpia todos los eventos asociados
       socket.disconnect();
       print('Usuario desconectado manualmente.');
     }
@@ -87,7 +87,8 @@ class SocketController extends GetxController {
     });
   }
 
-  void clearListeners(String eventName) {
-    socket.off(eventName);
+  void clearListeners() {
+    socket.clearListeners();
+    print('Se han eliminado todos los listeners del socket.');
   }
 }

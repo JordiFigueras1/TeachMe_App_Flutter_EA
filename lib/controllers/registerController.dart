@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/userModel.dart';
-import '../services/user.dart';
+import '../services/userService.dart';
 
 class RegisterController extends GetxController {
   final UserService userService = Get.put(UserService());
 
-  final nameController = TextEditingController();
+  final nameController = TextEditingController(); // Nuevo controlador para nombre completo
+  final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController(); // Nuevo controlador
+  final confirmPasswordController = TextEditingController();
   final mailController = TextEditingController();
-  final ageController = TextEditingController();
+  final birthdateController = TextEditingController(); // Controlador de fecha de nacimiento
 
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
   void signUp() async {
-    if (nameController.text.isEmpty ||
+    if (nameController.text.isEmpty || // Validar nombre completo
+        usernameController.text.isEmpty ||
         passwordController.text.isEmpty ||
-        confirmPasswordController.text.isEmpty || // Nueva validación
+        confirmPasswordController.text.isEmpty ||
         mailController.text.isEmpty ||
-        ageController.text.isEmpty) {
+        birthdateController.text.isEmpty) { // Validar fecha de nacimiento
       errorMessage.value = 'Todos los campos son obligatorios';
       Get.snackbar('Error', errorMessage.value,
           snackPosition: SnackPosition.BOTTOM);
@@ -44,33 +46,28 @@ class RegisterController extends GetxController {
     isLoading.value = true;
 
     try {
+      String fechaNacimiento = birthdateController.text; // Obtener fecha seleccionada
+
       UserModel newUser = UserModel(
-        id: '0', // ID temporal; esto debería actualizarse con el ID real tras la creación
-        name: nameController.text,
-        password: passwordController.text,
+        id: '0',
+        name: nameController.text, // Incluir nombre completo
+        username: usernameController.text,
         mail: mailController.text,
-        age: int.parse(ageController.text),
+        password: passwordController.text,
+        fechaNacimiento: fechaNacimiento,
         isProfesor: false,
         isAlumno: false,
-        isAdmin: true,
+        isAdmin: false,
       );
+
       final response = await userService.createUser(newUser);
 
       if (response == 201 || response == 204) {
         Get.snackbar('Éxito', 'Usuario registrado correctamente',
             snackPosition: SnackPosition.BOTTOM);
         Get.toNamed('/login');
-      } else if (response == 400) {
-        errorMessage.value = 'Datos inválidos. Revisa los campos.';
-        Get.snackbar('Error', errorMessage.value,
-            snackPosition: SnackPosition.BOTTOM);
-      } else if (response == 500) {
-        errorMessage.value =
-            'Error interno del servidor. Inténtalo más tarde.';
-        Get.snackbar('Error', errorMessage.value,
-            snackPosition: SnackPosition.BOTTOM);
       } else {
-        errorMessage.value = 'Ocurrió un error desconocido.';
+        errorMessage.value = 'Error durante el registro.';
         Get.snackbar('Error', errorMessage.value,
             snackPosition: SnackPosition.BOTTOM);
       }
