@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
           ),
           GetPage(
             name: '/home',
-            page: () => BottomNavScaffold(child: HomePage()),
+            page: () => HomeScreen(),
           ),
           GetPage(
             name: '/usuarios',
