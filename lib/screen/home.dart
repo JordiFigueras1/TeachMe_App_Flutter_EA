@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/localeController.dart';
 import '../controllers/authController.dart';
@@ -153,12 +153,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   void _showAddEventDialog(BuildContext context) {
-    final TextEditingController eventController = TextEditingController();
-    TimeOfDay selectedTime = TimeOfDay.now();
+  final TextEditingController eventController = TextEditingController();
+  DateTime selectedTime = DateTime.now();
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+  showDialog(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
         title: const Text('Agregar Clase'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -168,24 +169,26 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               decoration: const InputDecoration(labelText: 'Nombre de la Clase'),
             ),
             SizedBox(height: 16),
-            Row(
-              children: [
-                const Text('Hora: '),
-                TextButton(
-                  onPressed: () async {
-                    final TimeOfDay? pickedTime = await showTimePicker(
-                      context: context,
-                      initialTime: selectedTime,
-                    );
-                    if (pickedTime != null) {
-                      setState(() {
-                        selectedTime = pickedTime;
-                      });
-                    }
-                  },
-                  child: Text(selectedTime.format(context)),
-                ),
-              ],
+            Text(
+              "Selecciona la Hora:",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            // Usamos un contenedor con un tamaño fijo y desplazamiento
+            Container(
+              height: 200,  // Puedes ajustar el valor de la altura según sea necesario
+              child: TimePickerSpinner(
+                is24HourMode: true,
+                normalTextStyle: TextStyle(fontSize: 18, color: Colors.grey),
+                highlightedTextStyle: TextStyle(fontSize: 24, color: Colors.blue),
+                spacing: 100,
+                itemHeight: 50,
+                isForce2Digits: true,
+                onTimeChange: (time) {
+                  setState(() {
+                    selectedTime = time;
+                  });
+                },
+              ),
             ),
           ],
         ),
@@ -198,15 +201,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
           ElevatedButton(
             onPressed: () {
-              _addEvent(eventController.text, selectedTime);
+              _addEvent(eventController.text, TimeOfDay.fromDateTime(selectedTime));
               Navigator.pop(context);
             },
             child: const Text('Guardar'),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 
   @override
   void dispose() {
