@@ -4,6 +4,9 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/localeController.dart';
 import '../controllers/authController.dart';
@@ -24,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   final SocketController socketController = Get.find<SocketController>();
   final AuthController authController = Get.find<AuthController>();
   final ConnectedUsersController connectedUsersController = Get.find<ConnectedUsersController>();
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay = DateTime.now();
@@ -51,15 +55,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
     _loadEvents();
     _updateTime();
+    _checkAndNotifyEvents();
   }
 
-  void _addEvent(String event) {
+  void _addEvent(String event, TimeOfDay time) {
     if (event.isNotEmpty) {
       setState(() {
+        final formattedTime = time.format(context);
+        final fullEvent = '$event - $formattedTime';
         if (_events[_selectedDay] != null) {
-          _events[_selectedDay]?.add(event);
+          _events[_selectedDay]?.add(fullEvent);
         } else {
-          _events[_selectedDay!] = [event];
+          _events[_selectedDay!] = [fullEvent];
         }
       });
       _saveEvents();
@@ -96,6 +103,44 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     Future.delayed(Duration(seconds: 1), _updateTime);
   }
 
+  void _checkAndNotifyEvents() {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      final now = DateTime.now();
+      final todayEvents = _events[_selectedDay ?? DateTime.now()] ?? [];
+
+      for (String event in todayEvents) {
+        final parts = event.split(' - ');
+        if (parts.length == 2) {
+          final eventName = parts[0];
+          final eventTimeString = parts[1];
+          try {
+            final eventTime = DateFormat('HH:mm').parse(eventTimeString);
+            if (now.hour == eventTime.hour && now.minute == eventTime.minute && now.second == 0) {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('¡Notificación!'),
+                  content: Text('Es hora del evento: $eventName'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cerrar'),
+                    ),
+                  ],
+                ),
+              );
+
+              // Reproducir sonido personalizado
+              _audioPlayer.play(AssetSource('assets/alert_sound.mp3'));
+            }
+          } catch (e) {
+            print('Error al analizar la hora del evento: $eventTimeString');
+          }
+        }
+      }
+    });
+  }
+
   void _logout() {
     if (authController.getUserId.isNotEmpty) {
       socketController.disconnectUser(authController.getUserId);
@@ -109,14 +154,40 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   void _showAddEventDialog(BuildContext context) {
     final TextEditingController eventController = TextEditingController();
+    TimeOfDay selectedTime = TimeOfDay.now();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Agregar Clase'),
-        content: TextField(
-          controller: eventController,
-          decoration: const InputDecoration(labelText: 'Nombre de la Clase'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: eventController,
+              decoration: const InputDecoration(labelText: 'Nombre de la Clase'),
+            ),
+            SizedBox(height: 16),
+            Row(
+              children: [
+                const Text('Hora: '),
+                TextButton(
+                  onPressed: () async {
+                    final TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: selectedTime,
+                    );
+                    if (pickedTime != null) {
+                      setState(() {
+                        selectedTime = pickedTime;
+                      });
+                    }
+                  },
+                  child: Text(selectedTime.format(context)),
+                ),
+              ],
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -127,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
           ElevatedButton(
             onPressed: () {
-              _addEvent(eventController.text);
+              _addEvent(eventController.text, selectedTime);
               Navigator.pop(context);
             },
             child: const Text('Guardar'),
