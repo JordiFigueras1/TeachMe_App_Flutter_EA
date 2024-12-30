@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Map<DateTime, List<String>> _events = {};
   Map<String, double> _progressData = {};
   String currentTime = "";
+  final TextEditingController _textController = TextEditingController(); // Controlador para la caja de texto
 
   @override
   void initState() {
@@ -215,66 +216,64 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   List<Widget> _buildProgressCharts() {
-  // Inicializar el progreso acumulado de cada asignatura.
-  final Map<String, double> progressData = {};
+    // Inicializar el progreso acumulado de cada asignatura.
+    final Map<String, double> progressData = {};
 
-  // Recorrer todos los eventos y acumular progreso por asignatura.
-  _events.forEach((date, events) {
-    for (var event in events) {
-      final parts = event.split(' - ');
-      if (parts.isNotEmpty) {
-        final subject = parts[0];
-        progressData[subject] = (progressData[subject] ?? 0.0) + 0.1; // Incremento arbitrario del progreso.
+    // Recorrer todos los eventos y acumular progreso por asignatura.
+    _events.forEach((date, events) {
+      for (var event in events) {
+        final parts = event.split(' - ');
+        if (parts.isNotEmpty) {
+          final subject = parts[0];
+          progressData[subject] = (progressData[subject] ?? 0.0) + 0.1; // Incremento arbitrario del progreso.
+        }
       }
-    }
-  });
+    });
 
-  return [
-    SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: progressData.entries.map((entry) {
-          return Padding(
-            padding: const EdgeInsets.only(right: 20.0), // Añadir espacio entre los gráficos
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  height: 100,
-                  width: 100,
-                  child: PieChart(
-                    PieChartData(
-                      sections: [
-                        PieChartSectionData(
-                          value: entry.value * 100,
-                          title: "${(entry.value * 100).toStringAsFixed(1)}%",
-                          color: Colors.blue,
-                          radius: 30, // Reducir el radio para hacer el gráfico más fino
-                        ),
-                        PieChartSectionData(
-                          value: (1 - entry.value) * 100,
-                          title: "",
-                          color: Colors.grey.shade300,
-                          radius: 30, // Mantener el radio reducido
-                        ),
-                      ],
+    return [
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: progressData.entries.map((entry) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 20.0), // Añadir espacio entre los gráficos
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: PieChart(
+                      PieChartData(
+                        sections: [
+                          PieChartSectionData(
+                            value: entry.value * 100,
+                            title: "${(entry.value * 100).toStringAsFixed(1)}%",
+                            color: Colors.blue,
+                            radius: 30, // Reducir el radio para hacer el gráfico más fino
+                          ),
+                          PieChartSectionData(
+                            value: (1 - entry.value) * 100,
+                            title: "",
+                            color: Colors.grey.shade300,
+                            radius: 30, // Mantener el radio reducido
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Text(
-                  entry.key,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
+                  Text(
+                    entry.key,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
       ),
-    ),
-  ];
-}
-
-
+    ];
+  }
 
   @override
   void dispose() {
@@ -310,6 +309,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               } else {
                 localeController.changeLanguage('es');
               }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.map),
+            onPressed: () {
+              Get.toNamed('/map');
             },
           ),
           IconButton(
@@ -393,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                       ListView(
                         shrinkWrap: true,
-                        children: (_events[_selectedDay] ?? [])
+                        children: (_events[_selectedDay] ?? [] )
                             .map((event) => ListTile(
                                   title: Text(event),
                                   trailing: IconButton(
@@ -425,14 +430,50 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             Column(
               children: _buildProgressCharts(),
             ),
+            // Caja de texto en estilo post-it
+            Padding(
+              padding: const EdgeInsets.only(top: 24.0),
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.lightBlueAccent, // Azul claro
+                  borderRadius: BorderRadius.circular(15.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 8.0,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "NOTAS",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _textController,
+                      maxLines: 5,  // Ajusta la altura de la caja de texto
+                      decoration: InputDecoration(
+                        hintText: 'Escribe tus notas...',
+                        border: InputBorder.none,
+                        hintStyle: TextStyle(color: Colors.white70),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed('/map'),
-        backgroundColor: theme.primaryColor,
-        child: const Icon(Icons.map),
-        tooltip: 'Ver Mapa',
       ),
     );
   }
