@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/localeController.dart';
 import '../controllers/authController.dart';
@@ -32,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay = DateTime.now();
   Map<DateTime, List<String>> _events = {};
+  Map<String, double> _progressData = {};
   String currentTime = "";
 
   @override
@@ -153,63 +155,123 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   void _showAddEventDialog(BuildContext context) {
-  final TextEditingController eventController = TextEditingController();
-  DateTime selectedTime = DateTime.now();
+    final TextEditingController eventController = TextEditingController();
+    DateTime selectedTime = DateTime.now();
 
-  showDialog(
-    context: context,
-    builder: (context) => StatefulBuilder(
-      builder: (context, setState) => AlertDialog(
-        title: const Text('Agregar Clase'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: eventController,
-              decoration: const InputDecoration(labelText: 'Nombre de la Clase'),
-            ),
-            SizedBox(height: 16),
-            Text(
-              "Selecciona la Hora:",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            // Usamos un contenedor con un tamaño fijo y desplazamiento
-            Container(
-              height: 200,  // Puedes ajustar el valor de la altura según sea necesario
-              child: TimePickerSpinner(
-                is24HourMode: true,
-                normalTextStyle: TextStyle(fontSize: 18, color: Colors.grey),
-                highlightedTextStyle: TextStyle(fontSize: 24, color: Colors.blue),
-                spacing: 100,
-                itemHeight: 50,
-                isForce2Digits: true,
-                onTimeChange: (time) {
-                  setState(() {
-                    selectedTime = time;
-                  });
-                },
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Agregar Clase'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: eventController,
+                decoration: const InputDecoration(labelText: 'Nombre de la Clase'),
               ),
+              SizedBox(height: 16),
+              Text(
+                "Selecciona la Hora:",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              // Usamos un contenedor con un tamaño fijo y desplazamiento
+              Container(
+                height: 200,  // Puedes ajustar el valor de la altura según sea necesario
+                child: TimePickerSpinner(
+                  is24HourMode: true,
+                  normalTextStyle: TextStyle(fontSize: 18, color: Colors.grey),
+                  highlightedTextStyle: TextStyle(fontSize: 24, color: Colors.blue),
+                  spacing: 100,
+                  itemHeight: 50,
+                  isForce2Digits: true,
+                  onTimeChange: (time) {
+                    setState(() {
+                      selectedTime = time;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _addEvent(eventController.text, TimeOfDay.fromDateTime(selectedTime));
+                Navigator.pop(context);
+              },
+              child: const Text('Guardar'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _addEvent(eventController.text, TimeOfDay.fromDateTime(selectedTime));
-              Navigator.pop(context);
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildProgressCharts() {
+  // Inicializar el progreso acumulado de cada asignatura.
+  final Map<String, double> progressData = {};
+
+  // Recorrer todos los eventos y acumular progreso por asignatura.
+  _events.forEach((date, events) {
+    for (var event in events) {
+      final parts = event.split(' - ');
+      if (parts.isNotEmpty) {
+        final subject = parts[0];
+        progressData[subject] = (progressData[subject] ?? 0.0) + 0.1; // Incremento arbitrario del progreso.
+      }
+    }
+  });
+
+  return [
+    SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: progressData.entries.map((entry) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 20.0), // Añadir espacio entre los gráficos
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: PieChart(
+                    PieChartData(
+                      sections: [
+                        PieChartSectionData(
+                          value: entry.value * 100,
+                          title: "${(entry.value * 100).toStringAsFixed(1)}%",
+                          color: Colors.blue,
+                          radius: 30, // Reducir el radio para hacer el gráfico más fino
+                        ),
+                        PieChartSectionData(
+                          value: (1 - entry.value) * 100,
+                          title: "",
+                          color: Colors.grey.shade300,
+                          radius: 30, // Mantener el radio reducido
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Text(
+                  entry.key,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     ),
-  );
+  ];
 }
 
 
@@ -264,90 +326,104 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: GestureDetector(
-                onDoubleTap: () {
-                  if (_selectedDay != null) {
-                    _showAddEventDialog(context);
-                  }
-                },
-                child: TableCalendar(
-                  firstDay: DateTime(2000),
-                  lastDay: DateTime(2100),
-                  focusedDay: _focusedDay,
-                  selectedDayPredicate: (day) {
-                    return isSameDay(_selectedDay, day);
-                  },
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                      _selectedDay = selectedDay;
-                      _focusedDay = focusedDay;
-                    });
-                  },
-                  eventLoader: (day) => _events[day] ?? [],
-                  calendarStyle: CalendarStyle(
-                    selectedDecoration: BoxDecoration(
-                      color: Colors.blueAccent,
-                      shape: BoxShape.circle,
-                    ),
-                    todayDecoration: BoxDecoration(
-                      color: Colors.orangeAccent,
-                      shape: BoxShape.circle,
-                    ),
-                    markerDecoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  headerStyle: const HeaderStyle(
-                    formatButtonVisible: false,
-                    titleCentered: true,
-                    titleTextStyle: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Text(
-                      'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  child: GestureDetector(
+                    onDoubleTap: () {
+                      if (_selectedDay != null) {
+                        _showAddEventDialog(context);
+                      }
+                    },
+                    child: TableCalendar(
+                      firstDay: DateTime(2000),
+                      lastDay: DateTime(2100),
+                      focusedDay: _focusedDay,
+                      selectedDayPredicate: (day) {
+                        return isSameDay(_selectedDay, day);
+                      },
+                      onDaySelected: (selectedDay, focusedDay) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                        });
+                      },
+                      eventLoader: (day) => _events[day] ?? [],
+                      calendarStyle: CalendarStyle(
+                        selectedDecoration: BoxDecoration(
+                          color: Colors.blueAccent,
+                          shape: BoxShape.circle,
+                        ),
+                        todayDecoration: BoxDecoration(
+                          color: Colors.orangeAccent,
+                          shape: BoxShape.circle,
+                        ),
+                        markerDecoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      headerStyle: const HeaderStyle(
+                        formatButtonVisible: false,
+                        titleCentered: true,
+                        titleTextStyle: TextStyle(fontSize: 18),
                       ),
                     ),
                   ),
-                  ListView(
-                    shrinkWrap: true,
-                    children: (_events[_selectedDay] ?? [])
-                        .map((event) => ListTile(
-                              title: Text(event),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  setState(() {
-                                    _events[_selectedDay]?.remove(event);
-                                    if (_events[_selectedDay]?.isEmpty ?? true) {
-                                      _events.remove(_selectedDay);
-                                    }
-                                  });
-                                  _saveEvents();
-                                },
-                              ),
-                            ))
-                        .toList(),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Text(
+                          'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      ListView(
+                        shrinkWrap: true,
+                        children: (_events[_selectedDay] ?? [])
+                            .map((event) => ListTile(
+                                  title: Text(event),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () {
+                                      setState(() {
+                                        _events[_selectedDay]?.remove(event);
+                                        if (_events[_selectedDay]?.isEmpty ?? true) {
+                                          _events.remove(_selectedDay);
+                                        }
+                                      });
+                                      _saveEvents();
+                                    },
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
+            SizedBox(height: 24),
+            Text(
+              'Progreso de las asignaturas:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            Column(
+              children: _buildProgressCharts(),
             ),
           ],
         ),
