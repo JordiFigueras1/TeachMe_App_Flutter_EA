@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../models/asignaturaModel.dart';
 
 class UserModel with ChangeNotifier {
   String id;
   String name;
-  String username; // Agregado
+  String username;
   String mail;
   String password;
   String fechaNacimiento;
@@ -11,13 +12,16 @@ class UserModel with ChangeNotifier {
   bool isAlumno;
   bool isAdmin;
   bool conectado;
-  double lat;
-  double lng;
+  String? foto;
+  String? descripcion;
+  List<Map<String, String>>? disponibilidad;
+  List<AsignaturaModel>? asignaturasImparte;
+  Map<String, dynamic>? location;
 
   UserModel({
     required this.id,
     required this.name,
-    required this.username, // Agregado
+    required this.username,
     required this.mail,
     required this.password,
     required this.fechaNacimiento,
@@ -25,64 +29,53 @@ class UserModel with ChangeNotifier {
     this.isAlumno = false,
     this.isAdmin = true,
     this.conectado = false,
-    this.lat = 0.0,
-    this.lng = 0.0,
+    this.foto,
+    this.descripcion,
+    this.disponibilidad,
+    this.asignaturasImparte,
+    this.location,
   });
 
-  // Método para actualizar el modelo
-  void setUser({
-    required String id,
-    required String name,
-    required String username, // Agregado
-    required String mail,
-    required String password,
-    required String fechaNacimiento,
-    required bool isProfesor,
-    required bool isAlumno,
-    required bool isAdmin,
-    required bool conectado,
-    double? lat,
-    double? lng,
-  }) {
-    this.id = id;
-    this.name = name;
-    this.username = username; // Actualizado
-    this.mail = mail;
-    this.password = password;
-    this.fechaNacimiento = fechaNacimiento;
-    this.isProfesor = isProfesor;
-    this.isAlumno = isAlumno;
-    this.isAdmin = isAdmin;
-    this.conectado = conectado;
-    if (lat != null) this.lat = lat;
-    if (lng != null) this.lng = lng;
-    notifyListeners();
-  }
+  // Getters para latitud y longitud
+  double get lat => location?['coordinates']?[1] ?? 0.0;
+  double get lng => location?['coordinates']?[0] ?? 0.0;
 
-  // Crear instancia desde JSON
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['_id'] ?? '',
       name: json['nombre'] ?? 'Sin nombre',
       username: json['username'] ?? 'Sin username',
       mail: json['email'] ?? 'Sin email',
-      password: '', // El backend no devuelve la contraseña
+      password: '',
       fechaNacimiento: json['fechaNacimiento'] ?? 'No especificada',
       isProfesor: json['isProfesor'] ?? false,
       isAlumno: json['isAlumno'] ?? false,
       isAdmin: json['isAdmin'] ?? false,
       conectado: json['conectado'] ?? false,
-      lat: json['location']?['coordinates']?[1] ?? 0.0, // Validación segura
-      lng: json['location']?['coordinates']?[0] ?? 0.0,
+      foto: json['foto'] ?? '',
+      descripcion: json['descripcion'] ?? '',
+      disponibilidad: (json['disponibilidad'] as List?)
+          ?.map((item) => {
+                'dia': item['dia'].toString(),
+                'turno': item['turno'].toString(),
+              })
+          .toList(),
+      asignaturasImparte: (json['asignaturasImparte'] as List?)?.map((item) {
+        if (item is Map<String, dynamic>) {
+          return AsignaturaModel.fromJson(item);
+        } else {
+          return AsignaturaModel(id: item.toString(), nombre: 'Sin nombre', nivel: '');
+        }
+      }).toList(),
+      location: json['location'] ?? {},
     );
   }
 
-  // Convertir a JSON
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
       'nombre': name,
-      'username': username, // Agregado
+      'username': username,
       'email': mail,
       'password': password,
       'fechaNacimiento': fechaNacimiento,
@@ -90,12 +83,14 @@ class UserModel with ChangeNotifier {
       'isAlumno': isAlumno,
       'isAdmin': isAdmin,
       'conectado': conectado,
-      'lat': lat,
-      'lng': lng,
+      'foto': foto,
+      'descripcion': descripcion,
+      'disponibilidad': disponibilidad,
+      'asignaturasImparte': asignaturasImparte?.map((e) => e.toJson()).toList(),
+      'location': location,
     };
   }
 
-  // Método toString para depuración y representación
   @override
   String toString() {
     return '''
@@ -109,8 +104,11 @@ class UserModel with ChangeNotifier {
       isAlumno: $isAlumno,
       isAdmin: $isAdmin,
       conectado: $conectado,
-      lat: $lat,
-      lng: $lng
+      foto: $foto,
+      descripcion: $descripcion,
+      disponibilidad: $disponibilidad,
+      asignaturasImparte: ${asignaturasImparte?.map((item) => item.toString()).toList()},
+      location: $location
     }
     ''';
   }

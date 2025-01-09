@@ -5,6 +5,8 @@ import '../screen/logIn.dart';
 import '../screen/register.dart';
 import '../screen/user.dart';
 import '../screen/home.dart';
+import '../screen/settings_general.dart'; // Importa la pantalla de configuración general
+import '../screen/settings_asignaturas.dart'; // Importa la pantalla de configuración de asignaturas
 import '../controllers/authController.dart';
 import '../screen/perfil.dart';
 import '../controllers/userListController.dart';
@@ -16,6 +18,7 @@ import '../controllers/theme_controller.dart';
 import '../controllers/localeController.dart'; // Asegúrate de tener el LocaleController
 import '../screen/mapPage.dart';
 import '../screen/roleSelectionPage.dart'; // Importa tu pantalla de selección de rol
+import '../controllers/asignaturaController.dart'; // Importa el controlador de asignaturas
 import 'l10n.dart'; // Asegúrate de tener esta clase generada
 import 'package:flutter_localizations/flutter_localizations.dart'; // Importa las localizaciones globales
 
@@ -28,6 +31,7 @@ void main() {
   Get.put(SocketController());
   Get.put(ThemeController()); // Registrar el controlador del tema
   Get.put(LocaleController()); // Registrar el controlador de locales
+  Get.put(AsignaturaController()); // Registrar el controlador de asignaturas
 
   runApp(MyApp());
 }
@@ -98,6 +102,15 @@ class MyApp extends StatelessWidget {
           GetPage(
             name: '/roleSelection',
             page: () => RoleSelectionPage(), // Asegúrate de tener esta pantalla implementada
+          ),
+          // Nuevas rutas añadidas
+          GetPage(
+            name: '/settings_general',
+            page: () => SettingsGeneralPage(),
+          ),
+          GetPage(
+            name: '/settings_asignaturas',
+            page: () => SettingsAsignaturasPage(),
           ),
         ],
 

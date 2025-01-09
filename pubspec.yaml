@@ -27,6 +27,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter # Localización oficial de Flutter
   intl: ^0.19.0 # Paquete para manejar traducciones
+  multi_select_flutter: ^4.0.0
+
 
 dev_dependencies:
   flutter_test:

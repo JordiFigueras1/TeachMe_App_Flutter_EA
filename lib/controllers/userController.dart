@@ -4,6 +4,7 @@ import '../services/userService.dart';
 import '../controllers/authController.dart';
 import '../controllers/userModelController.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:dio/dio.dart' as dio; // Usar siempre el prefijo dio
 
 class UserController extends GetxController {
   final UserService userService = Get.put(UserService());
@@ -89,8 +90,18 @@ class UserController extends GetxController {
           isAlumno: userData['isAlumno'] ?? false,
           isAdmin: userData['isAdmin'] ?? false,
           conectado: true,
-          lat: locationData.length > 1 ? locationData[1] : 0.0,
-          lng: locationData.length > 0 ? locationData[0] : 0.0,
+          foto: userData['foto'] ?? '',
+          descripcion: userData['descripcion'] ?? '',
+          disponibilidad: (userData['disponibilidad'] as List?)?.map((item) {
+            return {
+              'dia': item['dia'].toString(),
+              'turno': item['turno'].toString(),
+            };
+          }).toList(),
+          asignaturasImparte: userData['asignaturasImparte'] ?? [],
+          location: {
+            'coordinates': [position.longitude, position.latitude],
+          },
         );
 
         print("Datos asignados correctamente al modelo UserModel.");
@@ -126,6 +137,78 @@ class UserController extends GetxController {
       Get.offAllNamed('/home');
     }
   }
+
+
+  Future<void> updateDisponibilidad(String userId, List<Map<String, String>> disponibilidad) async {
+    try {
+      final response = await userService.updateDisponibilidad(userId, disponibilidad);
+      if (response.statusCode == 200) {
+        final userData = response.data['usuario'];
+        userModelController.setUser(
+          id: userData['_id'],
+          name: userData['nombre'] ?? 'Desconocido',
+          username: userData['username'] ?? 'No especificado',
+          mail: userData['email'] ?? 'No especificado',
+          password: '',
+          fechaNacimiento: userData['fechaNacimiento'] ?? 'Sin especificar',
+          isProfesor: userData['isProfesor'] ?? false,
+          isAlumno: userData['isAlumno'] ?? false,
+          isAdmin: userData['isAdmin'] ?? false,
+          conectado: userData['conectado'] ?? false,
+          foto: userData['foto'] ?? '',
+          descripcion: userData['descripcion'] ?? '',
+          disponibilidad: userData['disponibilidad'],
+          asignaturasImparte: userData['asignaturasImparte'],
+          location: userData['location'],
+        );
+        Get.snackbar('Éxito', 'Disponibilidad actualizada correctamente');
+      } else {
+        Get.snackbar('Error', 'No se pudo actualizar la disponibilidad');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Ocurrió un problema: $e');
+    }
+  }
+
+  Future<void> fetchUserById(String userId) async {
+    try {
+      final dio.Response response = await userService.getUserById(userId); // Usar dio.Response
+      if (response.statusCode == 200) {
+        final userData = response.data;
+        if (userData is Map<String, dynamic>) {
+          userModelController.setUser(
+            id: userData['_id'],
+            name: userData['nombre'] ?? 'Desconocido',
+            username: userData['username'] ?? 'No especificado',
+            mail: userData['email'] ?? 'No especificado',
+            password: '', // Nunca asignamos la contraseña desde el backend
+            fechaNacimiento: userData['fechaNacimiento'] ?? 'Sin especificar',
+            isProfesor: userData['isProfesor'] ?? false,
+            isAlumno: userData['isAlumno'] ?? false,
+            isAdmin: userData['isAdmin'] ?? false,
+            conectado: userData['conectado'] ?? false,
+            foto: userData['foto'] ?? '',
+            descripcion: userData['descripcion'] ?? '',
+            disponibilidad: (userData['disponibilidad'] as List?)?.map((item) {
+              return {
+                'dia': item['dia'].toString(),
+                'turno': item['turno'].toString(),
+              };
+            }).toList(),
+            asignaturasImparte: userData['asignaturasImparte'],
+            location: userData['location'],
+          );
+        } else {
+          throw Exception('Datos inesperados en la respuesta del servidor');
+        }
+      } else {
+        throw Exception('Error al obtener los datos del usuario');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'No se pudo obtener los datos del usuario: $e');
+    }
+  }
+
 
   Future<void> assignRole(String role) async {
     try {
