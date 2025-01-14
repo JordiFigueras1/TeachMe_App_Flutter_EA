@@ -12,6 +12,7 @@ import '../screen/perfil.dart';
 import '../controllers/userListController.dart';
 import '../controllers/userModelController.dart';
 import '../controllers/connectedUsersController.dart';
+import '../controllers/userController.dart';
 import '../screen/chat.dart';
 import '../controllers/socketController.dart';
 import '../controllers/theme_controller.dart';
@@ -32,6 +33,7 @@ void main() {
   Get.put(ThemeController()); // Registrar el controlador del tema
   Get.put(LocaleController()); // Registrar el controlador de locales
   Get.put(AsignaturaController()); // Registrar el controlador de asignaturas
+  Get.put<UserController>(UserController()); // Registrar el UserController
 
   runApp(MyApp());
 }

@@ -41,20 +41,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   void _logout() {
-  if (authController.getUserId.isNotEmpty) {
-    // Emitir desconexión al backend
-    socketController.disconnectUser(authController.getUserId);
+    if (authController.getUserId.isNotEmpty) {
+      // Emitir desconexión al backend
+      socketController.disconnectUser(authController.getUserId);
 
-    // Limpiar el estado del usuario en AuthController
-    authController.setUserId('');
-    authController.setToken('');
-    connectedUsersController.updateConnectedUsers([]);
+      // Limpiar el estado del usuario en AuthController
+      authController.setUserId('');
+      authController.setToken('');
+      connectedUsersController.updateConnectedUsers([]);
+    }
+
+    // Navegar al login
+    Get.offAllNamed('/login');
   }
-
-  // Navegar al login
-  Get.offAllNamed('/login');
-}
-
 
   @override
   void dispose() {
@@ -82,14 +81,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             onPressed: themeController.toggleTheme,
           ),
           IconButton(
-            icon: const Icon(Icons.account_circle),
+            icon: const Icon(Icons.person_search), // Ícono de búsqueda de perfiles
             onPressed: () {
               Get.toNamed('/perfil');
             },
+            tooltip: 'Buscar perfiles',
           ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _logout,
+            tooltip: 'Cerrar sesión',
           ),
         ],
       ),

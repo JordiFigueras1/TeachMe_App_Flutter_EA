@@ -41,6 +41,21 @@ class UserListController extends GetxController {
     }
   }
 
+
+  Future<void> filterUsers(String role, String? asignaturaId, List<Map<String, String>> disponibilidad) async {
+  try {
+    isLoading(true);
+    final users = await userService.filterUsers(role, asignaturaId, disponibilidad);
+    userList.assignAll(users);
+  } catch (e) {
+    print('Error al filtrar usuarios: $e');
+    userList.clear();
+  } finally {
+    isLoading(false);
+  }
+}
+
+
   void handleWebSocketUpdates(List<String> connectedUsers) {
     for (var user in userList) {
       user.conectado = connectedUsers.contains(user.id);

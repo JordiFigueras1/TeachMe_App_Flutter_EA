@@ -9,12 +9,18 @@ class UserService {
   final dio.Dio dioClient = dio.Dio();
 
   UserService() {
+    _updateAuthToken(); // Configura el token en el constructor
+  }
+
+  // Método para actualizar dinámicamente el encabezado del token antes de cada solicitud
+  void _updateAuthToken() {
     final authController = Get.find<AuthController>();
-    dioClient.options.headers['auth-token'] = authController.getToken; // Añadir el token a las cabeceras automáticamente
+    dioClient.options.headers['auth-token'] = authController.getToken;
   }
 
   Future<int> createUser(UserModel newUser) async {
     try {
+      _updateAuthToken(); // Asegúrate de usar el token actualizado
       print(newUser.toJson().toString());
       dio.Response response = await dioClient.post('$baseUrl', data: newUser.toJson());
       int statusCode = response.statusCode ?? 500;
@@ -34,8 +40,26 @@ class UserService {
     }
   }
 
+  Future<List<UserModel>> filterUsers(String role, String? asignaturaId, List<Map<String, String>> disponibilidad) async {
+    try {
+      _updateAuthToken(); // Asegúrate de usar el token actualizado
+      final response = await dioClient.get(
+        '$baseUrl/filtrar',
+        queryParameters: {
+          'rol': role,
+          'asignaturaId': asignaturaId,
+          'disponibilidad': disponibilidad.map((d) => '${d['dia']},${d['turno']}').join(';'),
+        },
+      );
+      return (response.data as List).map((json) => UserModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Error al filtrar usuarios: $e');
+    }
+  }
+
   Future<dio.Response> updateUser({required String userId, required Map<String, dynamic> data}) async {
     try {
+      _updateAuthToken();
       final response = await dioClient.put('$baseUrl/$userId', data: data);
       return response;
     } catch (e) {
@@ -46,6 +70,7 @@ class UserService {
 
   Future<dio.Response> updateRole(String userId, bool isProfesor, bool isAlumno) async {
     try {
+      _updateAuthToken();
       final response = await dioClient.put(
         '$baseUrl/$userId/rol',
         data: {
@@ -62,7 +87,7 @@ class UserService {
 
   Future<dio.Response> logIn(Map<String, dynamic> credentials) async {
     try {
-      dio.Response response = await dioClient.post(
+      final response = await dioClient.post(
         '$baseUrl/login',
         data: {
           'identifier': credentials['identifier'],
@@ -97,6 +122,7 @@ class UserService {
 
   Future<dio.Response> getUserById(String userId) async {
     try {
+      _updateAuthToken();
       final response = await dioClient.get('$baseUrl/$userId');
       return response;
     } catch (e) {
@@ -105,9 +131,9 @@ class UserService {
     }
   }
 
-
   Future<dio.Response> updateDisponibilidad(String userId, List<Map<String, String>> disponibilidad) async {
     try {
+      _updateAuthToken();
       final response = await dioClient.put(
         '$baseUrl/$userId/actualizar-disponibilidad',
         data: {'disponibilidad': disponibilidad},
@@ -121,10 +147,8 @@ class UserService {
 
   Future<List<UserModel>> getUserCoordinates() async {
     try {
-      final authController = Get.find<AuthController>();
-      dioClient.options.headers['auth-token'] = authController.getToken;
-
-      final dio.Response response = await dioClient.get('$baseUrl/coordenadas');
+      _updateAuthToken();
+      final response = await dioClient.get('$baseUrl/coordenadas');
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((json) => UserModel.fromJson(json)).toList();
@@ -139,7 +163,8 @@ class UserService {
 
   Future<List<AsignaturaModel>> getAsignaturasByUser(String userId) async {
     try {
-      dio.Response response = await dioClient.get('$baseUrl/$userId/asignaturas');
+      _updateAuthToken();
+      final response = await dioClient.get('$baseUrl/$userId/asignaturas');
       List<dynamic> data = response.data;
       return data.map((json) => AsignaturaModel.fromJson(json)).toList();
     } catch (e) {
@@ -150,6 +175,7 @@ class UserService {
 
   Future<void> updateAsignaturas(String userId, List<String> asignaturaIds) async {
     try {
+      _updateAuthToken();
       final response = await dioClient.put(
         '$baseUrl/$userId/actualizar-asignaturas',
         data: {'asignaturas': asignaturaIds},
@@ -165,10 +191,10 @@ class UserService {
 
   Future<List<UserModel>> getUsers() async {
     try {
-      dio.Response response = await dioClient.get('$baseUrl');
+      _updateAuthToken();
+      final response = await dioClient.get('$baseUrl');
       List<dynamic> responseData = response.data;
-      List<UserModel> users = responseData.map((data) => UserModel.fromJson(data)).toList();
-      return users;
+      return responseData.map((data) => UserModel.fromJson(data)).toList();
     } catch (e) {
       print("Error en getUsers: $e");
       throw Exception('Error al obtener usuarios');
@@ -177,7 +203,8 @@ class UserService {
 
   Future<int> deleteUser(String id) async {
     try {
-      dio.Response response = await dioClient.delete('$baseUrl/$id');
+      _updateAuthToken();
+      final response = await dioClient.delete('$baseUrl/$id');
       int statusCode = response.statusCode ?? 500;
 
       if (statusCode == 204 || statusCode == 200) {
@@ -196,24 +223,23 @@ class UserService {
   }
 
   Future<List<AsignaturaModel>> getAllAsignaturas() async {
-  try {
-    dio.Response response = await dioClient.get('http://localhost:3000/api/asignaturas');
-    List<dynamic> data = response.data;
-    return data.map((json) => AsignaturaModel.fromJson(json)).toList();
-  } catch (e) {
-    throw Exception('Error al obtener todas las asignaturas');
+    try {
+      _updateAuthToken();
+      final response = await dioClient.get('http://localhost:3000/api/asignaturas');
+      List<dynamic> data = response.data;
+      return data.map((json) => AsignaturaModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Error al obtener todas las asignaturas');
+    }
   }
-}
-
 
   Future<List<UserModel>> searchUsers(String nombre, String token) async {
     try {
+      _updateAuthToken();
       final response = await dioClient.get(
         '$baseUrl/buscar',
         queryParameters: {'nombre': nombre},
-        options: dio.Options(
-          headers: {'auth-token': token},
-        ),
+        options: dio.Options(headers: {'auth-token': token}),
       );
 
       if (response.statusCode == 200) {

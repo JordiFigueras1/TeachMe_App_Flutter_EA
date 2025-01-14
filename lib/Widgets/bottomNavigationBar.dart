@@ -44,7 +44,7 @@ class BottomNavScaffold extends StatelessWidget {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
-              label: 'Usuarios',
+              label: 'Perfil',
             ),
           ],
         ),
