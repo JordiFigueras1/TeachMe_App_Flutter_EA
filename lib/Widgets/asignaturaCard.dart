@@ -20,7 +20,7 @@ class AsignaturaCard extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(asignatura.descripcion),
+            Text(asignatura.nivel),
           ],
         ),
       ),

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:table_calendar/table_calendar.dart';  // Importa el paquete de calendario
+import 'package:intl/intl.dart';  // Importa el paquete para manejar las fechas
+import 'dart:convert';
+import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';  // Asegúrate de tener este paquete para guardar datos
 import '../controllers/authController.dart';
 import '../controllers/socketController.dart';
 import '../controllers/connectedUsersController.dart';
@@ -17,6 +22,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final AuthController authController = Get.find<AuthController>();
   final ConnectedUsersController connectedUsersController = Get.find<ConnectedUsersController>();
   final ThemeController themeController = Get.find<ThemeController>();
+
+  // Variables para gestionar el calendario y los eventos
+  Map<DateTime, List<String>> _events = {};  // Mapa para almacenar eventos por fecha
+  DateTime _selectedDay = DateTime.now();    // Día seleccionado en el calendario
 
   @override
   void initState() {
@@ -38,20 +47,52 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         connectedUsersController.updateConnectedUsers(List<String>.from(data));
       });
     }
+
+    _loadEvents();  // Cargar eventos guardados al iniciar
+  }
+
+  Future<void> _loadEvents() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? eventsString = prefs.getString('events');
+    if (eventsString != null) {
+      final Map<String, dynamic> eventsMap = jsonDecode(eventsString);
+      setState(() {
+        _events = eventsMap.map((key, value) {
+          final date = DateTime.parse(key);
+          return MapEntry(date, List<String>.from(value));
+        });
+      });
+    }
+  }
+
+  Future<void> _saveEvents() async {
+    final prefs = await SharedPreferences.getInstance();
+    final Map<String, List<String>> eventsMap = _events.map((key, value) {
+      return MapEntry(key.toIso8601String(), value);
+    });
+    final String eventsString = jsonEncode(eventsMap);
+    prefs.setString('events', eventsString);
+  }
+
+  // Método para agregar un evento
+  void _addEvent(String event, DateTime date) {
+    setState(() {
+      if (_events[date] == null) {
+        _events[date] = [];
+      }
+      _events[date]?.add(event);
+      _saveEvents();
+    });
   }
 
   void _logout() {
     if (authController.getUserId.isNotEmpty) {
-      // Emitir desconexión al backend
       socketController.disconnectUser(authController.getUserId);
 
-      // Limpiar el estado del usuario en AuthController
       authController.setUserId('');
-      authController.setToken('');
       connectedUsersController.updateConnectedUsers([]);
     }
 
-    // Navegar al login
     Get.offAllNamed('/login');
   }
 
@@ -81,7 +122,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             onPressed: themeController.toggleTheme,
           ),
           IconButton(
-            icon: const Icon(Icons.person_search), // Ícono de búsqueda de perfiles
+            icon: const Icon(Icons.person_search),
             onPressed: () {
               Get.toNamed('/perfil');
             },
@@ -95,7 +136,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         ],
       ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Animación
           AnimatedBuilder(
@@ -112,63 +152,72 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             },
           ),
           const SizedBox(height: 20),
-          // Lista de usuarios conectados
+
+          // Calendario
+          TableCalendar(
+            focusedDay: _selectedDay,
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2025, 12, 31),
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+              });
+            },
+          ),
+
+          // Mostrar eventos del día seleccionado
           Expanded(
-            child: Obx(() {
-              if (connectedUsersController.connectedUsers.isEmpty) {
-                return Center(
-                  child: Text(
-                    'No hay usuarios conectados.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: theme.textTheme.bodyLarge?.color,
-                    ),
-                  ),
+            child: ListView.builder(
+              itemCount: _events[_selectedDay]?.length ?? 0,
+              itemBuilder: (context, index) {
+                final event = _events[_selectedDay]![index];
+                return ListTile(
+                  title: Text(event),
                 );
-              }
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                itemCount: connectedUsersController.connectedUsers.length,
-                itemBuilder: (context, index) {
-                  final userId = connectedUsersController.connectedUsers[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: theme.colorScheme.secondary,
-                        child: Icon(
-                          Icons.person,
-                          color: theme.colorScheme.onSecondary,
-                        ),
-                      ),
-                      title: Text(
-                        'ID: $userId',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.textTheme.bodyLarge?.color,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Estado: Conectado',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                    ),
-                  );
-                },
-              );
-            }),
+              },
+            ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed('/map'),
+        onPressed: () => _showAddEventDialog(context),
         backgroundColor: theme.primaryColor,
-        child: const Icon(Icons.map),
-        tooltip: 'Ver Mapa',
+        child: const Icon(Icons.add),
+        tooltip: 'Agregar evento',
+      ),
+    );
+  }
+
+  // Función para mostrar el diálogo para agregar un evento
+  void _showAddEventDialog(BuildContext context) {
+    final TextEditingController eventController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Agregar evento'),
+        content: TextField(
+          controller: eventController,
+          decoration: const InputDecoration(labelText: 'Nombre del evento'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _addEvent(eventController.text, _selectedDay);
+              Navigator.pop(context);
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
       ),
     );
   }
