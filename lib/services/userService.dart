@@ -5,7 +5,8 @@ import '../models/asignaturaModel.dart';
 import '../controllers/authController.dart';
 
 class UserService {
-  final String baseUrl = 'http://localhost:3000/api/usuarios'; // Cambia si es necesario
+  final String baseUrl =
+      'http://localhost:3000/api/usuarios'; // Cambia si es necesario
   final dio.Dio dioClient = dio.Dio();
 
   UserService() {
@@ -22,7 +23,8 @@ class UserService {
     try {
       _updateAuthToken(); // Asegúrate de usar el token actualizado
       print(newUser.toJson().toString());
-      dio.Response response = await dioClient.post('$baseUrl', data: newUser.toJson());
+      dio.Response response =
+          await dioClient.post('$baseUrl', data: newUser.toJson());
       int statusCode = response.statusCode ?? 500;
 
       if (statusCode == 204 || statusCode == 201 || statusCode == 200) {
@@ -40,7 +42,8 @@ class UserService {
     }
   }
 
-  Future<List<UserModel>> filterUsers(String role, String? asignaturaId, List<Map<String, String>> disponibilidad) async {
+  Future<List<UserModel>> filterUsers(String role, String? asignaturaId,
+      List<Map<String, String>> disponibilidad) async {
     try {
       _updateAuthToken(); // Asegúrate de usar el token actualizado
       final response = await dioClient.get(
@@ -48,16 +51,20 @@ class UserService {
         queryParameters: {
           'rol': role,
           'asignaturaId': asignaturaId,
-          'disponibilidad': disponibilidad.map((d) => '${d['dia']},${d['turno']}').join(';'),
+          'disponibilidad':
+              disponibilidad.map((d) => '${d['dia']},${d['turno']}').join(';'),
         },
       );
-      return (response.data as List).map((json) => UserModel.fromJson(json)).toList();
+      return (response.data as List)
+          .map((json) => UserModel.fromJson(json))
+          .toList();
     } catch (e) {
       throw Exception('Error al filtrar usuarios: $e');
     }
   }
 
-  Future<dio.Response> updateUser({required String userId, required Map<String, dynamic> data}) async {
+  Future<dio.Response> updateUser(
+      {required String userId, required Map<String, dynamic> data}) async {
     try {
       _updateAuthToken();
       final response = await dioClient.put('$baseUrl/$userId', data: data);
@@ -68,7 +75,8 @@ class UserService {
     }
   }
 
-  Future<dio.Response> updateRole(String userId, bool isProfesor, bool isAlumno) async {
+  Future<dio.Response> updateRole(
+      String userId, bool isProfesor, bool isAlumno) async {
     try {
       _updateAuthToken();
       final response = await dioClient.put(
@@ -131,7 +139,8 @@ class UserService {
     }
   }
 
-  Future<dio.Response> updateDisponibilidad(String userId, List<Map<String, String>> disponibilidad) async {
+  Future<dio.Response> updateDisponibilidad(
+      String userId, List<Map<String, String>> disponibilidad) async {
     try {
       _updateAuthToken();
       final response = await dioClient.put(
@@ -173,7 +182,8 @@ class UserService {
     }
   }
 
-  Future<void> updateAsignaturas(String userId, List<String> asignaturaIds) async {
+  Future<void> updateAsignaturas(
+      String userId, List<String> asignaturaIds) async {
     try {
       _updateAuthToken();
       final response = await dioClient.put(
@@ -225,7 +235,8 @@ class UserService {
   Future<List<AsignaturaModel>> getAllAsignaturas() async {
     try {
       _updateAuthToken();
-      final response = await dioClient.get('http://localhost:3000/api/asignaturas');
+      final response =
+          await dioClient.get('http://localhost:3000/api/asignaturas');
       List<dynamic> data = response.data;
       return data.map((json) => AsignaturaModel.fromJson(json)).toList();
     } catch (e) {

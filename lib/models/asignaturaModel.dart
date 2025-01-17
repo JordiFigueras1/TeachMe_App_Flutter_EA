@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
 
-class AsignaturaModel with ChangeNotifier{
+class AsignaturaModel with ChangeNotifier {
   final String id;
   final String nombre;
   final String nivel;
+  final String descripcion;
 
   AsignaturaModel({
     required this.id,
     required this.nombre,
     required this.nivel,
+    this.descripcion = '',
   });
 
   factory AsignaturaModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +20,7 @@ class AsignaturaModel with ChangeNotifier{
       id: json['_id'],
       nombre: json['nombre'] ?? 'Sin nombre',
       nivel: json['nivel'] ?? 'Sin nivel',
+      descripcion: json['descripcion'] ?? 'Sin descripcion',
     );
   }
 
@@ -26,7 +29,7 @@ class AsignaturaModel with ChangeNotifier{
       '_id': id,
       'nombre': nombre,
       'nivel': nivel,
+      'descripcion': descripcion,
     };
   }
 }
-
