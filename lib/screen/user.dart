@@ -1,14 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/controllers/localeController.dart';
 import 'package:get/get.dart';
 import '../controllers/userModelController.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/userController.dart';
 import '../controllers/authController.dart';
+import 'dart:html' as html;
+import '../helpers/image_picker_helper.dart';
+import '../services/cloudinary_service.dart';
+import '../screen/upload_image_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n.dart';
+import '../controllers/localeController.dart';
+
+
 
 class UserPage extends StatelessWidget {
   final UserModelController userModelController = Get.find<UserModelController>();
   final ThemeController themeController = Get.find<ThemeController>();
   final UserController userController = Get.put(UserController());
+  final LocaleController localeController = Get.find<LocaleController>();
+  final ImagePickerHelper _imagePicker = ImagePickerHelper();
+  final CloudinaryService _cloudinaryService = CloudinaryService();
+
+   String? _profileImageUrl;
+
+
+   
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +49,8 @@ class UserPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Perfil de Usuario'),
+        title: Text(AppLocalizations.of(context)?.translate('user_profile') ?? 'Perfil de Usuario'),
+
         backgroundColor: theme.appBarTheme.backgroundColor,
         actions: [
           IconButton(
@@ -38,6 +62,18 @@ class UserPage extends StatelessWidget {
             ),
             onPressed: themeController.toggleTheme,
           ),
+          IconButton(
+                  icon: Icon(Icons.language,
+                      color: theme.textTheme.bodyLarge?.color),
+                  onPressed: () {
+                    if (localeController.currentLocale.value.languageCode ==
+                        'es') {
+                      localeController.changeLanguage('en');
+                    } else {
+                      localeController.changeLanguage('es');
+                    }
+                  },
+                )
         ],
       ),
       body: Obx(() {
@@ -76,24 +112,46 @@ class UserPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildStatisticItem(theme, Icons.star, 'Valoraciones', '-'),
-                    _buildStatisticItem(theme, Icons.book, 'Asignaturas',
-                        '${user.asignaturasImparte?.length ?? 0}'),
-                    _buildStatisticItem(theme, Icons.person, 'Alumnos', '-'),
+                    _buildStatisticItem(
+                      theme,
+                      Icons.star,
+                      AppLocalizations.of(context)?.translate('ratings') ?? 'Valoraciones',
+                      '-',
+                    ),
+                    _buildStatisticItem(
+                      theme,
+                      Icons.book,
+                      AppLocalizations.of(context)?.translate('subjects') ?? 'Asignaturas',
+                      '${user.asignaturasImparte?.length ?? 0}',
+                    ),
+                    _buildStatisticItem(
+                      theme,
+                      Icons.person,
+                      AppLocalizations.of(context)?.translate('students') ?? 'Alumnos',
+                      '-',
+                    ),
                   ],
                 ),
+
                 const SizedBox(height: 20),
               ],
 
-              // Descripción
-              _buildSectionTitle('Descripción', theme),
-              Text(user.descripcion ?? 'Sin descripción',
-                  style: theme.textTheme.bodyMedium),
+              _buildSectionTitle(
+                  AppLocalizations.of(context)?.translate('description') ?? 'Descripción',
+                  theme, ),
+                Text(
+                  user.descripcion ?? AppLocalizations.of(context)?.translate('no_description') ?? 'Sin descripción',
+                  style: theme.textTheme.bodyMedium, ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
+
+
+             
+              
 
               // Asignaturas
-              _buildSectionTitle('Asignaturas', theme),
+              _buildSectionTitle(AppLocalizations.of(context)?.translate('subjects') ?? 'Asignaturas',theme,),
+
               if (user.asignaturasImparte != null && user.asignaturasImparte!.isNotEmpty)
                 Column(
                   children: user.asignaturasImparte!
@@ -101,18 +159,18 @@ class UserPage extends StatelessWidget {
                             title: Text(asignatura.nombre),
                             subtitle: Text(asignatura.nivel.isNotEmpty
                                 ? asignatura.nivel
-                                : 'Sin nivel especificado'),
+                                : AppLocalizations.of(context)?.translate('no_level_specified') ?? 'Sin nivel especificado'),
                           ))
                       .toList(),
                 )
               else
-                Text('No tienes asignaturas asignadas',
+                Text(AppLocalizations.of(context)?.translate('no_subjects_assigned') ??'No tienes asignaturas asignadas',
                     style: theme.textTheme.bodyMedium),
 
               const SizedBox(height: 20),
 
               // Disponibilidad
-              _buildSectionTitle('Disponibilidad', theme),
+              _buildSectionTitle(AppLocalizations.of(context)?.translate('availability') ??'Disponibilidad', theme),
               if (user.disponibilidad != null && user.disponibilidad!.isNotEmpty)
                 Column(
                   children: user.disponibilidad!
@@ -122,14 +180,14 @@ class UserPage extends StatelessWidget {
                       .toList(),
                 )
               else
-                Text('No has configurado tu disponibilidad',
+                Text(AppLocalizations.of(context)?.translate('no_availability_configured') ??'No has configurado tu disponibilidad',
                     style: theme.textTheme.bodyMedium),
 
               if (!user.isProfesor) ...[
                 const SizedBox(height: 30),
                 // Historial de clases para alumnos
-                _buildSectionTitle('Historial de Clases', theme),
-                Text('Aquí se mostrará el historial de clases del alumno.',
+                _buildSectionTitle(AppLocalizations.of(context)?.translate('class_history') ?? 'Historial de Clases',theme,),
+                Text(AppLocalizations.of(context)?.translate('class_history_description') ??'Aquí se mostrará el historial de clases del alumno.',
                     style: theme.textTheme.bodyMedium),
               ],
 
@@ -152,7 +210,7 @@ class UserPage extends StatelessWidget {
                         });
                       },
                       icon: const Icon(Icons.settings),
-                      label: const Text('Configuración'),
+                      label: Text(AppLocalizations.of(context)?.translate('settings') ?? 'Configuración',),
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton.icon(
@@ -167,7 +225,7 @@ class UserPage extends StatelessWidget {
                         });
                       },
                       icon: const Icon(Icons.edit),
-                      label: const Text('Actualizar Datos'),
+                      label: Text(AppLocalizations.of(context)?.translate('update_data') ?? 'Actualizar Datos', ),
                     ),
                   ],
                 ),
