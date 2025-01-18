@@ -1,38 +1,59 @@
 {
-    "register": "Register",
-    "name": "Name",
-    "email": "Email",
-    "age": "Age",
-    "password": "Password",
-    "confirmPassword": "Confirm Password",
-    "alreadyHaveAccount": "Already have an account? Sign in",
-    "@register": {
-      "description": "Text for the register button",
-      "type": "text"
-    },
-    "@name": {
-      "description": "Label for the name field",
-      "type": "text"
-    },
-    "@email": {
-      "description": "Label for the email field",
-      "type": "text"
-    },
-    "@age": {
-      "description": "Label for the age field",
-      "type": "text"
-    },
-    "@password": {
-      "description": "Label for the password field",
-      "type": "text"
-    },
-    "@confirmPassword": {
-      "description": "Label for the confirm password field",
-      "type": "text"
-    },
-    "@alreadyHaveAccount": {
-      "description": "Text for the sign-in link",
-      "type": "text"
-    }
-  }
+  "login": "Log In",
+  "identifier": "Email or Username",
+  "password": "Password",
+  "loginButton": "Log In",
+  "noAccount": "Don't have an account? Register",
+  "register": "Register",
+  "fullName": "Full Name",
+  "username": "Username",
+  "email": "Email",
+  "birthdate": "Birthdate",
+  "confirmPassword": "Confirm Password",
   
+  "@login": {
+    "description": "Title for the login page",
+    "type": "text"
+  },
+  "@identifier": {
+    "description": "Label for the email or username field",
+    "type": "text"
+  },
+  "@password": {
+    "description": "Label for the password field",
+    "type": "text"
+  },
+  "@loginButton": {
+    "description": "Text for the login button",
+    "type": "text"
+  },
+  "@noAccount": {
+    "description": "Text for the register link",
+    "type": "text"
+  },
+  
+  "@register": {
+    "description": "Title for the register page",
+    "type": "text"
+  },
+  "@fullName": {
+    "description": "Label for the full name field",
+    "type": "text"
+  },
+  "@username": {
+    "description": "Label for the username field",
+    "type": "text"
+  },
+  "@email": {
+    "description": "Label for the email field",
+    "type": "text"
+  },
+  "@birthdate": {
+    "description": "Label for the birthdate field",
+    "type": "text"
+  },
+  "@confirmPassword": {
+    "description": "Label for the confirm password field",
+    "type": "text"
+  }
+}

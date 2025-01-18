@@ -11,33 +11,31 @@ class AppLocalizations {
   static Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'helloWorld': 'Hello World',
-      'logIn': 'Log In',
-      'email': 'Email',
+      'login': 'Log In',
+      'identifier': 'Email or Username',
       'password': 'Password',
-      'loginButton': 'Login',
-      'noAccount': 'Don\'t have an account? Sign Up',
+      'loginButton': 'Log In',
+      'noAccount': "Don't have an account? Register",
       'register': 'Register',
-    'name': 'Name',
-    'email': 'Email',
-    'age': 'Age',
-    'password': 'Password',
-    'confirmPassword': 'Confirm Password',
-    'alreadyHaveAccount': 'Already have an account? Sign in',
+      'fullName': 'Full Name',
+      'username': 'Username',
+      'email': 'Email',
+      'birthdate': 'Birthdate',
+      'confirmPassword': 'Confirm Password',
     },
     'es': {
       'helloWorld': 'Hola Mundo',
-      'logIn': 'Iniciar Sesión',
-      'email': 'Correo Electrónico',
+      'login': 'Iniciar Sesión',
+      'identifier': 'Correo o Nombre de Usuario',
       'password': 'Contraseña',
       'loginButton': 'Iniciar Sesión',
       'noAccount': '¿No tienes cuenta? Regístrate',
       'register': 'Registrarse',
-    'name': 'Nombre',
-    'email': 'Correo Electrónico',
-    'age': 'Edad',
-    'password': 'Contraseña',
-    'confirmPassword': 'Confirmar Contraseña',
-    'alreadyHaveAccount': '¿Ya tienes una cuenta? Inicia sesión',
+      'fullName': 'Nombre Completo',
+      'username': 'Nombre de Usuario',
+      'email': 'Correo Electrónico',
+      'birthdate': 'Fecha de Nacimiento',
+      'confirmPassword': 'Confirmar Contraseña',
     },
   };
 
@@ -76,4 +74,3 @@ class _AppLocalizationsDelegate
   @override
   bool shouldReload(LocalizationsDelegate<AppLocalizations> old) => false;
 }
-

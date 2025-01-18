@@ -13,11 +13,12 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final localization = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Registrarse'),
+        title: Text(localization?.translate('register') ?? 'Register'),
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         actions: [
@@ -73,7 +74,7 @@ class RegisterPage extends StatelessWidget {
             // Campo Nombre Completo
             _buildTextField(
               controller: registerController.nameController,
-              label: 'Nombre Completo',
+              label: localization?.translate('fullName') ?? 'Full Name',
               icon: Icons.person,
               theme: theme,
             ),
@@ -82,7 +83,7 @@ class RegisterPage extends StatelessWidget {
             // Campo Nombre de Usuario
             _buildTextField(
               controller: registerController.usernameController,
-              label: 'Nombre de Usuario',
+              label: localization?.translate('username') ?? 'Username',
               icon: Icons.person_outline,
               theme: theme,
             ),
@@ -91,7 +92,7 @@ class RegisterPage extends StatelessWidget {
             // Campo Correo Electrónico
             _buildTextField(
               controller: registerController.mailController,
-              label: 'Correo Electrónico',
+              label: localization?.translate('email') ?? 'Email',
               icon: Icons.email,
               keyboardType: TextInputType.emailAddress,
               theme: theme,
@@ -105,7 +106,7 @@ class RegisterPage extends StatelessWidget {
                 child: TextField(
                   controller: registerController.birthdateController,
                   decoration: InputDecoration(
-                    labelText: 'Fecha de Nacimiento',
+                    labelText: localization?.translate('birthdate') ?? 'Birthdate',
                     prefixIcon: const Icon(Icons.calendar_today),
                     filled: true,
                     fillColor: theme.cardColor,
@@ -122,7 +123,7 @@ class RegisterPage extends StatelessWidget {
             // Campo Contraseña
             _buildTextField(
               controller: registerController.passwordController,
-              label: 'Contraseña',
+              label: localization?.translate('password') ?? 'Password',
               icon: Icons.lock,
               obscureText: true,
               theme: theme,
@@ -132,7 +133,7 @@ class RegisterPage extends StatelessWidget {
             // Campo Confirmar Contraseña
             _buildTextField(
               controller: registerController.confirmPasswordController,
-              label: 'Confirmar Contraseña',
+              label: localization?.translate('confirmPassword') ?? 'Confirm Password',
               icon: Icons.lock_outline,
               obscureText: true,
               theme: theme,
@@ -142,8 +143,8 @@ class RegisterPage extends StatelessWidget {
             // Botón para Registrarse
             Obx(() {
               if (registerController.isLoading.value) {
-                return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF3B82F6)),
+                return Center(
+                  child: CircularProgressIndicator(color: theme.primaryColor),
                 );
               } else {
                 return ElevatedButton(
@@ -155,9 +156,9 @@ class RegisterPage extends StatelessWidget {
                     ),
                     backgroundColor: theme.primaryColor,
                   ),
-                  child: const Text(
-                    'Registrarse',
-                    style: TextStyle(color: Colors.white),
+                  child: Text(
+                    localization?.translate('register') ?? 'Register',
+                    style: const TextStyle(color: Colors.white),
                   ),
                 );
               }
