@@ -3,20 +3,18 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:get/get.dart';
 import '../controllers/userListController.dart';
-import '../controllers/connectedUsersController.dart'; // Importar ConnectedUsersController
+import '../controllers/connectedUsersController.dart';
 import '../controllers/theme_controller.dart';
 import '../models/userModel.dart';
 
 class MapPage extends StatelessWidget {
   final UserListController userListController = Get.put(UserListController());
   final ConnectedUsersController connectedUsersController =
-      Get.find<ConnectedUsersController>(); // Acceder al controller
+      Get.find<ConnectedUsersController>();
   final ThemeController themeController = Get.find<ThemeController>();
 
   @override
   Widget build(BuildContext context) {
-    userListController
-        .fetchUserCoordinates(); // Obtener coordenadas solo para los usuarios logueados
     final isDarkMode = themeController.themeMode.value == ThemeMode.dark;
 
     return Scaffold(
@@ -35,10 +33,9 @@ class MapPage extends StatelessWidget {
         ],
       ),
       body: Obx(() {
-        final connectedUsers = connectedUsersController
-            .connectedUsers; // Obtener la lista de usuarios conectados
+        // Observar usuarios conectados dinámicamente
+        final connectedUsers = connectedUsersController.connectedUsers;
 
-        // Verificar si hay usuarios conectados
         if (connectedUsers.isEmpty) {
           return const Center(
             child: Text(
@@ -49,10 +46,9 @@ class MapPage extends StatelessWidget {
           );
         }
 
-        // Filtrar los usuarios logueados para mostrarlos en el mapa
+        // Filtrar los usuarios logueados con coordenadas válidas
         final usersAtLocations = userListController.userList
-            .where((user) =>
-                connectedUsers.contains(user.id)) // Solo mostrar los conectados
+            .where((user) => connectedUsers.contains(user.id))
             .toList();
 
         final groupedUsers = _groupUsersByLocation(usersAtLocations);
@@ -60,7 +56,7 @@ class MapPage extends StatelessWidget {
         final markers =
             _generateMarkersForGroupedUsers(groupedUsers, isDarkMode);
 
-        // Si no se encuentran usuarios en las coordenadas, mostrar un mensaje
+        // Si no hay marcadores válidos, mostrar mensaje
         if (markers.isEmpty) {
           return const Center(
             child: Text(
@@ -70,14 +66,11 @@ class MapPage extends StatelessWidget {
           );
         }
 
-        // Agregar una posición base en caso de que no haya usuarios
-        final initialLatLng = markers.isNotEmpty
-            ? markers.first.point
-            : LatLng(40.7128, -74.0060); // Nueva York por defecto
+        final initialLatLng = markers.first.point;
 
         return FlutterMap(
           options: MapOptions(
-            center: initialLatLng, // Definir un punto base si no hay usuarios
+            center: initialLatLng,
             zoom: 13.0,
           ),
           children: [
@@ -92,13 +85,12 @@ class MapPage extends StatelessWidget {
     );
   }
 
-  // Agrupar usuarios por ubicación (coordenadas)
   Map<String, List<UserModel>> _groupUsersByLocation(List<UserModel> users) {
     Map<String, List<UserModel>> groupedUsers = {};
 
     for (var user in users) {
       String key =
-          '${user.lat.toStringAsFixed(5)},${user.lng.toStringAsFixed(5)}'; // Usar coordenadas fijas
+          '${user.lat.toStringAsFixed(5)},${user.lng.toStringAsFixed(5)}';
       if (!groupedUsers.containsKey(key)) {
         groupedUsers[key] = [];
       }
@@ -108,7 +100,6 @@ class MapPage extends StatelessWidget {
     return groupedUsers;
   }
 
-  // Crear marcadores para cada grupo de usuarios
   List<Marker> _generateMarkersForGroupedUsers(
       Map<String, List<UserModel>> groupedUsers, bool isDarkMode) {
     List<Marker> markers = [];
@@ -159,7 +150,6 @@ class MapPage extends StatelessWidget {
     return markers;
   }
 
-  // Mostrar los detalles de los usuarios en una ubicación
   void _showUsersAtLocationDetails(
       BuildContext context, List<UserModel> users, bool isDarkMode) {
     showModalBottomSheet(
@@ -173,11 +163,8 @@ class MapPage extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Selecciona un usuario:',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
+                'Usuarios en esta ubicación:',
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               ...users.map((user) {
@@ -202,7 +189,6 @@ class MapPage extends StatelessWidget {
     );
   }
 
-  // Mostrar detalles de un solo usuario
   void _showUserDetails(BuildContext context, UserModel user, bool isDarkMode) {
     showModalBottomSheet(
       context: context,
@@ -230,35 +216,6 @@ class MapPage extends StatelessWidget {
                   color: isDarkMode ? Colors.white70 : Colors.black87,
                 ),
               ),
-              const SizedBox(height: 10),
-              Text(
-                'Asignaturas que imparte:',
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white70 : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 5),
-              user.asignaturasImparte != null &&
-                      user.asignaturasImparte!.isNotEmpty
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: user.asignaturasImparte!.map((asignatura) {
-                        return Text(
-                          '- ${asignatura.nombre} (${asignatura.nivel})',
-                          style: TextStyle(
-                            color: isDarkMode ? Colors.white : Colors.black,
-                          ),
-                        );
-                      }).toList(),
-                    )
-                  : Text(
-                      'No tiene asignaturas asignadas.',
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.white70 : Colors.black87,
-                      ),
-                    ),
             ],
           ),
         );
