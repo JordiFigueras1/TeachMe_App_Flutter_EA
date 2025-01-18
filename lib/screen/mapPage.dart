@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:flutter_map/flutter_map.dart' hide MapController;
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import '../controllers/mapController.dart';
+import 'package:get/get.dart';
 import '../controllers/userListController.dart';
 import '../controllers/userModelController.dart';
 import '../controllers/theme_controller.dart';
-import '../services/mapService.dart';
+import '../models/userModel.dart';
 
 class MapPage extends StatelessWidget {
-  // Instanciamos el controlador MapController
-  final mapController = Get.put(MapController());
-
-  // Otros controladores
   final UserListController userListController = Get.put(UserListController());
   final UserModelController userModelController =
       Get.find<UserModelController>();
   final ThemeController themeController = Get.find<ThemeController>();
-  final LocationService locationService = LocationService();
 
   @override
   Widget build(BuildContext context) {
-    userListController.fetchUserCoordinates();
-
+    userListController
+        .fetchUserCoordinates(); // Obtener coordenadas de todos los usuarios
     final isDarkMode = themeController.themeMode.value == ThemeMode.dark;
 
     return Scaffold(
@@ -41,20 +35,9 @@ class MapPage extends StatelessWidget {
         ],
       ),
       body: Obx(() {
-        if (userListController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (userListController.userList.isEmpty) {
-          return const Center(
-            child: Text('No hay usuarios con coordenadas disponibles.'),
-          );
-        }
-
-        final userLoggedInLat = userModelController.user.value.lat;
-        final userLoggedInLng = userModelController.user.value.lng;
-
-        if (userLoggedInLat == 0.0 || userLoggedInLng == 0.0) {
+        // Verificamos si el usuario logueado tiene coordenadas disponibles
+        final loggedInUser = userModelController.user.value;
+        if (loggedInUser.lat == 0.0 || loggedInUser.lng == 0.0) {
           return const Center(
             child: Text(
               'No se puede centrar el mapa porque las coordenadas del usuario no están disponibles.',
@@ -64,146 +47,127 @@ class MapPage extends StatelessWidget {
           );
         }
 
-        final double searchRadius = mapController.searchRadius.value;
+        // Generar marcadores solo para el usuario logueado
+        final markers = _generateMarkersForUsers([loggedInUser], isDarkMode);
 
-        final markers = userListController.userList
-            .map((user) {
-              final coordinates = user.lat != 0.0 && user.lng != 0.0
-                  ? LatLng(user.lat, user.lng)
-                  : null;
-
-              if (coordinates != null) {
-                double distance = locationService.calculateDistance(
-                    userLoggedInLat, userLoggedInLng, user.lat, user.lng);
-                if (distance <= searchRadius) {
-                  return Marker(
-                    width: 100.0,
-                    height: 100.0,
-                    point: coordinates,
-                    builder: (ctx) => GestureDetector(
-                      onTap: () {
-                        // Aquí puedes agregar el código para abrir un chat con el usuario
-                        _showChatDialog(context, user);
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            color: isDarkMode ? Colors.blue : Colors.red,
-                            size: 40.0,
-                          ),
-                          Text(
-                            user.name,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-              }
-              return null;
-            })
-            .where((marker) => marker != null)
-            .toList();
-
-        markers.add(Marker(
-          width: 100.0,
-          height: 100.0,
-          point: LatLng(userLoggedInLat, userLoggedInLng),
-          builder: (ctx) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.person_pin,
-                color: isDarkMode ? Colors.blue : Colors.green,
-                size: 40.0,
-              ),
-              Text(
-                'Tú',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black,
-                ),
-              ),
-            ],
+        return FlutterMap(
+          options: MapOptions(
+            center: LatLng(loggedInUser.lat,
+                loggedInUser.lng), // Centrado en el usuario logueado
+            zoom:
+                13.0, // Zoom ajustado para ver la ubicación del usuario con más detalle
           ),
-        ));
-
-        return Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                      'Buscar usuarios dentro de ${searchRadius.toStringAsFixed(1)} km'),
-                  Slider(
-                    value: searchRadius,
-                    min: 1.0,
-                    max: 50.0,
-                    divisions: 10,
-                    label: '${searchRadius.toStringAsFixed(1)} km',
-                    onChanged: (double value) {
-                      mapController.searchRadius.value = value;
-                    },
-                  ),
-                ],
-              ),
+            TileLayer(
+              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              subdomains: ['a', 'b', 'c'],
             ),
-            Expanded(
-              child: FlutterMap(
-                options: MapOptions(
-                  center: LatLng(userLoggedInLat, userLoggedInLng),
-                  zoom: 13.0,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    subdomains: ['a', 'b', 'c'],
-                  ),
-                  MarkerLayer(markers: markers.cast<Marker>()),
-                ],
-              ),
-            ),
+            MarkerLayer(markers: markers), // Mostrar solo al usuario logueado
           ],
         );
       }),
     );
   }
 
-  // Método para mostrar el diálogo del chat
-  void _showChatDialog(BuildContext context, user) {
-    showDialog(
+  List<Marker> _generateMarkersForUsers(
+      List<UserModel> users, bool isDarkMode) {
+    return users.map((user) {
+      return Marker(
+        width: 120.0,
+        height: 70.0,
+        point: LatLng(user.lat, user.lng),
+        builder: (ctx) => GestureDetector(
+          onTap: () {
+            _showUserDetails(ctx, user, isDarkMode);
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.location_on,
+                color: isDarkMode ? Colors.blue : Colors.red,
+                size: 30.0,
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.black : Colors.white,
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+                child: Text(
+                  user.name, // Mostrar el nombre del usuario
+                  style: TextStyle(
+                    fontSize: 10.0,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  void _showUserDetails(BuildContext context, UserModel user, bool isDarkMode) {
+    showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Iniciar chat con ${user.name}'),
-          content: Text('¿Quieres iniciar un chat con ${user.name}?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Cierra el diálogo
-              },
-              child: Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                // Lógica para abrir la pantalla de chat con el usuario seleccionado
-                // Aquí podrías navegar a la página de chat, por ejemplo
-              },
-              child: Text('Iniciar chat'),
-            ),
-          ],
+        return Container(
+          color: isDarkMode ? Colors.black87 : Colors.white,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Detalles de ${user.name}',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Correo: ${user.mail}',
+                style: TextStyle(
+                  fontSize: 16.0,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Asignaturas que imparte:',
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 5),
+              user.asignaturasImparte != null &&
+                      user.asignaturasImparte!.isNotEmpty
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: user.asignaturasImparte!.map((asignatura) {
+                        return Text(
+                          '- ${asignatura.nombre} (${asignatura.nivel})',
+                          style: TextStyle(
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
+                        );
+                      }).toList(),
+                    )
+                  : Text(
+                      'No tiene asignaturas asignadas.',
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+            ],
+          ),
         );
       },
     );
