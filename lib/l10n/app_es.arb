@@ -22,6 +22,32 @@
   "subjects_progress": "Progreso de las asignaturas:",
   "notes": "NOTAS",
   "write_notes_hint": "Escribe tus notas...",
+  "search_users": "Buscar Usuarios",
+  "profile": "Perfil",
+  "subject": "Asignatura",
+  "level": "Nivel",
+  "monday": "Lunes",
+  "tuesday": "Martes",
+  "wednesday": "Miércoles",
+  "thursday": "Jueves",
+  "friday": "Viernes",
+  "shift": "Turno",
+  "morning": "Mañana",
+  "afternoon": "Tarde",
+  "no_users_found": "No se encontraron usuarios.",
+  "role_teacher": "Profesor",
+  "role_student": "Estudiante",
+  "valoraciones": "Valoraciones",
+  "asignaturas": "Asignaturas",
+  "alumnos": "Alumnos",
+  "descripcion": "Descripción",
+  "sin_descripcion": "Sin descripción",
+  "sin_asignaturas": "No tiene asignaturas asignadas",
+  "disponibilidad": "Disponibilidad",
+  "sin_disponibilidad": "No ha configurado su disponibilidad",
+  "historial_clases": "Historial de Clases",
+  "historial_clases_alumno": "Aquí se mostrará el historial de clases del alumno.",
+  "iniciar_chat": "Iniciar Chat",
   
   "@login": {
     "description": "Título de la página de inicio de sesión",
@@ -115,5 +141,110 @@
   "@write_notes_hint": {
     "description": "Texto que aparece como sugerencia en el campo de notas",
     "type": "text"
+  },
+  "@search_users": {
+    "description": "Título para la sección de búsqueda de usuarios",
+    "type": "text"
+  },
+  "@profile": {
+    "description": "Título para la página de perfil",
+    "type": "text"
+  },
+  "@subject": {
+    "description": "Etiqueta para la selección de asignatura",
+    "type": "text"
+  },
+  "@level": {
+    "description": "Etiqueta para el nivel de asignatura",
+    "type": "text"
+  },
+  "@monday": {
+    "description": "Etiqueta para el lunes",
+    "type": "text"
+  },
+  "@tuesday": {
+    "description": "Etiqueta para el martes",
+    "type": "text"
+  },
+  "@wednesday": {
+    "description": "Etiqueta para el miércoles",
+    "type": "text"
+  },
+  "@thursday": {
+    "description": "Etiqueta para el jueves",
+    "type": "text"
+  },
+  "@friday": {
+    "description": "Etiqueta para el viernes",
+    "type": "text"
+  },
+  "@shift": {
+    "description": "Etiqueta para la selección de turno",
+    "type": "text"
+  },
+  "@morning": {
+    "description": "Etiqueta para el turno de mañana",
+    "type": "text"
+  },
+  "@afternoon": {
+    "description": "Etiqueta para el turno de tarde",
+    "type": "text"
+  },
+  "@no_users_found": {
+    "description": "Mensaje mostrado cuando no se encuentran usuarios",
+    "type": "text"
+  },
+  "@role_teacher": {
+    "description": "Rol para profesor",
+    "type": "text"
+  },
+  "@role_student": {
+    "description": "Rol para estudiante",
+    "type": "text"
+  },
+  "@valoraciones": {
+    "description": "Etiqueta de valoraciones",
+    "type": "text"
+  },
+  "@asignaturas": {
+    "description": "Etiqueta de asignaturas",
+    "type": "text"
+  },
+  "@alumnos": {
+    "description": "Etiqueta de alumnos",
+    "type": "text"
+  },
+  "@descripcion": {
+    "description": "Título de la sección de descripción",
+    "type": "text"
+  },
+  "@sin_descripcion": {
+    "description": "Texto cuando no hay descripción disponible",
+    "type": "text"
+  },
+  "@sin_asignaturas": {
+    "description": "Texto cuando no tiene asignaturas asignadas",
+    "type": "text"
+  },
+  "@disponibilidad": {
+    "description": "Título de la sección de disponibilidad",
+    "type": "text"
+  },
+  "@sin_disponibilidad": {
+    "description": "Texto cuando no hay disponibilidad configurada",
+    "type": "text"
+  },
+  "@historial_clases": {
+    "description": "Título de la sección de historial de clases",
+    "type": "text"
+  },
+  "@historial_clases_alumno": {
+    "description": "Texto para el historial de clases del alumno",
+    "type": "text"
+  },
+  "@iniciar_chat": {
+    "description": "Texto del botón para iniciar chat",
+    "type": "text"
   }
+
 }

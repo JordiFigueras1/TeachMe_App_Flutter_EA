@@ -22,6 +22,32 @@
   "subjects_progress": "Subjects progress:",
   "notes": "NOTES",
   "write_notes_hint": "Write your notes...",
+  "search_users": "Search Users",
+  "profile": "Profile",
+  "subject": "Subject",
+  "level": "Level",
+  "monday": "Monday",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "shift": "Shift",
+  "morning": "Morning",
+  "afternoon": "Afternoon",
+  "no_users_found": "No users found.",
+  "role_teacher": "Teacher",
+  "role_student": "Student",
+  "valoraciones": "Ratings",
+  "asignaturas": "Subjects",
+  "alumnos": "Students",
+  "descripcion": "Description",
+  "sin_descripcion": "No description",
+  "sin_asignaturas": "No subjects assigned",
+  "disponibilidad": "Availability",
+  "sin_disponibilidad": "No availability set",
+  "historial_clases": "Class History",
+  "historial_clases_alumno": "This is where the student's class history will be displayed.",
+  "iniciar_chat": "Start Chat",
   
   
   "@login": {
@@ -115,6 +141,111 @@
   },
   "@write_notes_hint": {
     "description": "Hint for writing notes",
+    "type": "text"
+  },
+  
+  "@search_users": {
+    "description": "Title for the user search section",
+    "type": "text"
+  },
+  "@profile": {
+    "description": "Title for the profile page",
+    "type": "text"
+  },
+  "@subject": {
+    "description": "Label for the subject selection",
+    "type": "text"
+  },
+  "@level": {
+    "description": "Label for the subject level",
+    "type": "text"
+  },
+  "@monday": {
+    "description": "Label for Monday",
+    "type": "text"
+  },
+  "@tuesday": {
+    "description": "Label for Tuesday",
+    "type": "text"
+  },
+  "@wednesday": {
+    "description": "Label for Wednesday",
+    "type": "text"
+  },
+  "@thursday": {
+    "description": "Label for Thursday",
+    "type": "text"
+  },
+  "@friday": {
+    "description": "Label for Friday",
+    "type": "text"
+  },
+  "@shift": {
+    "description": "Label for shift selection",
+    "type": "text"
+  },
+  "@morning": {
+    "description": "Label for the morning shift",
+    "type": "text"
+  },
+  "@afternoon": {
+    "description": "Label for the afternoon shift",
+    "type": "text"
+  },
+  "@no_users_found": {
+    "description": "Message displayed when no users are found",
+    "type": "text"
+  },
+  "@role_teacher": {
+    "description": "Role for teacher",
+    "type": "text"
+  },
+  "@role_student": {
+    "description": "Role for student",
+    "type": "text"
+  },
+  "@valoraciones": {
+    "description": "Ratings label",
+    "type": "text"
+  },
+  "@asignaturas": {
+    "description": "Subjects label",
+    "type": "text"
+  },
+  "@alumnos": {
+    "description": "Students label",
+    "type": "text"
+  },
+  "@descripcion": {
+    "description": "Description section title",
+    "type": "text"
+  },
+  "@sin_descripcion": {
+    "description": "Text when no description is available",
+    "type": "text"
+  },
+  "@sin_asignaturas": {
+    "description": "Text when no subjects are assigned",
+    "type": "text"
+  },
+  "@disponibilidad": {
+    "description": "Availability section title",
+    "type": "text"
+  },
+  "@sin_disponibilidad": {
+    "description": "Text when no availability is set",
+    "type": "text"
+  },
+  "@historial_clases": {
+    "description": "Class history section title",
+    "type": "text"
+  },
+  "@historial_clases_alumno": {
+    "description": "Text for student class history message",
+    "type": "text"
+  },
+  "@iniciar_chat": {
+    "description": "Start chat button label",
     "type": "text"
   }
 
