@@ -8,7 +8,8 @@ import 'package:dio/dio.dart' as dio; // Usar siempre el prefijo dio
 
 class UserController extends GetxController {
   final UserService userService = Get.put(UserService());
-  final UserModelController userModelController = Get.find<UserModelController>();
+  final UserModelController userModelController =
+      Get.find<UserModelController>();
 
   final TextEditingController mailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -46,7 +47,8 @@ class UserController extends GetxController {
         timeLimit: const Duration(seconds: 10),
       );
 
-      print("Coordenadas obtenidas: (${position.latitude}, ${position.longitude})");
+      print(
+          "Coordenadas obtenidas: (${position.latitude}, ${position.longitude})");
 
       final response = await userService.logIn({
         'identifier': mailController.text, // Correo o username
@@ -64,7 +66,8 @@ class UserController extends GetxController {
 
         // Validar que los datos críticos estén presentes
         if (userId == '0' || token.isEmpty) {
-          throw Exception('Datos críticos faltantes en la respuesta del servidor.');
+          throw Exception(
+              'Datos críticos faltantes en la respuesta del servidor.');
         }
 
         // Almacenar userId y token en el AuthController
@@ -127,7 +130,8 @@ class UserController extends GetxController {
     final user = userModelController.user.value;
 
     // Agrega este print para verificar la ruta de navegación
-    print('Redirigiendo a: ${!user.isProfesor && !user.isAlumno ? "/roleSelection" : "/home"}');
+    print(
+        'Redirigiendo a: ${!user.isProfesor && !user.isAlumno ? "/roleSelection" : "/home"}');
 
     if (!user.isProfesor && !user.isAlumno) {
       // Primer inicio de sesión: Redirigir a RoleSelectionPage
@@ -138,10 +142,11 @@ class UserController extends GetxController {
     }
   }
 
-
-  Future<void> updateDisponibilidad(String userId, List<Map<String, String>> disponibilidad) async {
+  Future<void> updateDisponibilidad(
+      String userId, List<Map<String, String>> disponibilidad) async {
     try {
-      final response = await userService.updateDisponibilidad(userId, disponibilidad);
+      final response =
+          await userService.updateDisponibilidad(userId, disponibilidad);
       if (response.statusCode == 200) {
         final userData = response.data['usuario'];
         userModelController.setUser(
@@ -172,7 +177,8 @@ class UserController extends GetxController {
 
   Future<void> fetchUserById(String userId) async {
     try {
-      final dio.Response response = await userService.getUserById(userId); // Usar dio.Response
+      final dio.Response response =
+          await userService.getUserById(userId); // Usar dio.Response
       if (response.statusCode == 200) {
         final userData = response.data;
         if (userData is Map<String, dynamic>) {
@@ -209,7 +215,6 @@ class UserController extends GetxController {
     }
   }
 
-
   Future<void> assignRole(String role) async {
     try {
       final userId = Get.find<AuthController>().getUserId;
@@ -217,7 +222,8 @@ class UserController extends GetxController {
       final isAlumno = role == "alumno";
 
       // Llamada al servicio para actualizar el rol
-      final response = await userService.updateRole(userId, isProfesor, isAlumno);
+      final response =
+          await userService.updateRole(userId, isProfesor, isAlumno);
 
       if (response.statusCode == 200) {
         // Actualizar el modelo del usuario en el controlador

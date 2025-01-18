@@ -3,20 +3,20 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:get/get.dart';
 import '../controllers/userListController.dart';
-import '../controllers/userModelController.dart';
+import '../controllers/connectedUsersController.dart'; // Importar ConnectedUsersController
 import '../controllers/theme_controller.dart';
 import '../models/userModel.dart';
 
 class MapPage extends StatelessWidget {
   final UserListController userListController = Get.put(UserListController());
-  final UserModelController userModelController =
-      Get.find<UserModelController>();
+  final ConnectedUsersController connectedUsersController =
+      Get.find<ConnectedUsersController>(); // Acceder al controller
   final ThemeController themeController = Get.find<ThemeController>();
 
   @override
   Widget build(BuildContext context) {
     userListController
-        .fetchUserCoordinates(); // Obtener coordenadas de todos los usuarios
+        .fetchUserCoordinates(); // Obtener coordenadas solo para los usuarios logueados
     final isDarkMode = themeController.themeMode.value == ThemeMode.dark;
 
     return Scaffold(
@@ -35,50 +35,97 @@ class MapPage extends StatelessWidget {
         ],
       ),
       body: Obx(() {
-        // Verificamos si el usuario logueado tiene coordenadas disponibles
-        final loggedInUser = userModelController.user.value;
-        if (loggedInUser.lat == 0.0 || loggedInUser.lng == 0.0) {
+        final connectedUsers = connectedUsersController
+            .connectedUsers; // Obtener la lista de usuarios conectados
+
+        // Verificar si hay usuarios conectados
+        if (connectedUsers.isEmpty) {
           return const Center(
             child: Text(
-              'No se puede centrar el mapa porque las coordenadas del usuario no están disponibles.',
+              'No hay usuarios logueados para mostrar en el mapa.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.red),
             ),
           );
         }
 
-        // Generar marcadores solo para el usuario logueado
-        final markers = _generateMarkersForUsers([loggedInUser], isDarkMode);
+        // Filtrar los usuarios logueados para mostrarlos en el mapa
+        final usersAtLocations = userListController.userList
+            .where((user) =>
+                connectedUsers.contains(user.id)) // Solo mostrar los conectados
+            .toList();
+
+        final groupedUsers = _groupUsersByLocation(usersAtLocations);
+
+        final markers =
+            _generateMarkersForGroupedUsers(groupedUsers, isDarkMode);
+
+        // Si no se encuentran usuarios en las coordenadas, mostrar un mensaje
+        if (markers.isEmpty) {
+          return const Center(
+            child: Text(
+              'No se encontraron usuarios con coordenadas válidas.',
+              style: TextStyle(fontSize: 16, color: Colors.red),
+            ),
+          );
+        }
+
+        // Agregar una posición base en caso de que no haya usuarios
+        final initialLatLng = markers.isNotEmpty
+            ? markers.first.point
+            : LatLng(40.7128, -74.0060); // Nueva York por defecto
 
         return FlutterMap(
           options: MapOptions(
-            center: LatLng(loggedInUser.lat,
-                loggedInUser.lng), // Centrado en el usuario logueado
-            zoom:
-                13.0, // Zoom ajustado para ver la ubicación del usuario con más detalle
+            center: initialLatLng, // Definir un punto base si no hay usuarios
+            zoom: 13.0,
           ),
           children: [
             TileLayer(
               urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
               subdomains: ['a', 'b', 'c'],
             ),
-            MarkerLayer(markers: markers), // Mostrar solo al usuario logueado
+            MarkerLayer(markers: markers),
           ],
         );
       }),
     );
   }
 
-  List<Marker> _generateMarkersForUsers(
-      List<UserModel> users, bool isDarkMode) {
-    return users.map((user) {
-      return Marker(
+  // Agrupar usuarios por ubicación (coordenadas)
+  Map<String, List<UserModel>> _groupUsersByLocation(List<UserModel> users) {
+    Map<String, List<UserModel>> groupedUsers = {};
+
+    for (var user in users) {
+      String key =
+          '${user.lat.toStringAsFixed(5)},${user.lng.toStringAsFixed(5)}'; // Usar coordenadas fijas
+      if (!groupedUsers.containsKey(key)) {
+        groupedUsers[key] = [];
+      }
+      groupedUsers[key]!.add(user);
+    }
+
+    return groupedUsers;
+  }
+
+  // Crear marcadores para cada grupo de usuarios
+  List<Marker> _generateMarkersForGroupedUsers(
+      Map<String, List<UserModel>> groupedUsers, bool isDarkMode) {
+    List<Marker> markers = [];
+
+    groupedUsers.forEach((locationKey, usersAtLocation) {
+      final LatLng location = LatLng(
+        usersAtLocation.first.lat,
+        usersAtLocation.first.lng,
+      );
+
+      markers.add(Marker(
         width: 120.0,
         height: 70.0,
-        point: LatLng(user.lat, user.lng),
+        point: location,
         builder: (ctx) => GestureDetector(
           onTap: () {
-            _showUserDetails(ctx, user, isDarkMode);
+            _showUsersAtLocationDetails(ctx, usersAtLocation, isDarkMode);
           },
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -95,7 +142,7 @@ class MapPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(5.0),
                 ),
                 child: Text(
-                  user.name, // Mostrar el nombre del usuario
+                  '${usersAtLocation.length} usuarios',
                   style: TextStyle(
                     fontSize: 10.0,
                     color: isDarkMode ? Colors.white : Colors.black,
@@ -106,10 +153,56 @@ class MapPage extends StatelessWidget {
             ],
           ),
         ),
-      );
-    }).toList();
+      ));
+    });
+
+    return markers;
   }
 
+  // Mostrar los detalles de los usuarios en una ubicación
+  void _showUsersAtLocationDetails(
+      BuildContext context, List<UserModel> users, bool isDarkMode) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          color: isDarkMode ? Colors.black87 : Colors.white,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Selecciona un usuario:',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              ...users.map((user) {
+                return ListTile(
+                  title: Text(
+                    user.name,
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showUserDetails(context, user, isDarkMode);
+                  },
+                );
+              }).toList(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Mostrar detalles de un solo usuario
   void _showUserDetails(BuildContext context, UserModel user, bool isDarkMode) {
     showModalBottomSheet(
       context: context,
