@@ -60,7 +60,12 @@ class AppLocalizations {
       'historial_clases': 'Class History',
       'historial_clases_alumno': 'This will show the student\'s class history.',
       'iniciar_chat': 'Start Chat',
-    },
+      "select_role": "Select Your Role",
+      "select_role_message": "Please select your role to continue:",
+      "i_am_teacher": "I am a Teacher",
+     "i_am_student": "I am a Student",
+      "role_note": "Note: After selecting your role, we recommend updating your profile with information such as availability, description, and subjects of interest.",
+      },
     'es': {
       'helloWorld': 'Hola Mundo',
       'login': 'Iniciar Sesión',
@@ -112,6 +117,11 @@ class AppLocalizations {
       'historial_clases': 'Historial de Clases',
       'historial_clases_alumno': 'Aquí se mostrará el historial de clases del alumno.',
       'iniciar_chat': 'Iniciar Chat',
+       "select_role": "Selecciona tu Rol",
+        "select_role_message": "Por favor, selecciona tu rol para continuar:",
+        "i_am_teacher": "Soy Profesor",
+        "i_am_student": "Soy Estudiante",
+        "role_note": "Nota: Después de seleccionar tu rol, te recomendamos actualizar tu perfil con información como disponibilidad, descripción y asignaturas de interés.",
     },
   };
 

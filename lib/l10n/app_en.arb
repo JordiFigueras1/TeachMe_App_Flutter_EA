@@ -48,6 +48,12 @@
   "historial_clases": "Class History",
   "historial_clases_alumno": "This is where the student's class history will be displayed.",
   "iniciar_chat": "Start Chat",
+  "select_role": "Select Your Role",
+  "select_role_message": "Please select your role to continue:",
+  "i_am_teacher": "I am a Teacher",
+  "i_am_student": "I am a Student",
+  "role_note": "Note: After selecting your role, we recommend updating your profile with information such as availability, description, and subjects of interest.",
+
   
   
   "@login": {
@@ -143,7 +149,7 @@
     "description": "Hint for writing notes",
     "type": "text"
   },
-  
+
   "@search_users": {
     "description": "Title for the user search section",
     "type": "text"
@@ -247,6 +253,30 @@
   "@iniciar_chat": {
     "description": "Start chat button label",
     "type": "text"
+  },
+  "@iniciar_chat": {
+    "description": "Start chat button label",
+    "type": "text"
+  },
+  "@select_role": {
+    "description": "Text for the role selection heading",
+    "type": "text"
+  },
+  "@select_role_message": {
+    "description": "Message asking the user to select their role",
+    "type": "text"
+  },
+  "@i_am_teacher": {
+    "description": "Button text for selecting the teacher role",
+    "type": "text"
+  },
+  "@i_am_student": {
+    "description": "Button text for selecting the student role",
+    "type": "text"
+  },
+  "@role_note": {
+    "description": "Note regarding profile update after role selection",
+    "type": "text"
   }
-
 }
+
