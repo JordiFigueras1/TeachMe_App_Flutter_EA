@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/controllers/localeController.dart';
+import 'package:flutter_application_1/services/userService.dart';
 import 'package:get/get.dart';
 import '../controllers/userModelController.dart';
 import '../controllers/theme_controller.dart';
@@ -12,26 +13,74 @@ import '../screen/upload_image_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n.dart';
 import '../controllers/localeController.dart';
+import 'dart:html' as html;
+import '../helpers/image_picker_helper.dart';
+import '../services/cloudinary_service.dart';
 
 
 
-class UserPage extends StatelessWidget {
+
+class UserPage extends StatefulWidget {
+  @override
+  State<UserPage> createState() => _UserPageState();
+}
+
+class _UserPageState extends State<UserPage> {
   final UserModelController userModelController = Get.find<UserModelController>();
+
   final ThemeController themeController = Get.find<ThemeController>();
+
   final UserController userController = Get.put(UserController());
+
   final LocaleController localeController = Get.find<LocaleController>();
+
   final ImagePickerHelper _imagePicker = ImagePickerHelper();
+
   final CloudinaryService _cloudinaryService = CloudinaryService();
+  final _userService = UserService();
+  
 
    String? _profileImageUrl;
 
+    @override
+  void initState() {
+    super.initState();
+    _loadProfileImageUrl();
+  }
 
-   
+Future<void> _loadProfileImageUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _profileImageUrl = prefs.getString('profileImageUrl');
+    });
+  }
+
+  Future<void> _saveProfileImageUrl(String url) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profileImageUrl', url);
+  }
 
 
-
-
-
+  Future<void> _selectAndUploadProfileImage() async {
+    final user = userModelController.user.value;
+    
+    final imageBase64 = await _imagePicker.pickImage();
+    if (imageBase64 != null) {
+      String? imageUrl = await _cloudinaryService.uploadImage(imageBase64);
+      print("esta es la url$imageUrl");
+      await _userService.updateUser(userId: user.id, data: {'foto': imageUrl});
+      if (imageUrl != null) {
+        setState(() {
+          user.foto = imageUrl;
+        userModelController.user.value.foto = imageUrl;
+          _profileImageUrl = imageUrl;
+        });
+        _saveProfileImageUrl(imageUrl);
+      } else {
+        Get.snackbar('Error', 'No se pudo subir la imagen.');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +124,11 @@ class UserPage extends StatelessWidget {
                   },
                 )
         ],
+      ),
+       floatingActionButton: FloatingActionButton(
+        onPressed: _selectAndUploadProfileImage,
+        child: const Icon(Icons.upload),
+        tooltip: 'Subir foto de perfil',
       ),
       body: Obx(() {
         final user = userModelController.user.value;

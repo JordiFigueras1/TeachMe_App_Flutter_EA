@@ -8,10 +8,7 @@ import '../models/userModel.dart';
 import '../l10n.dart';
 import '../controllers/localeController.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:html' as html;
-import '../helpers/image_picker_helper.dart';
-import '../services/cloudinary_service.dart';
-import '../screen/upload_image_screen.dart';
+
 
 class PerfilPage extends StatefulWidget {
   @override
@@ -26,8 +23,7 @@ class _PerfilPageState extends State<PerfilPage> {
       Get.find<ConnectedUsersController>();
   final AsignaturaController asignaturaController =
       Get.find<AsignaturaController>();
-  final ImagePickerHelper _imagePicker = ImagePickerHelper();
-  final CloudinaryService _cloudinaryService = CloudinaryService();
+  
   final LocaleController localeController = Get.find<LocaleController>();
 
   String? selectedAsignaturaId;
@@ -40,35 +36,10 @@ class _PerfilPageState extends State<PerfilPage> {
   void initState() {
     super.initState();
     _initializeData();
-    _loadProfileImageUrl();
+    
   }
 
-  Future<void> _loadProfileImageUrl() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _profileImageUrl = prefs.getString('profileImageUrl');
-    });
-  }
-
-  Future<void> _saveProfileImageUrl(String url) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('profileImageUrl', url);
-  }
-
-  Future<void> _selectAndUploadProfileImage() async {
-    final imageBase64 = await _imagePicker.pickImage();
-    if (imageBase64 != null) {
-      String? imageUrl = await _cloudinaryService.uploadImage(imageBase64);
-      if (imageUrl != null) {
-        setState(() {
-          _profileImageUrl = imageUrl;
-        });
-        _saveProfileImageUrl(imageUrl);
-      } else {
-        Get.snackbar('Error', 'No se pudo subir la imagen.');
-      }
-    }
-  }
+  
 
   Future<void> _initializeData() async {
     await asignaturaController.fetchAllAsignaturas();
@@ -136,7 +107,7 @@ class _PerfilPageState extends State<PerfilPage> {
           ? _buildUserList(theme)
           : _buildUserProfile(theme),
       floatingActionButton: FloatingActionButton(
-        onPressed: _selectAndUploadProfileImage,
+        onPressed: (){},
         child: const Icon(Icons.upload),
         tooltip: 'Subir foto de perfil',
       ),
@@ -301,7 +272,7 @@ class _PerfilPageState extends State<PerfilPage> {
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton.icon(
-                  onPressed: _selectAndUploadProfileImage,
+                  onPressed: (){},
                   icon: const Icon(Icons.upload),
                   label: const Text('Cambiar Foto de Perfil'),
                 ),
