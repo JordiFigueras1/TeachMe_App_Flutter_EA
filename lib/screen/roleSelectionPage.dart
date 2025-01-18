@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/userController.dart';
+import '../l10n.dart';
+import '../controllers/localeController.dart';
 
 class RoleSelectionPage extends StatelessWidget {
   final UserController userController = Get.find<UserController>();
@@ -11,8 +13,7 @@ class RoleSelectionPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Selecciona tu Rol",
+        title: Text( AppLocalizations.of(context)?.translate('select_role') ?? 'Selecciona tu Rol',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         backgroundColor: Colors.blueAccent,
@@ -32,8 +33,7 @@ class RoleSelectionPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
-                "Por favor, selecciona tu rol para continuar:",
+              Text( AppLocalizations.of(context)?.translate('select_role_message') ?? 'Por favor, selecciona tu rol para continuar:',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
@@ -43,7 +43,7 @@ class RoleSelectionPage extends StatelessWidget {
               ),
               const SizedBox(height: 40),
               ElevatedButton(
-                onPressed: () => userController.assignRole("profesor"),
+                onPressed: () => userController.assignRole(AppLocalizations.of(context)?.translate('role_teacher') ?? "profesor"),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                   shape: RoundedRectangleBorder(
@@ -51,14 +51,16 @@ class RoleSelectionPage extends StatelessWidget {
                   ),
                   backgroundColor: Colors.deepPurpleAccent,
                 ),
-                child: const Text(
-                  "Soy Profesor",
+                child: Text(AppLocalizations.of(context)?.translate('i_am_teacher') ?? 'Soy Profesor',
+
+
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => userController.assignRole("alumno"),
+                onPressed: () => userController.assignRole(AppLocalizations.of(context)?.translate('role_student') ?? "alumno"),
+
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                   shape: RoundedRectangleBorder(
@@ -66,8 +68,9 @@ class RoleSelectionPage extends StatelessWidget {
                   ),
                   backgroundColor: Colors.greenAccent,
                 ),
-                child: const Text(
-                  "Soy Alumno",
+                child: Text(AppLocalizations.of(context)?.translate('i_am_student') ?? 'Soy Alumno',
+
+
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -87,17 +90,19 @@ class RoleSelectionPage extends StatelessWidget {
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Icon(Icons.info_outline, color: Colors.blueAccent, size: 28),
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        "Nota: Después de seleccionar tu rol, te recomendamos actualizar tu perfil con información como disponibilidad, descripción y asignaturas de interés.",
+                        AppLocalizations.of(context)?.translate('role_note') ??
+                            "Nota: Después de seleccionar tu rol, te recomendamos actualizar tu perfil con información como disponibilidad, descripción y asignaturas de interés.",
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
                         textAlign: TextAlign.left,
                       ),
                     ),
                   ],
+
                 ),
               ),
             ],

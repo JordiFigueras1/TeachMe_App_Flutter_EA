@@ -5,6 +5,8 @@ import '../controllers/userModelController.dart';
 import '../controllers/connectedUsersController.dart';
 import '../controllers/asignaturaController.dart';
 import '../models/userModel.dart';
+import '../l10n.dart';
+import '../controllers/localeController.dart';
 
 class PerfilPage extends StatefulWidget {
   @override
@@ -34,12 +36,17 @@ class _PerfilPageState extends State<PerfilPage> {
   }
 
   void _filterUsers() {
-    final role = userModelController.user.value.isProfesor ? 'alumno' : 'profesor';
-    final List<Map<String, String>> disponibilidad = (selectedDia != null && selectedTurno != null)
-        ? [{'dia': selectedDia!, 'turno': selectedTurno!}]
-        : [];
-    userListController.filterUsers(role, selectedAsignaturaId, disponibilidad);
-  }
+  final role = userModelController.user.value.isProfesor
+      ? AppLocalizations.of(context)?.translate('role_student') ?? 'alumno'
+      : AppLocalizations.of(context)?.translate('role_teacher') ?? 'profesor';
+  
+  final List<Map<String, String>> disponibilidad = (selectedDia != null && selectedTurno != null)
+      ? [{'dia': selectedDia!, 'turno': selectedTurno!}]
+      : [];
+  
+  userListController.filterUsers(role, selectedAsignaturaId, disponibilidad);
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +54,10 @@ class _PerfilPageState extends State<PerfilPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: selectedUser == null ? const Text('Buscar Usuarios') : const Text('Perfil'),
+        title: selectedUser == null
+    ? Text(AppLocalizations.of(context)?.translate('search_users') ?? 'Buscar Usuarios')
+    : Text(AppLocalizations.of(context)?.translate('profile') ?? 'Perfil'),
+
         leading: selectedUser != null
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -87,13 +97,13 @@ class _PerfilPageState extends State<PerfilPage> {
                   items: asignaturaController.asignaturas
                       .map((asignatura) => DropdownMenuItem(
                             value: asignatura.id,
-                            child: Text('${asignatura.nombre} - Nivel: ${asignatura.nivel}'),
+                            child: Text('${asignatura.nombre} - ${AppLocalizations.of(context)?.translate('level') ?? 'Nivel'}: ${asignatura.nivel}'),
                           ))
                       .toList(),
                   onChanged: (value) => setState(() {
                     selectedAsignaturaId = value;
                   }),
-                  decoration: const InputDecoration(labelText: 'Asignatura'),
+                   decoration: InputDecoration(labelText: AppLocalizations.of(context)?.translate('subject') ?? 'Asignatura'),
                 );
               }),
               Row(
@@ -101,7 +111,12 @@ class _PerfilPageState extends State<PerfilPage> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: selectedDia,
-                      items: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
+                      items: [
+                        AppLocalizations.of(context)?.translate('monday') ?? 'Lunes',
+                        AppLocalizations.of(context)?.translate('tuesday') ?? 'Martes',
+                        AppLocalizations.of(context)?.translate('wednesday') ?? 'Miércoles',
+                        AppLocalizations.of(context)?.translate('thursday') ?? 'Jueves',
+                      AppLocalizations.of(context)?.translate('friday') ?? 'Viernes',]
                           .map((dia) => DropdownMenuItem(
                                 value: dia,
                                 child: Text(dia),
@@ -116,7 +131,7 @@ class _PerfilPageState extends State<PerfilPage> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: selectedTurno,
-                      items: ['Mañana', 'Tarde']
+                      items: [ AppLocalizations.of(context)?.translate('morning') ?? 'Mañana', AppLocalizations.of(context)?.translate('afternoon') ?? 'Tarde',]
                           .map((turno) => DropdownMenuItem(
                                 value: turno,
                                 child: Text(turno),
@@ -125,7 +140,7 @@ class _PerfilPageState extends State<PerfilPage> {
                       onChanged: (value) => setState(() {
                         selectedTurno = value;
                       }),
-                      decoration: const InputDecoration(labelText: 'Turno'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)?.translate('shift') ?? 'Turno',),
                     ),
                   ),
                 ],
@@ -140,7 +155,9 @@ class _PerfilPageState extends State<PerfilPage> {
             }
 
             if (userListController.userList.isEmpty) {
-              return const Center(child: Text('No se encontraron usuarios.'));
+              return Center(child: Text(AppLocalizations.of(context)?.translate('no_users_found') ?? 'No se encontraron usuarios.',), 
+              );
+
             }
 
             return ListView.builder(
@@ -204,18 +221,19 @@ class _PerfilPageState extends State<PerfilPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStatisticItem(theme, Icons.star, 'Valoraciones', '-'),
+                _buildStatisticItem(theme, Icons.star, AppLocalizations.of(context)?.translate('valoraciones') ?? 'Valoraciones', '-'),
+
                 _buildStatisticItem(
-                    theme, Icons.book, 'Asignaturas', '${user.asignaturasImparte?.length ?? 0}'),
-                _buildStatisticItem(theme, Icons.person, 'Alumnos', '-'),
+                    theme, Icons.book, AppLocalizations.of(context)?.translate('asignaturas') ?? 'Asignaturas', '${user.asignaturasImparte?.length ?? 0}'),
+                _buildStatisticItem(theme, Icons.person, AppLocalizations.of(context)?.translate('alumnos') ?? 'Alumnos', '-'),
               ],
             ),
             const SizedBox(height: 20),
           ],
-          _buildSectionTitle('Descripción', theme),
-          Text(user.descripcion ?? 'Sin descripción', style: theme.textTheme.bodyMedium),
+          _buildSectionTitle(AppLocalizations.of(context)?.translate('descripcion') ?? 'Descripción', theme),
+          Text(user.descripcion ?? AppLocalizations.of(context)?.translate('sin_descripcion') ?? 'Sin descripción', style: theme.textTheme.bodyMedium),
           const SizedBox(height: 20),
-          _buildSectionTitle('Asignaturas', theme),
+          _buildSectionTitle(AppLocalizations.of(context)?.translate('asignaturas') ?? 'Asignaturas', theme),
           if (user.asignaturasImparte != null && user.asignaturasImparte!.isNotEmpty)
             Column(
               children: user.asignaturasImparte!
@@ -226,9 +244,9 @@ class _PerfilPageState extends State<PerfilPage> {
                   .toList(),
             )
           else
-            Text('No tiene asignaturas asignadas', style: theme.textTheme.bodyMedium),
+            Text(AppLocalizations.of(context)?.translate('sin_asignaturas') ?? 'No tiene asignaturas asignadas', style: theme.textTheme.bodyMedium),
           const SizedBox(height: 20),
-          _buildSectionTitle('Disponibilidad', theme),
+          _buildSectionTitle(AppLocalizations.of(context)?.translate('disponibilidad') ?? 'Disponibilidad', theme),
           if (user.disponibilidad != null && user.disponibilidad!.isNotEmpty)
             Column(
               children: user.disponibilidad!
@@ -238,11 +256,11 @@ class _PerfilPageState extends State<PerfilPage> {
                   .toList(),
             )
           else
-            Text('No ha configurado su disponibilidad', style: theme.textTheme.bodyMedium),
+            Text(AppLocalizations.of(context)?.translate('sin_disponibilidad') ?? 'No ha configurado su disponibilidad', style: theme.textTheme.bodyMedium),
           if (!user.isProfesor) ...[
             const SizedBox(height: 30),
-            _buildSectionTitle('Historial de Clases', theme),
-            Text('Aquí se mostrará el historial de clases del alumno.',
+            _buildSectionTitle(AppLocalizations.of(context)?.translate('historial_clases') ?? 'Historial de Clases', theme),
+            Text(AppLocalizations.of(context)?.translate('historial_clases_alumno') ?? 'Aquí se mostrará el historial de clases del alumno.',
                 style: theme.textTheme.bodyMedium),
           ],
           const SizedBox(height: 30),
@@ -255,7 +273,7 @@ class _PerfilPageState extends State<PerfilPage> {
                 });
               },
               icon: const Icon(Icons.chat),
-              label: const Text('Iniciar Chat'),
+              label: Text(AppLocalizations.of(context)?.translate('iniciar_chat') ?? 'Iniciar Chat'),
             ),
           ),
         ],

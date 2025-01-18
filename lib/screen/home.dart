@@ -125,8 +125,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text('¡Notificación!'),
-                  content: Text('Es hora del evento: $eventName'),
+                  title: Text(AppLocalizations.of(context)?.translate('notification_title') ?? 'Notification'),
+                  content: Text(AppLocalizations.of(context)?.translate('event_time_message') ?? 'It\'s time for the event: $eventName'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -173,19 +173,23 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Agregar Clase'),
+          title: Text(AppLocalizations.of(context)?.translate('add_class') ?? 'Add Class'),
+
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: eventController,
-                decoration: const InputDecoration(labelText: 'Nombre de la Clase'),
-              ),
+                decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)?.translate('class_name_label') ?? 'Class Name',
+                )),
+
               SizedBox(height: 16),
               Text(
-                "Selecciona la Hora:",
+                AppLocalizations.of(context)?.translate('select_time_label') ?? 'Select Time:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
+
               // Usamos un contenedor con un tamaño fijo y desplazamiento
               Container(
                 height: 200,  // Puedes ajustar el valor de la altura según sea necesario
@@ -210,14 +214,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('Cancelar'),
+              child: Text(AppLocalizations.of(context)?.translate('cancel') ?? 'Cancel',),
+
             ),
             ElevatedButton(
               onPressed: () {
                 _addEvent(eventController.text, TimeOfDay.fromDateTime(selectedTime));
                 Navigator.pop(context);
               },
-              child: const Text('Guardar'),
+              child: Text(AppLocalizations.of(context)?.translate('save') ?? 'Save',),
+
             ),
           ],
         ),
@@ -397,7 +403,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: Text(
-                          'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
+                           AppLocalizations.of(context)?.translate('classes_for_day') ?? 'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -431,9 +437,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ),
             SizedBox(height: 24),
             Text(
-              'Progreso de las asignaturas:',
+              AppLocalizations.of(context)?.translate('subjects_progress') ?? 'Progreso de las asignaturas:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
+
+            
             SizedBox(height: 16),
             Column(
               children: _buildProgressCharts(),
@@ -458,23 +466,25 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "NOTAS",
+                      AppLocalizations.of(context)?.translate('notes') ?? 'NOTAS',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
+
                     SizedBox(height: 10),
                     TextField(
                       controller: _textController,
                       maxLines: 5,  // Ajusta la altura de la caja de texto
                       decoration: InputDecoration(
-                        hintText: 'Escribe tus notas...',
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(color: Colors.white70),
-                      ),
-                      style: TextStyle(color: Colors.white),
+                      hintText: AppLocalizations.of(context)?.translate('write_notes_hint') ?? 'Escribe tus notas...',
+                      border: InputBorder.none,
+                      hintStyle: TextStyle(color: Colors.white70),
+                    ),
+                    style: TextStyle(color: Colors.white),
+
                     ),
                   ],
                 ),
