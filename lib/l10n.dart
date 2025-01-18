@@ -7,7 +7,7 @@ class AppLocalizations {
 
   AppLocalizations(this.locale);
 
-  // Mapa de traducciones para diferentes idiomas
+ // Mapa de traducciones para diferentes idiomas
   static Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'helloWorld': 'Hello World',
@@ -22,6 +22,18 @@ class AppLocalizations {
       'email': 'Email',
       'birthdate': 'Birthdate',
       'confirmPassword': 'Confirm Password',
+      'home': 'Home',
+      'classes_for_day': 'Classes for {day}:',
+      'notification_title': 'Notification',
+      'event_time_message': 'It\'s time for the event: {eventName}',
+      'add_class': 'Add class',
+      'class_name_label': 'Class name',
+      'select_time_label': 'Select time:',
+      'cancel': 'Cancel',
+      'save': 'Save',
+      'subjects_progress': 'Subjects progress:',
+      'notes': 'NOTES',
+      'write_notes_hint': 'Write your notes...',
     },
     'es': {
       'helloWorld': 'Hola Mundo',
@@ -36,6 +48,18 @@ class AppLocalizations {
       'email': 'Correo Electrónico',
       'birthdate': 'Fecha de Nacimiento',
       'confirmPassword': 'Confirmar Contraseña',
+      'home': 'Inicio',
+      'classes_for_day': 'Clases para el {day}:',
+      'notification_title': 'Notificación',
+      'event_time_message': 'Es hora para el evento: {eventName}',
+      'add_class': 'Agregar clase',
+      'class_name_label': 'Nombre de la clase',
+      'select_time_label': 'Selecciona la hora:',
+      'cancel': 'Cancelar',
+      'save': 'Guardar',
+      'subjects_progress': 'Progreso de las asignaturas:',
+      'notes': 'NOTAS',
+      'write_notes_hint': 'Escribe tus notas...',
     },
   };
 

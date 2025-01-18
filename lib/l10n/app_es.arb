@@ -10,6 +10,18 @@
   "email": "Correo Electrónico",
   "birthdate": "Fecha de Nacimiento",
   "confirmPassword": "Confirmar Contraseña",
+  "home": "Inicio",
+  "classes_for_day": "Clases para el {day}:",
+  "notification_title": "Notificación",
+  "event_time_message": "Es hora para el evento: {eventName}",
+  "add_class": "Agregar clase",
+  "class_name_label": "Nombre de la clase",
+  "select_time_label": "Selecciona la hora:",
+  "cancel": "Cancelar",
+  "save": "Guardar",
+  "subjects_progress": "Progreso de las asignaturas:",
+  "notes": "NOTAS",
+  "write_notes_hint": "Escribe tus notas...",
   
   "@login": {
     "description": "Título de la página de inicio de sesión",
@@ -54,6 +66,54 @@
   },
   "@confirmPassword": {
     "description": "Etiqueta para el campo de confirmar contraseña",
+    "type": "text"
+  },
+  "@home": {
+    "description": "Título de la página principal",
+    "type": "text"
+  },
+  "@classes_for_day": {
+    "description": "Texto que muestra las clases del día seleccionado",
+    "type": "text"
+  },
+  "@notification_title": {
+    "description": "Título de la notificación de evento",
+    "type": "text"
+  },
+  "@event_time_message": {
+    "description": "Mensaje para notificar que es hora de un evento",
+    "type": "text"
+  },
+  "@add_class": {
+    "description": "Texto en el botón para agregar clase",
+    "type": "text"
+  },
+  "@class_name_label": {
+    "description": "Etiqueta para el campo de nombre de clase",
+    "type": "text"
+  },
+  "@select_time_label": {
+    "description": "Etiqueta para el selector de hora",
+    "type": "text"
+  },
+  "@cancel": {
+    "description": "Texto para el botón de cancelar",
+    "type": "text"
+  },
+  "@save": {
+    "description": "Texto para el botón de guardar",
+    "type": "text"
+  },
+  "@subjects_progress": {
+    "description": "Texto que muestra el progreso de las asignaturas",
+    "type": "text"
+  },
+  "@notes": {
+    "description": "Título de la sección de notas",
+    "type": "text"
+  },
+  "@write_notes_hint": {
+    "description": "Texto que aparece como sugerencia en el campo de notas",
     "type": "text"
   }
 }
