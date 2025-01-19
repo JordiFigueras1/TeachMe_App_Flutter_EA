@@ -4,6 +4,8 @@ import '../controllers/authController.dart';
 import '../controllers/socketController.dart';
 import '../controllers/connectedUsersController.dart';
 import '../controllers/theme_controller.dart';
+import '../controllers/userModelController.dart';
+import '../screen/notificaciones.dart'; // Asegúrate de que esta ruta sea la correcta
 
 class HomePage extends StatefulWidget {
   @override
@@ -17,6 +19,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final AuthController authController = Get.find<AuthController>();
   final ConnectedUsersController connectedUsersController = Get.find<ConnectedUsersController>();
   final ThemeController themeController = Get.find<ThemeController>();
+  final UserModelController userModelController = Get.find<UserModelController>();
 
   @override
   void initState() {
@@ -81,6 +84,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             onPressed: themeController.toggleTheme,
           ),
           IconButton(
+            icon: const Icon(Icons.notifications), // Ícono de notificaciones
+            onPressed: () {
+              Get.to(() => NotificacionesPage(userId: userModelController.user.value.id));
+            },
+            tooltip: 'Ver notificaciones',
+          ),
+          IconButton(
             icon: const Icon(Icons.person_search), // Ícono de búsqueda de perfiles
             onPressed: () {
               Get.toNamed('/perfil');
@@ -139,11 +149,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: theme.colorScheme.secondary,
-                        child: Icon(
-                          Icons.person,
-                          color: theme.colorScheme.onSecondary,
+                      leading: Hero(
+                        tag: 'user-avatar-$userId', // Asignar un tag único a cada usuario
+                        child: CircleAvatar(
+                          backgroundColor: theme.colorScheme.secondary,
+                          child: Icon(
+                            Icons.person,
+                            color: theme.colorScheme.onSecondary,
+                          ),
                         ),
                       ),
                       title: Text(
@@ -173,6 +186,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0), // Separación del botón de mapa
             child: FloatingActionButton(
+              heroTag: 'programar-clase', // Hero tag único
               onPressed: () => Get.toNamed('/programar_clase'),
               backgroundColor: Theme.of(context).primaryColor,
               child: const Icon(Icons.add),
@@ -181,6 +195,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
           // Botón para ver el mapa
           FloatingActionButton(
+            heroTag: 'ver-mapa', // Hero tag único
             onPressed: () => Get.toNamed('/map'),
             backgroundColor: Theme.of(context).primaryColor,
             child: const Icon(Icons.map),
