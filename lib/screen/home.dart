@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Widgets/todoListWidget.dart';
+import 'package:flutter_application_1/controllers/notificacionController.dart';
+import 'package:flutter_application_1/controllers/userModelController.dart';
 import 'package:flutter_application_1/extensions/HexToColor.dart';
+import 'package:flutter_application_1/screen/notificaciones.dart';
 import 'package:get/get.dart';
 import '../controllers/authController.dart';
 import '../controllers/theme_controller.dart';
@@ -16,6 +19,9 @@ import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../controllers/socketController.dart';
 import '../controllers/connectedUsersController.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -30,9 +36,11 @@ class _HomePageState extends State<HomePage>
   final LocaleController localeController = Get.find<LocaleController>();
   final SocketController socketController = Get.find<SocketController>();
   final AuthController authController = Get.find<AuthController>();
-  final ConnectedUsersController connectedUsersController =
-      Get.find<ConnectedUsersController>();
+  final ConnectedUsersController connectedUsersController = Get.find<ConnectedUsersController>();
   final AudioPlayer _audioPlayer = AudioPlayer();
+  final NotificacionController notificacionController = Get.find<NotificacionController>();
+  final UserModelController userModelController = Get.find<UserModelController>();
+  
 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay = DateTime.now();
@@ -61,6 +69,8 @@ class _HomePageState extends State<HomePage>
         print('Actualización del estado de usuarios: $data');
         connectedUsersController.updateConnectedUsers(List<String>.from(data));
       });
+       // Cargar notificaciones no leídas
+      notificacionController.fetchNotificaciones(authController.getUserId);
     }
 
     _loadEvents();
@@ -162,6 +172,7 @@ class _HomePageState extends State<HomePage>
       socketController.disconnectUser(authController.getUserId);
 
       authController.setUserId('');
+      authController.setToken('');
       connectedUsersController.updateConnectedUsers([]);
     }
 
@@ -342,6 +353,49 @@ class _HomePageState extends State<HomePage>
               }
             },
           ),
+           // Icono de campanita con contador
+            Obx(() {
+            final int notificacionesSinLeer = notificacionController.notificaciones
+                .where((notificacion) => !notificacion.leida)
+                .length;
+
+            return Stack(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.notifications,
+                    color: notificacionesSinLeer > 0 ? Colors.red : theme.iconTheme.color,
+                  ),
+                  onPressed: () {
+                    Get.to(() => NotificacionesPage(userId: userModelController.user.value.id));
+                  },
+                  tooltip: 'Ver notificaciones',
+                ),
+                if (notificacionesSinLeer > 0)
+                  Positioned(
+                    right: 10,
+                    top: 10,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '$notificacionesSinLeer',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
+
+          
           IconButton(
             icon: const Icon(Icons.person_search),
             onPressed: () {
@@ -423,10 +477,14 @@ body: SingleChildScrollView(
                               shape: BoxShape.circle,
                             ),
                           ),
-                          headerStyle: const HeaderStyle(
+                          headerStyle: HeaderStyle(
                             formatButtonVisible: false,
                             titleCentered: true,
-                            titleTextStyle: TextStyle(fontSize: 18),
+                            titleTextStyle: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
                           ),
                           onPageChanged: (focusedDay) {
                             setState(() {
@@ -446,11 +504,12 @@ body: SingleChildScrollView(
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: Text(
                               AppLocalizations.of(context)
-                                      ?.translate('classes_for_day') ??
+                                      ?.translate('classes_for_day') ?? 
                                   'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
-                              style: const TextStyle(
-                                fontSize: 16,
+                              style: GoogleFonts.lora(
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
+                                color: theme.textTheme.bodyLarge?.color,
                               ),
                             ),
                           ),
@@ -459,16 +518,19 @@ body: SingleChildScrollView(
                             physics: NeverScrollableScrollPhysics(),
                             children: (_events[_selectedDay] ?? [])
                                 .map((event) => ListTile(
-                                      title: Text(event),
+                                      title: Text(
+                                        event,
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 16,
+                                          color: theme.textTheme.bodyLarge?.color,
+                                        ),
+                                      ),
                                       trailing: IconButton(
-                                        icon: const Icon(Icons.delete,
-                                            color: Colors.red),
+                                        icon: const Icon(Icons.delete, color: Colors.red),
                                         onPressed: () {
                                           setState(() {
                                             _events[_selectedDay]?.remove(event);
-                                            if (_events[_selectedDay]
-                                                    ?.isEmpty ??
-                                                true) {
+                                            if (_events[_selectedDay]?.isEmpty ?? true) {
                                               _events.remove(_selectedDay);
                                             }
                                           });
@@ -513,7 +575,7 @@ body: SingleChildScrollView(
                 return Center(
                   child: Text(
                     'No hay usuarios conectados.',
-                    style: TextStyle(
+                    style: GoogleFonts.montserrat(
                       fontSize: 16,
                       color: theme.textTheme.bodyLarge?.color,
                     ),
@@ -526,8 +588,7 @@ body: SingleChildScrollView(
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: connectedUsersController.connectedUsers.length,
                 itemBuilder: (context, index) {
-                  final userId =
-                      connectedUsersController.connectedUsers[index];
+                  final userId = connectedUsersController.connectedUsers[index];
                   return Card(
                     margin: const EdgeInsets.only(bottom: 10),
                     elevation: 4,
@@ -544,14 +605,17 @@ body: SingleChildScrollView(
                       ),
                       title: Text(
                         'ID: $userId',
-                        style: theme.textTheme.bodyLarge?.copyWith(
+                        style: GoogleFonts.lora(
                           fontWeight: FontWeight.bold,
                           color: theme.textTheme.bodyLarge?.color,
                         ),
                       ),
                       subtitle: Text(
                         'Estado: Conectado',
-                        style: theme.textTheme.bodyMedium,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          color: theme.textTheme.bodyMedium?.color,
+                        ),
                       ),
                     ),
                   );
@@ -583,9 +647,12 @@ body: SingleChildScrollView(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                AppLocalizations.of(context)?.translate('subjects_progress') ??
-                    'Progreso de las asignaturas:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                AppLocalizations.of(context)?.translate('subjects_progress') ?? 'Progreso de las asignaturas:',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: theme.textTheme.bodyLarge?.color,
+                ),
               ),
               SizedBox(height: 8),
               Column(
@@ -611,26 +678,6 @@ floatingActionButton: Column(
         backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(Icons.add),
         tooltip: 'Programar Clase',
-      ),
-    ),
-    
-    // Botón para ver el mapa
-    FloatingActionButton(
-      onPressed: () => Get.toNamed('/map'),
-      backgroundColor: Theme.of(context).primaryColor,
-      child: const Icon(Icons.map),
-      tooltip: 'Ver Mapa',
-    ),
-    
-    // Botón para el chat general
-    Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: FloatingActionButton(
-        heroTag: 'chat-general', // Hero tag único para el chat general
-        onPressed: () => Get.toNamed('/chat-general'),
-        backgroundColor: Theme.of(context).primaryColor,
-        child: const Icon(Icons.chat),
-        tooltip: 'Chat General',
       ),
     ),
   ],

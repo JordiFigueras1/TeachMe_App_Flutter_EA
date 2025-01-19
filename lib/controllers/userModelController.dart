@@ -3,9 +3,8 @@ import '../models/userModel.dart';
 import '../models/asignaturaModel.dart';
 import '../models/clase.dart';
 import '../models/review.dart';
-import 'authController.dart';
+import 'authController.dart'; // Asegúrate de que esta línea sea correcta
 import 'package:dio/dio.dart' as dio;
-import '../services/notificacionService.dart';
 
 class UserModelController extends GetxController {
   final user = UserModel(
@@ -20,11 +19,9 @@ class UserModelController extends GetxController {
     isAdmin: false,
   ).obs;
 
-  final AuthController authController = Get.find<AuthController>();
-  final NotificacionService notificacionService = NotificacionService();
+  var isLoading = false.obs; // Variable para gestionar estados de carga
 
-  var isLoading = false.obs;
-
+  // Método para actualizar los datos del usuario
   void setUser({
     required String id,
     required String name,
@@ -102,18 +99,26 @@ class UserModelController extends GetxController {
         }
       }
     });
-    printUserData();
+    printUserData(); // Para depuración
   }
 
+  // Método para obtener el historial de clases del usuario actual
   Future<void> fetchHistorialClases(String userId) async {
     isLoading(true);
     try {
+      final authController = Get.find<AuthController>();
       final dio.Dio dioClient = dio.Dio();
+
+      // Añadir el token al encabezado
       dioClient.options.headers['auth-token'] = authController.getToken;
 
+      // Realizar la solicitud al servidor
       final response = await dioClient.get('http://localhost:3000/api/clases/$userId/alumno');
+
+      // Parsear los datos de las clases
       final clasesData = (response.data as List).map((clase) => ClaseModel.fromJson(clase)).toList();
 
+      // Actualizar el modelo del usuario con el historial de clases
       user.update((val) {
         if (val != null) {
           val.historialClases = clasesData;
@@ -126,90 +131,30 @@ class UserModelController extends GetxController {
     }
   }
 
-  Future<bool> crearReview(Map<String, dynamic> reviewData) async {
-    isLoading(true);
-    try {
-      final dio.Dio dioClient = dio.Dio();
-      dioClient.options.headers['auth-token'] = authController.getToken;
-
-      final response = await dioClient.post(
-        'http://localhost:3000/api/reviews/',
-        data: reviewData,
-      );
-
-      if (response.statusCode == 201) {
-        print('Review creada con éxito: ${response.data}');
-
-        final profesorId = reviewData['profesorId'] ?? '';
-        if (profesorId.isNotEmpty) {
-          await notificacionService.crearNotificacion(
-            profesorId,
-            'Has recibido una nueva review.',
-          ).then((_) {
-            print('Notificación enviada al profesor.');
-          }).catchError((e) {
-            print('Error al enviar notificación al profesor: $e');
-          });
-        }
-        return true;
-      } else {
-        print('Error al crear la review: ${response.data}');
-        return false;
-      }
-    } catch (e) {
-      print('Error al crear la review: $e');
-      return false;
-    } finally {
-      isLoading(false);
-    }
-  }
-
-Future<bool> programarClase(Map<String, dynamic> claseData) async {
+Future<bool> crearReview(Map<String, dynamic> reviewData) async {
   isLoading(true);
   try {
+    final authController = Get.find<AuthController>();
     final dio.Dio dioClient = dio.Dio();
+
+    // Añadir el token al encabezado
     dioClient.options.headers['auth-token'] = authController.getToken;
 
-    print('Intentando programar clase con datos: $claseData');
-
+    // Realizar la solicitud POST al servidor con el mapa
     final response = await dioClient.post(
-      'http://localhost:3000/api/clases/',
-      data: claseData,
+      'http://localhost:3000/api/reviews/',
+      data: reviewData,
     );
 
     if (response.statusCode == 201) {
-      print('Clase programada con éxito: ${response.data}');
-
-      // Crear notificaciones sin tanta lógica condicional
-      final List<Map<String, String>> notificaciones = [
-        {
-          'userId': claseData['profesorId']!,
-          'descripcion': 'Tienes una nueva clase programada.',
-        },
-        {
-          'userId': claseData['alumnoId']!,
-          'descripcion': 'Has programado una nueva clase.',
-        },
-      ];
-
-      for (var notificacion in notificaciones) {
-        await notificacionService.crearNotificacion(
-          notificacion['userId']!,
-          notificacion['descripcion']!,
-        ).then((_) {
-          print('Notificación enviada a ${notificacion['userId']}');
-        }).catchError((e) {
-          print('Error al enviar notificación a ${notificacion['userId']}: $e');
-        });
-      }
-
+      print('Review creada con éxito: ${response.data}');
       return true;
     } else {
-      print('Error al programar la clase: ${response.data}');
+      print('Error al crear la review: ${response.data}');
       return false;
     }
   } catch (e) {
-    print('Error al programar la clase: $e');
+    print('Error al crear la review: $e');
     return false;
   } finally {
     isLoading(false);
@@ -217,19 +162,63 @@ Future<bool> programarClase(Map<String, dynamic> claseData) async {
 }
 
 
+  Future<bool> programarClase(Map<String, dynamic> claseData) async {
+    isLoading(true);
+    try {
+      final authController = Get.find<AuthController>();
+      final dio.Dio dioClient = dio.Dio();
+
+      // Añadir el token al encabezado
+      dioClient.options.headers['auth-token'] = authController.getToken;
+
+      // Realizar la solicitud al servidor
+      final response = await dioClient.post(
+        'http://localhost:3000/api/clases/',
+        data: claseData,
+      );
+
+      if (response.statusCode == 201) {
+        print('Clase programada con éxito: ${response.data}');
+        return true;
+      } else {
+        print('Error al programar la clase: ${response.data}');
+        return false;
+      }
+    } catch (e) {
+      print('Error al programar la clase: $e');
+      return false;
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  // Método para obtener las reviews del profesor actual
   Future<void> fetchReviews(String profesorId) async {
     isLoading(true);
     try {
+      final authController = Get.find<AuthController>();
       final dio.Dio dioClient = dio.Dio();
+
+      // Añadir el token al encabezado
       dioClient.options.headers['auth-token'] = authController.getToken;
 
-      final response = await dioClient.get('http://localhost:3000/api/reviews/profesor/$profesorId');
-      final reviewsData = (response.data as List).map((review) => ReviewModel.fromJson(review)).toList();
+      // Realizar la petición al servidor
+      final response = await dioClient.get(
+        'http://localhost:3000/api/reviews/profesor/$profesorId',
+      );
 
+      // Parsear la lista de reviews
+      final reviewsData = (response.data as List)
+          .map((review) => ReviewModel.fromJson(review))
+          .toList();
+
+      // Calcular media de valoraciones
       final mediaValoraciones = reviewsData.isNotEmpty
-          ? reviewsData.map((r) => r.puntuacion).reduce((a, b) => a + b) / reviewsData.length
+          ? reviewsData.map((r) => r.puntuacion).reduce((a, b) => a + b) /
+              reviewsData.length
           : null;
 
+      // Actualizar los datos del usuario
       user.update((val) {
         if (val != null) {
           val.reviews = reviewsData;
@@ -243,6 +232,7 @@ Future<bool> programarClase(Map<String, dynamic> claseData) async {
     }
   }
 
+  // Método para depuración
   void printUserData() {
     print('User Data -> ${user.value.toJson()}');
   }

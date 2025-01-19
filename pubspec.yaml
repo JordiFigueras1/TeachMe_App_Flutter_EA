@@ -38,6 +38,7 @@ dependencies:
   fl_chart: ^0.70.0
   flutter_colorpicker: ^1.0.3
   multi_select_flutter: ^4.0.0
+  google_fonts: ^4.0.3
 
 
 dev_dependencies:
