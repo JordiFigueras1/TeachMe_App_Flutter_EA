@@ -99,7 +99,7 @@ class SocketController extends GetxController {
     // Crear notificación para el receptor del mensaje
     notificacionService.crearNotificacion(
       receiverId,
-      'Has recibido un nuevo mensaje de $senderName',
+      'Has recibido un nuevo mensaje.',
     ).then((_) {
       print('Notificación creada para el usuario $receiverId');
     }).catchError((error) {
