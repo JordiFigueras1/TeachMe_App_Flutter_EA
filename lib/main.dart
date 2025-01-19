@@ -5,6 +5,8 @@ import '../screen/logIn.dart';
 import '../screen/register.dart';
 import '../screen/user.dart';
 import '../screen/home.dart';
+import '../screen/chatGeneral.dart'; // Cambia la ruta según la ubicación real
+import '../screen/programar_clase.dart';
 import '../screen/settings_general.dart'; // Importa la pantalla de configuración general
 import '../screen/settings_asignaturas.dart'; // Importa la pantalla de configuración de asignaturas
 import '../controllers/authController.dart';
@@ -18,10 +20,13 @@ import '../controllers/socketController.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/localeController.dart'; // Asegúrate de tener el LocaleController
 import '../screen/mapPage.dart';
+import '../screen/notificaciones.dart'; // Asegúrate de que esta ruta es correcta
 import '../screen/roleSelectionPage.dart'; // Importa tu pantalla de selección de rol
+import '../screen/notificaciones.dart'; // Importa la pantalla de notificaciones
 import '../controllers/asignaturaController.dart'; // Importa el controlador de asignaturas
 import 'l10n.dart'; // Asegúrate de tener esta clase generada
 import 'package:flutter_localizations/flutter_localizations.dart'; // Importa las localizaciones globales
+import '../controllers/notificacionController.dart'; // Asegúrate de importar el controlador
 
 void main() {
   // Inicializa los controladores
@@ -29,6 +34,7 @@ void main() {
   Get.put<UserListController>(UserListController());
   Get.put<UserModelController>(UserModelController());
   Get.put(ConnectedUsersController());
+  Get.put(NotificacionController()); // Registra el controlador de notificaciones
   Get.put(SocketController());
   Get.put(ThemeController()); // Registrar el controlador del tema
   Get.put(LocaleController()); // Registrar el controlador de locales
@@ -91,6 +97,14 @@ class MyApp extends StatelessWidget {
             page: () => PerfilPage(),
           ),
           GetPage(
+            name: '/chat-general',
+            page: () => const ChatGeneralPage(),
+          ),
+          GetPage(
+            name: '/notificaciones',
+            page: () => NotificacionesPage(userId: Get.arguments['userId']),
+          ),
+          GetPage(
             name: '/chat',
             page: () => ChatPage(
               receiverId: Get.arguments['receiverId'],
@@ -111,8 +125,16 @@ class MyApp extends StatelessWidget {
             page: () => SettingsGeneralPage(),
           ),
           GetPage(
+            name: '/programar_clase',
+            page: () => ProgramarClasePage(),
+          ),
+          GetPage(
             name: '/settings_asignaturas',
             page: () => SettingsAsignaturasPage(),
+          ),
+          GetPage(
+            name: '/notificaciones',
+            page: () => NotificacionesPage(userId: Get.arguments['userId']),
           ),
         ],
 
