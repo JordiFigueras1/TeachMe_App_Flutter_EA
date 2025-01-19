@@ -48,13 +48,19 @@ class _ProgramarClasePageState extends State<ProgramarClasePage> {
         'descripcion': descripcion,
         'fecha': fechaHoraInicio!.toIso8601String(),
         'duracion': duracion,
-        'profesor': userModelController.user.value.id,
-        'alumno': selectedAlumnoId,
+        'profesorId': userModelController.user.value.id,
+        'alumnoId': selectedAlumnoId,
       };
 
       final success = await userModelController.programarClase(claseData);
 
       if (success) {
+        // Enviar notificación para la clase programada
+        await userModelController.notificacionService.crearNotificacion(
+          selectedAlumnoId!,
+          'Se ha programado una clase nueva.',
+        );
+
         Get.back();
         Get.snackbar('Éxito', 'Clase programada correctamente.');
       } else {
@@ -128,6 +134,16 @@ class _ProgramarClasePageState extends State<ProgramarClasePage> {
       final success = await userModelController.crearReview(reviewData);
 
       if (success) {
+        // Cambiar el ID del receptor de la notificación a la persona adecuada
+        final profesorId = userModelController.user.value.isProfesor
+            ? userModelController.user.value.id
+            : claseId; // Ajustar según la lógica de clase
+
+        await userModelController.notificacionService.crearNotificacion(
+          profesorId,
+          'Has creado una nueva review.',
+        );
+
         Get.snackbar('Éxito', 'Review creada correctamente.');
         userModelController.fetchHistorialClases(userModelController.user.value.id);
       } else {

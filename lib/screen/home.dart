@@ -5,6 +5,7 @@ import '../controllers/socketController.dart';
 import '../controllers/connectedUsersController.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/userModelController.dart';
+import '../controllers/notificacionController.dart'; // Importar el controlador de notificaciones
 import '../screen/notificaciones.dart'; // Asegúrate de que esta ruta sea la correcta
 
 class HomePage extends StatefulWidget {
@@ -20,6 +21,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final ConnectedUsersController connectedUsersController = Get.find<ConnectedUsersController>();
   final ThemeController themeController = Get.find<ThemeController>();
   final UserModelController userModelController = Get.find<UserModelController>();
+  final NotificacionController notificacionController = Get.find<NotificacionController>();
 
   @override
   void initState() {
@@ -40,6 +42,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         print('Actualización del estado de usuarios: $data');
         connectedUsersController.updateConnectedUsers(List<String>.from(data));
       });
+
+      // Cargar notificaciones no leídas
+      notificacionController.fetchNotificaciones(authController.getUserId);
     }
   }
 
@@ -83,13 +88,46 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ),
             onPressed: themeController.toggleTheme,
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications), // Ícono de notificaciones
-            onPressed: () {
-              Get.to(() => NotificacionesPage(userId: userModelController.user.value.id));
-            },
-            tooltip: 'Ver notificaciones',
-          ),
+          Obx(() {
+            final int notificacionesSinLeer = notificacionController.notificaciones
+                .where((notificacion) => !notificacion.leida)
+                .length;
+
+            return Stack(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.notifications,
+                    color: notificacionesSinLeer > 0 ? Colors.red : theme.iconTheme.color,
+                  ),
+                  onPressed: () {
+                    Get.to(() => NotificacionesPage(userId: userModelController.user.value.id));
+                  },
+                  tooltip: 'Ver notificaciones',
+                ),
+                if (notificacionesSinLeer > 0)
+                  Positioned(
+                    right: 10,
+                    top: 10,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '$notificacionesSinLeer',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
           IconButton(
             icon: const Icon(Icons.person_search), // Ícono de búsqueda de perfiles
             onPressed: () {
