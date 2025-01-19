@@ -7,15 +7,23 @@ import '../controllers/connectedUsersController.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/userModelController.dart';
 import '../models/userModel.dart';
-import '../screen/chat.dart'; // Asegúrate de importar la página de chat
+import '../screen/chat.dart';
 
-class MapPage extends StatelessWidget {
+class MapPage extends StatefulWidget {
+  @override
+  _MapPageState createState() => _MapPageState();
+}
+
+class _MapPageState extends State<MapPage> {
   final UserListController userListController = Get.put(UserListController());
   final ConnectedUsersController connectedUsersController =
       Get.find<ConnectedUsersController>();
   final ThemeController themeController = Get.find<ThemeController>();
   final UserModelController userModelController =
       Get.find<UserModelController>();
+
+  double _zoom = 13.0;
+  MapController _mapController = MapController(); // Agregar MapController
 
   @override
   Widget build(BuildContext context) {
@@ -68,17 +76,63 @@ class MapPage extends StatelessWidget {
 
         final initialLatLng = markers.first.point;
 
-        return FlutterMap(
-          options: MapOptions(
-            center: initialLatLng,
-            zoom: 13.0,
-          ),
+        return Stack(
           children: [
-            TileLayer(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: ['a', 'b', 'c'],
+            FlutterMap(
+              mapController: _mapController, // Asigna el MapController
+              options: MapOptions(
+                center: initialLatLng,
+                zoom: _zoom,
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate:
+                      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  subdomains: ['a', 'b', 'c'],
+                ),
+                MarkerLayer(markers: markers),
+              ],
             ),
-            MarkerLayer(markers: markers),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        if (_zoom < 18) {
+                          _zoom++;
+                          _mapController.move(_mapController.center,
+                              _zoom); // Actualiza el zoom
+                        }
+                      });
+                    },
+                    heroTag: null,
+                    child: Icon(Icons.zoom_in),
+                    backgroundColor:
+                        isDarkMode ? Colors.blue : Colors.blueAccent,
+                  ),
+                  const SizedBox(height: 8),
+                  FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        if (_zoom > 1) {
+                          _zoom--;
+                          _mapController.move(_mapController.center,
+                              _zoom); // Actualiza el zoom
+                        }
+                      });
+                    },
+                    heroTag: null,
+                    child: Icon(Icons.zoom_out),
+                    backgroundColor:
+                        isDarkMode ? Colors.blue : Colors.blueAccent,
+                  ),
+                ],
+              ),
+            ),
           ],
         );
       }),
