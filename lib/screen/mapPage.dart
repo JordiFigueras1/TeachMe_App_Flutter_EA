@@ -5,13 +5,17 @@ import 'package:get/get.dart';
 import '../controllers/userListController.dart';
 import '../controllers/connectedUsersController.dart';
 import '../controllers/theme_controller.dart';
+import '../controllers/userModelController.dart';
 import '../models/userModel.dart';
+import '../screen/chat.dart'; // Asegúrate de importar la página de chat
 
 class MapPage extends StatelessWidget {
   final UserListController userListController = Get.put(UserListController());
   final ConnectedUsersController connectedUsersController =
       Get.find<ConnectedUsersController>();
   final ThemeController themeController = Get.find<ThemeController>();
+  final UserModelController userModelController =
+      Get.find<UserModelController>();
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +37,6 @@ class MapPage extends StatelessWidget {
         ],
       ),
       body: Obx(() {
-        // Observar usuarios conectados dinámicamente
         final connectedUsers = connectedUsersController.connectedUsers;
 
         if (connectedUsers.isEmpty) {
@@ -46,17 +49,14 @@ class MapPage extends StatelessWidget {
           );
         }
 
-        // Filtrar los usuarios logueados con coordenadas válidas
         final usersAtLocations = userListController.userList
             .where((user) => connectedUsers.contains(user.id))
             .toList();
 
         final groupedUsers = _groupUsersByLocation(usersAtLocations);
-
         final markers =
             _generateMarkersForGroupedUsers(groupedUsers, isDarkMode);
 
-        // Si no hay marcadores válidos, mostrar mensaje
         if (markers.isEmpty) {
           return const Center(
             child: Text(
@@ -91,9 +91,7 @@ class MapPage extends StatelessWidget {
     for (var user in users) {
       String key =
           '${user.lat.toStringAsFixed(5)},${user.lng.toStringAsFixed(5)}';
-      if (!groupedUsers.containsKey(key)) {
-        groupedUsers[key] = [];
-      }
+      groupedUsers.putIfAbsent(key, () => []);
       groupedUsers[key]!.add(user);
     }
 
@@ -176,9 +174,41 @@ class MapPage extends StatelessWidget {
                       color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
+                  subtitle: Text(
+                    ' ${_getUserRole(user)}',
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.info,
+                          color: isDarkMode ? Colors.blue : Colors.green,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context); // Cierra el popup de usuarios
+                          _showUserDetails(context, user, isDarkMode);
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.chat,
+                          color: isDarkMode ? Colors.blue : Colors.green,
+                        ),
+                        onPressed: () {
+                          _startChatWithUser(context, user);
+                        },
+                      ),
+                    ],
+                  ),
                   onTap: () {
-                    Navigator.pop(context);
-                    _showUserDetails(context, user, isDarkMode);
+                    Navigator.pop(context); // Cierra el popup
+                    _showUserDetails(context, user,
+                        isDarkMode); // Muestra el popup de detalles
                   },
                 );
               }).toList(),
@@ -190,36 +220,91 @@ class MapPage extends StatelessWidget {
   }
 
   void _showUserDetails(BuildContext context, UserModel user, bool isDarkMode) {
-    showModalBottomSheet(
+    showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          color: isDarkMode ? Colors.black87 : Colors.white,
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        return AlertDialog(
+          backgroundColor: isDarkMode ? Colors.black87 : Colors.white,
+          title: Text(
+            'Detalles de ${user.name}',
+            style: TextStyle(
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
+          ),
+          content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Detalles de ${user.name}',
+                'Nombre: ${user.name}',
                 style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Correo: ${user.mail}',
-                style: TextStyle(
-                  fontSize: 16.0,
                   color: isDarkMode ? Colors.white70 : Colors.black87,
                 ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                'Email: ${user.mail}',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                ' ${_getUserRole(user)}',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Disponibilidad:',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              ...?user.disponibilidad?.map((slot) => Text(
+                        '${slot['dia']} - ${slot['turno']}',
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.white70 : Colors.black87,
+                        ),
+                      )) ??
+                  [],
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cerrar'),
+            ),
+          ],
         );
       },
     );
+  }
+
+  void _startChatWithUser(BuildContext context, UserModel user) {
+    // Aquí puedes implementar la lógica para abrir el chat con el usuario.
+    Get.snackbar(
+      'Chat iniciado',
+      'Iniciando chat con ${user.name}',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+
+    // Navegar a la página de chat
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              ChatPage(receiverId: user.id, receiverName: user.name)),
+    );
+  }
+
+  String _getUserRole(UserModel user) {
+    if (user.isProfesor) return 'Profesor';
+    if (user.isAlumno) return 'Alumno';
+    return 'Sin rol';
   }
 }
