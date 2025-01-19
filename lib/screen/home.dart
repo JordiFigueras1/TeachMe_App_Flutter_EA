@@ -201,6 +201,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             child: const Icon(Icons.map),
             tooltip: 'Ver Mapa',
           ),
+          const SizedBox(height: 8),
+          // Botón para el chat general
+          FloatingActionButton(
+            heroTag: 'chat-general', // Hero tag único para el chat general
+            onPressed: () => Get.toNamed('/chat-general'),
+            backgroundColor: Theme.of(context).primaryColor,
+            child: const Icon(Icons.chat),
+            tooltip: 'Chat General',
+          ),
         ],
       ),
     );
