@@ -356,189 +356,273 @@ class _HomePageState extends State<HomePage>
           ),
         ],
       ),
-      body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: LayoutBuilder(builder: (context, constraints) {
-            double width = constraints.maxWidth;
-            double height = constraints.maxHeight;
-            return Row(children: [
-              Flexible(
-                  flex: 6,
+body: SingleChildScrollView(
+  padding: const EdgeInsets.all(8.0), // Reducido el padding general
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // Sección del calendario y eventos
+      Container(
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(12.0), // Bordes ajustados
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6.0, // Sombra menos prominente
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(12.0), // Reducido el padding del contenedor
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Fila con el calendario, clases para el día y TodoList
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Calendario
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.45, // Más estrecho
+                  child: GestureDetector(
+                    onDoubleTap: () {
+                      if (_selectedDay != null) {
+                        _showAddEventDialog(context);
+                      }
+                    },
+                    child: TableCalendar(
+                      locale: 'es_ES',
+                      firstDay: DateTime(2000),
+                      lastDay: DateTime(2100),
+                      focusedDay: _focusedDay,
+                      selectedDayPredicate: (day) {
+                        return isSameDay(_selectedDay, day);
+                      },
+                      onDaySelected: (selectedDay, focusedDay) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                        });
+                      },
+                      eventLoader: (day) => _events[day] ?? [],
+                      calendarStyle: CalendarStyle(
+                        selectedDecoration: BoxDecoration(
+                          color: Colors.blueAccent,
+                          shape: BoxShape.circle,
+                        ),
+                        todayDecoration: BoxDecoration(
+                          color: Colors.orangeAccent,
+                          shape: BoxShape.circle,
+                        ),
+                        markerDecoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      headerStyle: const HeaderStyle(
+                        formatButtonVisible: false,
+                        titleCentered: true,
+                        titleTextStyle: TextStyle(fontSize: 16), // Texto más pequeño
+                      ),
+                      onPageChanged: (focusedDay) {
+                        setState(() {
+                          _focusedDay = focusedDay;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12), // Reducido el espacio entre columnas
+                // Contenedor de "Clases para el día" + TodoList al lado
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Contenedor con bordes redondeados y sombra para el calendario
-                      Container(
-                        decoration: BoxDecoration(
-                          color: theme.cardColor,
-                          borderRadius: BorderRadius.circular(16.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 8.0,
-                              offset: Offset(0, 4), // Sombra sutil
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(16.0),
-                        margin: const EdgeInsets.only(
-                            bottom: 16.0), // Margen para espaciar el calendario
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: MediaQuery.of(context).size.width * 0.5,
-                              child: GestureDetector(
-                                onDoubleTap: () {
-                                  if (_selectedDay != null) {
-                                    _showAddEventDialog(context);
-                                  }
-                                },
-                                child: TableCalendar(
-                                  locale:
-                                      'es_ES', // Configurar el calendario en español
-                                  firstDay: DateTime(2000),
-                                  lastDay: DateTime(2100),
-                                  focusedDay: _focusedDay,
-                                  selectedDayPredicate: (day) {
-                                    return isSameDay(_selectedDay, day);
-                                  },
-                                  onDaySelected: (selectedDay, focusedDay) {
-                                    setState(() {
-                                      _selectedDay = selectedDay;
-                                      _focusedDay = focusedDay;
-                                    });
-                                  },
-                                  eventLoader: (day) => _events[day] ?? [],
-                                  calendarStyle: CalendarStyle(
-                                    selectedDecoration: BoxDecoration(
-                                      color: Colors.blueAccent,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    todayDecoration: BoxDecoration(
-                                      color: Colors.orangeAccent,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    markerDecoration: BoxDecoration(
-                                      color: Colors.redAccent,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  headerStyle: const HeaderStyle(
-                                    formatButtonVisible: false,
-                                    titleCentered: true,
-                                    titleTextStyle: TextStyle(fontSize: 18),
-                                  ),
-                                  onPageChanged: (focusedDay) {
-                                    setState(() {
-                                      _focusedDay = focusedDay;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 8.0),
-                                    child: Text(
-                                      AppLocalizations.of(context)
-                                              ?.translate('classes_for_day') ??
-                                          'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  ListView(
-                                    shrinkWrap: true,
-                                    children: (_events[_selectedDay] ?? [])
-                                        .map((event) => ListTile(
-                                              title: Text(event),
-                                              trailing: IconButton(
-                                                icon: const Icon(Icons.delete,
-                                                    color: Colors.red),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    _events[_selectedDay]
-                                                        ?.remove(event);
-                                                    if (_events[_selectedDay]
-                                                            ?.isEmpty ??
-                                                        true) {
-                                                      _events
-                                                          .remove(_selectedDay);
-                                                    }
-                                                  });
-                                                  _saveEvents();
-                                                },
-                                              ),
-                                            ))
-                                        .toList(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6.0), // Espaciado más pequeño
+                        child: Text(
+                          AppLocalizations.of(context)
+                                  ?.translate('classes_for_day') ??
+                              'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
+                          style: const TextStyle(
+                            fontSize: 14, // Fuente más pequeña
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-
-                      // Contenedor con bordes redondeados y sombra para los gráficos de progreso
-                      Container(
-                        decoration: BoxDecoration(
-                          color: theme.cardColor,
-                          borderRadius: BorderRadius.circular(16.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 8.0,
-                              offset: Offset(0, 4), // Sombra sutil
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            SizedBox(height: 24),
-                            Text(
-                              AppLocalizations.of(context)
-                                      ?.translate('subjects_progress') ??
-                                  'Progreso de las asignaturas:',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(height: 16),
-                            Column(
-                              children: _buildProgressCharts(),
-                            ),
-                          ],
-                        ),
+                      ListView(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        children: (_events[_selectedDay] ?? [])
+                            .map((event) => ListTile(
+                                  title: Text(
+                                    event,
+                                    style: const TextStyle(fontSize: 14), // Fuente más pequeña
+                                  ),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.delete,
+                                        color: Colors.red),
+                                    onPressed: () {
+                                      setState(() {
+                                        _events[_selectedDay]?.remove(event);
+                                        if (_events[_selectedDay]
+                                                ?.isEmpty ??
+                                            true) {
+                                          _events.remove(_selectedDay);
+                                        }
+                                      });
+                                      _saveEvents();
+                                    },
+                                  ),
+                                ))
+                            .toList(),
                       ),
                     ],
-                  )),
-              Flexible(
-                flex: 4, // Esto define el 40% del espacio disponible
-                child: Container(
-                  color: "#0176ff".toColor(opacity: 0.4),
-                  child: Center(
-                    child: TodoListWidget(date: _selectedDay),
                   ),
                 ),
+                // TodoList al lado derecho
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.23, // Reducido el ancho
+                  child: TodoListWidget(date: _selectedDay),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      // Reducido el espacio entre secciones
+
+      // Progreso de asignaturas
+      Container(
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(12.0), // Bordes ajustados
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6.0,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(8.0), // Reducido el padding del contenedor
+        margin: const EdgeInsets.only(bottom: 8.0), // Reducido el margen inferior
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)
+                      ?.translate('subjects_progress') ??
+                  'Progreso de las asignaturas:',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 4),
+
+            Column(
+              children: _buildProgressCharts(),
+            ),
+          ],
+        ),
+      ),
+
+      // Lista de usuarios conectados
+      Container(
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(12.0), // Bordes ajustados
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6.0,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(12.0), // Reducido el padding
+        child: Obx(() {
+          if (connectedUsersController.connectedUsers.isEmpty) {
+            return Center(
+              child: Text(
+                'No hay usuarios conectados.',
+                style: TextStyle(
+                  fontSize: 14, // Fuente más pequeña
+                  color: theme.textTheme.bodyLarge?.color,
+                ),
               ),
-            ]);
-          })),
-    );
-  }
-}
-                   
-                  
-                
-                
-                    
-                    
-                  
-                
-   
+            );
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: connectedUsersController.connectedUsers.length,
+            itemBuilder: (context, index) {
+              final userId =
+                  connectedUsersController.connectedUsers[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 8), // Espacio reducido
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: theme.colorScheme.secondary,
+                    child: Icon(
+                      Icons.person,
+                      color: theme.colorScheme.onSecondary,
+                    ),
+                  ),
+                  title: Text(
+                    'ID: $userId',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14, // Fuente más pequeña
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Estado: Conectado',
+                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
+                  ),
+                ),
+              );
+            },
+          );
+        }),
+      ),
+    ],
+  ),
+),
+
+
+// Botones flotantes
+floatingActionButton: Column(
+  mainAxisSize: MainAxisSize.min,
+  mainAxisAlignment: MainAxisAlignment.end,
+  children: [
+    Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: FloatingActionButton(
+        onPressed: () => Get.toNamed('/programar_clase'),
+        backgroundColor: Theme.of(context).primaryColor,
+        child: const Icon(Icons.add),
+        tooltip: 'Programar Clase',
+      ),
+    ),
+    FloatingActionButton(
+      onPressed: () => Get.toNamed('/map'),
+      backgroundColor: Theme.of(context).primaryColor,
+      child: const Icon(Icons.map),
+      tooltip: 'Ver Mapa',
+    ),
+  ],
+),
+
+);
+
+
+    
+    
+  }}
