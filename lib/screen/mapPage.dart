@@ -23,8 +23,8 @@ class _MapPageState extends State<MapPage> {
       Get.find<UserModelController>();
 
   double _zoom = 13.0;
-  MapController _mapController = MapController(); // Agregar MapController
-  String selectedRole = 'Todos'; // Agregar variable para el filtro
+  MapController _mapController = MapController();
+  String selectedRole = 'Todos';
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +103,7 @@ class _MapPageState extends State<MapPage> {
         return Stack(
           children: [
             FlutterMap(
-              mapController: _mapController, // Asigna el MapController
+              mapController: _mapController,
               options: MapOptions(
                 center: initialLatLng,
                 zoom: _zoom,
@@ -128,8 +128,7 @@ class _MapPageState extends State<MapPage> {
                       setState(() {
                         if (_zoom < 18) {
                           _zoom++;
-                          _mapController.move(_mapController.center,
-                              _zoom); // Actualiza el zoom
+                          _mapController.move(_mapController.center, _zoom);
                         }
                       });
                     },
@@ -144,8 +143,7 @@ class _MapPageState extends State<MapPage> {
                       setState(() {
                         if (_zoom > 1) {
                           _zoom--;
-                          _mapController.move(_mapController.center,
-                              _zoom); // Actualiza el zoom
+                          _mapController.move(_mapController.center, _zoom);
                         }
                       });
                     },
@@ -238,19 +236,33 @@ class _MapPageState extends State<MapPage> {
 
   void _showUsersAtLocationDetails(
       BuildContext context, List<UserModel> users, bool isDarkMode) {
+    // Colores personalizados para este popup
+    final Color backgroundColor =
+        isDarkMode ? Color(0xFF0D1B2A) : Color(0xFFEAF6FF);
+    final Color titleColor = isDarkMode ? Color(0xFF84A9C0) : Color(0xFF0D3B66);
+    final Color textColor = isDarkMode ? Color(0xFFB8D8E7) : Color(0xFF0D1B2A);
+    final Color secondaryTextColor =
+        isDarkMode ? Color(0xFF5A768A) : Color(0xFF5C6F81);
+    final Color buttonColor =
+        isDarkMode ? Color(0xFF1E5F74) : Color(0xFF007EA7);
+
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return Container(
-          color: isDarkMode ? Colors.black87 : Colors.white,
+          color: backgroundColor,
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Usuarios en esta ubicación:',
-                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: titleColor,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 10),
               ...users.map((user) {
@@ -259,14 +271,14 @@ class _MapPageState extends State<MapPage> {
                     user.name,
                     style: TextStyle(
                       fontSize: 16.0,
-                      color: isDarkMode ? Colors.white : Colors.black,
+                      color: textColor,
                     ),
                   ),
                   subtitle: Text(
                     ' ${_getUserRole(user)}',
                     style: TextStyle(
                       fontSize: 14.0,
-                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                      color: secondaryTextColor,
                     ),
                   ),
                   trailing: Row(
@@ -275,7 +287,7 @@ class _MapPageState extends State<MapPage> {
                       IconButton(
                         icon: Icon(
                           Icons.info,
-                          color: isDarkMode ? Colors.blue : Colors.green,
+                          color: buttonColor,
                         ),
                         onPressed: () {
                           Navigator.pop(context); // Cierra el popup de usuarios
@@ -285,7 +297,7 @@ class _MapPageState extends State<MapPage> {
                       IconButton(
                         icon: Icon(
                           Icons.chat,
-                          color: isDarkMode ? Colors.blue : Colors.green,
+                          color: buttonColor,
                         ),
                         onPressed: () {
                           _startChatWithUser(context, user);
@@ -308,15 +320,30 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _showUserDetails(BuildContext context, UserModel user, bool isDarkMode) {
+    // Colores personalizados
+    final Color backgroundColor =
+        isDarkMode ? Color(0xFF0D1B2A) : Color(0xFFEAF6FF);
+    final Color titleColor = isDarkMode ? Color(0xFF84A9C0) : Color(0xFF0D3B66);
+    final Color textColor = isDarkMode ? Color(0xFFB8D8E7) : Color(0xFF0D1B2A);
+    final Color secondaryTextColor =
+        isDarkMode ? Color(0xFF5A768A) : Color(0xFF5C6F81);
+    final Color buttonColor =
+        isDarkMode ? Color(0xFF1E5F74) : Color(0xFF007EA7);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: isDarkMode ? Colors.black87 : Colors.white,
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
           title: Text(
             'Detalles de ${user.name}',
             style: TextStyle(
-              color: isDarkMode ? Colors.white : Colors.black,
+              color: titleColor,
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
             ),
           ),
           content: Column(
@@ -324,53 +351,125 @@ class _MapPageState extends State<MapPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Nombre: ${user.name}',
+                'Nombre:',
                 style: TextStyle(
-                  color: isDarkMode ? Colors.white70 : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Email: ${user.mail}',
-                style: TextStyle(
-                  color: isDarkMode ? Colors.white70 : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                ' ${_getUserRole(user)}',
-                style: TextStyle(
-                  color: isDarkMode ? Colors.white70 : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Disponibilidad:',
-                style: TextStyle(
-                  color: isDarkMode ? Colors.white : Colors.black,
+                  color: titleColor,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              ...?user.disponibilidad?.map((slot) => Text(
-                        '${slot['dia']} - ${slot['turno']}',
-                        style: TextStyle(
-                          color: isDarkMode ? Colors.white70 : Colors.black87,
-                        ),
-                      )) ??
-                  [],
+              Text(
+                user.name,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 14.0,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Email:',
+                style: TextStyle(
+                  color: titleColor,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                user.mail,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 14.0,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Rol:',
+                style: TextStyle(
+                  color: titleColor,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                _getUserRole(user),
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 14.0,
+                ),
+              ),
+              if (user.asignaturasImparte != null &&
+                  user.asignaturasImparte!.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(
+                  'Asignaturas que imparte:',
+                  style: TextStyle(
+                    color: titleColor,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...user.asignaturasImparte!.map((asignatura) {
+                  return Text(
+                    '- ${asignatura.nombre}',
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 14.0,
+                    ),
+                  );
+                }),
+              ],
+              if (user.disponibilidad != null &&
+                  user.disponibilidad!.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(
+                  'Disponibilidad:',
+                  style: TextStyle(
+                    color: titleColor,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...user.disponibilidad!.map((slot) {
+                  return Text(
+                    '${slot['dia']} - ${slot['turno']}',
+                    style: TextStyle(
+                      color: secondaryTextColor,
+                      fontSize: 14.0,
+                    ),
+                  );
+                }),
+              ],
             ],
           ),
           actions: [
-            TextButton(
+            TextButton.icon(
+              icon: Icon(Icons.arrow_back, color: buttonColor),
+              label: Text(
+                'Volver',
+                style: TextStyle(
+                  color: buttonColor,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(context); // Cierra el popup de detalles
               },
-              child: const Text('Cerrar'),
             ),
           ],
         );
       },
     );
+  }
+
+  /// Método auxiliar para determinar el rol del usuario
+  String _getUserRole(UserModel user) {
+    if (user.isProfesor) return 'Profesor';
+    if (user.isAlumno) return 'Alumno';
+    if (user.isAdmin) return 'Administrador';
+    return 'Sin especificar';
   }
 
   void _startChatWithUser(BuildContext context, UserModel user) {
@@ -388,9 +487,5 @@ class _MapPageState extends State<MapPage> {
           builder: (context) =>
               ChatPage(receiverId: user.id, receiverName: user.name)),
     );
-  }
-
-  String _getUserRole(UserModel user) {
-    return user.isProfesor ? 'Profesor' : 'Alumno';
   }
 }
