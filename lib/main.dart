@@ -19,7 +19,9 @@ import '../controllers/socketController.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/localeController.dart'; // Asegúrate de tener el LocaleController
 import '../screen/mapPage.dart';
+import '../screen/notificaciones.dart'; // Asegúrate de que esta ruta es correcta
 import '../screen/roleSelectionPage.dart'; // Importa tu pantalla de selección de rol
+import '../screen/notificaciones.dart'; // Importa la pantalla de notificaciones
 import '../controllers/asignaturaController.dart'; // Importa el controlador de asignaturas
 import 'l10n.dart'; // Asegúrate de tener esta clase generada
 import 'package:flutter_localizations/flutter_localizations.dart'; // Importa las localizaciones globales
@@ -92,6 +94,10 @@ class MyApp extends StatelessWidget {
             page: () => PerfilPage(),
           ),
           GetPage(
+            name: '/notificaciones',
+            page: () => NotificacionesPage(userId: Get.arguments['userId']),
+          ),
+          GetPage(
             name: '/chat',
             page: () => ChatPage(
               receiverId: Get.arguments['receiverId'],
@@ -118,6 +124,10 @@ class MyApp extends StatelessWidget {
           GetPage(
             name: '/settings_asignaturas',
             page: () => SettingsAsignaturasPage(),
+          ),
+          GetPage(
+            name: '/notificaciones',
+            page: () => NotificacionesPage(userId: Get.arguments['userId']),
           ),
         ],
 

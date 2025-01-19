@@ -1,10 +1,12 @@
 import 'package:get/get.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../controllers/authController.dart';
+import '../services/notificacionService.dart'; // Importa el servicio de notificaciones
 
 class SocketController extends GetxController {
   late IO.Socket socket;
   final AuthController authController = Get.find<AuthController>();
+  final NotificacionService notificacionService = NotificacionService(); // Instancia del servicio de notificaciones
 
   @override
   void onInit() {
@@ -43,6 +45,10 @@ class SocketController extends GetxController {
       }
     });
 
+    socket.on('private-message', (data) {
+      _handlePrivateMessage(data);
+    });
+
     socket.on('update-user-status', (data) {
       print('Actualización del estado de usuarios: $data');
     });
@@ -56,16 +62,49 @@ class SocketController extends GetxController {
     });
   }
 
-  void disconnectUser(String userId) {
-    if (userId.isNotEmpty) {
-      socket.emit('user-disconnected', {
-        'userId': userId,
-        'auth-token': authController.getToken, // Envía el token si es necesario
-      });
-      socket.clearListeners(); // Limpia todos los eventos asociados
-      socket.disconnect();
-      print('Usuario desconectado manualmente.');
+  void _handlePrivateMessage(Map<String, dynamic> data) {
+    if (data == null) {
+      print('Evento private-message recibido sin datos válidos.');
+      return;
     }
+
+    print('Mensaje recibido desde el servidor: $data');
+
+    final senderId = data['senderId'] ?? '';
+    final receiverId = data['receiverId'] ?? '';
+    final senderName = data['senderName'] ?? 'Desconocido';
+    final messageContent = data['messageContent'] ?? 'Sin contenido';
+
+    if (receiverId == authController.getUserId) {
+      print('Mensaje recibido por el usuario actual de $senderName');
+    } else {
+      print('Mensaje no destinado a este usuario.');
+    }
+  }
+
+  void sendMessage(String senderId, String receiverId, String messageContent, String senderName) {
+    final messageData = {
+      'senderId': senderId,
+      'receiverId': receiverId,
+      'messageContent': messageContent,
+      'senderName': senderName,
+      'timestamp': DateTime.now().toIso8601String(),
+      'auth-token': authController.getToken, // Enviar token al enviar mensajes
+    };
+
+    // Emitir mensaje al servidor
+    socket.emit('private-message', messageData);
+    print('Mensaje enviado: $messageContent de $senderName a $receiverId');
+
+    // Crear notificación para el receptor del mensaje
+    notificacionService.crearNotificacion(
+      receiverId,
+      'Has recibido un nuevo mensaje de $senderName',
+    ).then((_) {
+      print('Notificación creada para el usuario $receiverId');
+    }).catchError((error) {
+      print('Error al crear notificación: $error');
+    });
   }
 
   void joinChat(String senderId, String receiverId) {
@@ -76,15 +115,16 @@ class SocketController extends GetxController {
     });
   }
 
-  void sendMessage(String senderId, String receiverId, String messageContent, String senderName) {
-    socket.emit('private-message', {
-      'senderId': senderId,
-      'receiverId': receiverId,
-      'messageContent': messageContent,
-      'senderName': senderName, // Añadir el nombre del usuario
-      'timestamp': DateTime.now().toIso8601String(),
-      'auth-token': authController.getToken, // Enviar token al enviar mensajes
-    });
+  void disconnectUser(String userId) {
+    if (userId.isNotEmpty) {
+      socket.emit('user-disconnected', {
+        'userId': userId,
+        'auth-token': authController.getToken, // Envía el token si es necesario
+      });
+      socket.clearListeners(); // Limpia todos los eventos asociados
+      socket.disconnect();
+      print('Usuario desconectado manualmente.');
+    }
   }
 
   void clearListeners() {
