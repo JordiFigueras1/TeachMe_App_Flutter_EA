@@ -357,7 +357,7 @@ class _HomePageState extends State<HomePage>
         ],
       ),
 body: SingleChildScrollView(
-  padding: const EdgeInsets.all(8.0), // Reducido el padding general
+  padding: const EdgeInsets.all(16.0),
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -365,16 +365,17 @@ body: SingleChildScrollView(
       Container(
         decoration: BoxDecoration(
           color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12.0), // Bordes ajustados
+          borderRadius: BorderRadius.circular(16.0),
           boxShadow: [
             BoxShadow(
               color: Colors.black26,
-              blurRadius: 6.0, // Sombra menos prominente
-              offset: Offset(0, 3),
+              blurRadius: 8.0,
+              offset: Offset(0, 4),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(12.0), // Reducido el padding del contenedor
+        padding: const EdgeInsets.all(16.0),
+        margin: const EdgeInsets.only(bottom: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -384,7 +385,7 @@ body: SingleChildScrollView(
               children: [
                 // Calendario
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.45, // Más estrecho
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: GestureDetector(
                     onDoubleTap: () {
                       if (_selectedDay != null) {
@@ -423,7 +424,7 @@ body: SingleChildScrollView(
                       headerStyle: const HeaderStyle(
                         formatButtonVisible: false,
                         titleCentered: true,
-                        titleTextStyle: TextStyle(fontSize: 16), // Texto más pequeño
+                        titleTextStyle: TextStyle(fontSize: 18),
                       ),
                       onPageChanged: (focusedDay) {
                         setState(() {
@@ -433,20 +434,20 @@ body: SingleChildScrollView(
                     ),
                   ),
                 ),
-                SizedBox(width: 12), // Reducido el espacio entre columnas
+                SizedBox(width: 16),
                 // Contenedor de "Clases para el día" + TodoList al lado
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 6.0), // Espaciado más pequeño
+                        padding: const EdgeInsets.only(bottom: 8.0),
                         child: Text(
                           AppLocalizations.of(context)
                                   ?.translate('classes_for_day') ??
                               'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
                           style: const TextStyle(
-                            fontSize: 14, // Fuente más pequeña
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -456,10 +457,7 @@ body: SingleChildScrollView(
                         physics: NeverScrollableScrollPhysics(),
                         children: (_events[_selectedDay] ?? [])
                             .map((event) => ListTile(
-                                  title: Text(
-                                    event,
-                                    style: const TextStyle(fontSize: 14), // Fuente más pequeña
-                                  ),
+                                  title: Text(event),
                                   trailing: IconButton(
                                     icon: const Icon(Icons.delete,
                                         color: Colors.red),
@@ -483,44 +481,50 @@ body: SingleChildScrollView(
                 ),
                 // TodoList al lado derecho
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.23, // Reducido el ancho
+                  width: MediaQuery.of(context).size.width * 0.25, // ancho reducido
                   child: TodoListWidget(date: _selectedDay),
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-      // Reducido el espacio entre secciones
+            SizedBox(height: 16),
 
-      // Progreso de asignaturas
-      Container(
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12.0), // Bordes ajustados
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 6.0,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(8.0), // Reducido el padding del contenedor
-        margin: const EdgeInsets.only(bottom: 8.0), // Reducido el margen inferior
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context)
-                      ?.translate('subjects_progress') ??
-                  'Progreso de las asignaturas:',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 4),
-
-            Column(
-              children: _buildProgressCharts(),
+            // Nueva fila con "Progreso de asignaturas" debajo
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(16.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8.0,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)
+                                  ?.translate('subjects_progress') ??
+                              'Progreso de las asignaturas:',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8),
+                        Column(
+                          children: _buildProgressCharts(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -530,30 +534,31 @@ body: SingleChildScrollView(
       Container(
         decoration: BoxDecoration(
           color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12.0), // Bordes ajustados
+          borderRadius: BorderRadius.circular(16.0),
           boxShadow: [
             BoxShadow(
               color: Colors.black26,
-              blurRadius: 6.0,
-              offset: Offset(0, 3),
+              blurRadius: 8.0,
+              offset: Offset(0, 4),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(12.0), // Reducido el padding
+        padding: const EdgeInsets.all(16.0),
+        margin: const EdgeInsets.only(bottom: 16.0),
         child: Obx(() {
           if (connectedUsersController.connectedUsers.isEmpty) {
             return Center(
               child: Text(
                 'No hay usuarios conectados.',
                 style: TextStyle(
-                  fontSize: 14, // Fuente más pequeña
+                  fontSize: 16,
                   color: theme.textTheme.bodyLarge?.color,
                 ),
               ),
             );
           }
           return ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
             itemCount: connectedUsersController.connectedUsers.length,
@@ -561,10 +566,10 @@ body: SingleChildScrollView(
               final userId =
                   connectedUsersController.connectedUsers[index];
               return Card(
-                margin: const EdgeInsets.only(bottom: 8), // Espacio reducido
+                margin: const EdgeInsets.only(bottom: 10),
                 elevation: 4,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
                   leading: CircleAvatar(
@@ -578,13 +583,12 @@ body: SingleChildScrollView(
                     'ID: $userId',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14, // Fuente más pequeña
                       color: theme.textTheme.bodyLarge?.color,
                     ),
                   ),
                   subtitle: Text(
                     'Estado: Conectado',
-                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
+                    style: theme.textTheme.bodyMedium,
                   ),
                 ),
               );
@@ -595,7 +599,6 @@ body: SingleChildScrollView(
     ],
   ),
 ),
-
 
 // Botones flotantes
 floatingActionButton: Column(
@@ -620,9 +623,7 @@ floatingActionButton: Column(
   ],
 ),
 
-);
 
-
-    
+    );
     
   }}
