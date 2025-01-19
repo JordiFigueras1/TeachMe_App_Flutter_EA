@@ -25,7 +25,8 @@ class _MapPageState extends State<MapPage> {
   double _zoom = 13.0;
   MapController _mapController = MapController();
   String selectedRole = 'Todos';
-  bool showCircle = true; // Controla la visibilidad del círculo
+  bool showCircle = false; // Controla la visibilidad del círculo
+  double circleRadius = 500; // Controla el radio del círculo (en metros)
 
   @override
   Widget build(BuildContext context) {
@@ -122,13 +123,78 @@ class _MapPageState extends State<MapPage> {
                         borderStrokeWidth: 1,
                         borderColor: Colors.blue,
                         useRadiusInMeter: true,
-                        radius: 500, // Radio en metros
+                        radius: circleRadius, // Usa la variable del radio
                       ),
                     ],
                   ),
                 MarkerLayer(markers: markers),
               ],
             ),
+            if (showCircle)
+              Positioned(
+                bottom: 80,
+                left: 16,
+                right: 16,
+                child: AnimatedOpacity(
+                  opacity: showCircle ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Card(
+                    color: isDarkMode ? Colors.black : Colors.white,
+                    elevation: 6,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Radio del círculo (metros)',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0,
+                            ),
+                          ),
+                          SliderTheme(
+                            data: SliderTheme.of(context).copyWith(
+                              activeTrackColor: Colors.blue,
+                              inactiveTrackColor: Colors.grey,
+                              trackHeight: 4.0,
+                              thumbShape: const RoundSliderThumbShape(
+                                enabledThumbRadius: 10.0,
+                              ),
+                              overlayShape: const RoundSliderOverlayShape(
+                                overlayRadius: 20.0,
+                              ),
+                              thumbColor: isDarkMode
+                                  ? Colors.orange
+                                  : Colors.orangeAccent,
+                              overlayColor: Colors.orange.withOpacity(0.2),
+                              valueIndicatorTextStyle: const TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                            child: Slider(
+                              value: circleRadius,
+                              min: 0,
+                              max: 20000, // 20 km
+                              divisions: 40, // Opcional: 500 m por división
+                              label:
+                                  '${(circleRadius / 1000).toStringAsFixed(1)} km',
+                              onChanged: (value) {
+                                setState(() {
+                                  circleRadius = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             Positioned(
               bottom: 16,
               right: 16,

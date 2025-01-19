@@ -17,56 +17,56 @@ class UserModelController extends GetxController {
   ).obs;
 
   // Método para actualizar los datos del usuario
- void setUser({
-  required String id,
-  required String name,
-  required String username,
-  required String mail,
-  required String password,
-  required String fechaNacimiento,
-  required bool isProfesor,
-  required bool isAlumno,
-  required bool isAdmin,
-  required bool conectado,
-  String? foto,
-  String? descripcion,
-  List<Map<String, String>>? disponibilidad,
-  List<dynamic>? asignaturasImparte,
-  Map<String, dynamic>? location,
-}) {
-  user.update((val) {
-    if (val != null) {
-      val.id = id;
-      val.name = name;
-      val.username = username;
-      val.mail = mail;
-      val.password = password;
-      val.fechaNacimiento = fechaNacimiento;
-      val.isProfesor = isProfesor;
-      val.isAlumno = isAlumno;
-      val.isAdmin = isAdmin;
-      val.conectado = conectado;
-      if (foto != null) val.foto = foto;
-      if (descripcion != null) val.descripcion = descripcion;
-      if (disponibilidad != null) val.disponibilidad = disponibilidad;
+  void setUser({
+    required String id,
+    required String name,
+    required String username,
+    required String mail,
+    required String password,
+    required String fechaNacimiento,
+    required bool isProfesor,
+    required bool isAlumno,
+    required bool isAdmin,
+    required bool conectado,
+    String? foto,
+    String? descripcion,
+    List<Map<String, String>>? disponibilidad,
+    List<dynamic>? asignaturasImparte,
+    Map<String, dynamic>? location,
+  }) {
+    user.update((val) {
+      if (val != null) {
+        val.id = id;
+        val.name = name;
+        val.username = username;
+        val.mail = mail;
+        val.password = password;
+        val.fechaNacimiento = fechaNacimiento;
+        val.isProfesor = isProfesor;
+        val.isAlumno = isAlumno;
+        val.isAdmin = isAdmin;
+        val.conectado = conectado;
+        if (foto != null) val.foto = foto;
+        if (descripcion != null) val.descripcion = descripcion;
+        if (disponibilidad != null) val.disponibilidad = disponibilidad;
 
-      if (asignaturasImparte != null) {
-        val.asignaturasImparte = asignaturasImparte.map((item) {
-          if (item is AsignaturaModel) {
-            return item;
-          } else if (item is Map<String, dynamic>) {
-            return AsignaturaModel.fromJson(item);
-          } else {
-            throw Exception('Tipo inesperado en asignaturasImparte: $item');
-          }
-        }).toList();
+        if (asignaturasImparte != null) {
+          val.asignaturasImparte = asignaturasImparte.map((item) {
+            if (item is AsignaturaModel) {
+              return item;
+            } else if (item is Map<String, dynamic>) {
+              return AsignaturaModel.fromJson(item);
+            } else {
+              throw Exception('Tipo inesperado en asignaturasImparte: $item');
+            }
+          }).toList();
+        }
+
+        if (location != null) val.location = location;
       }
-
-      if (location != null) val.location = location;
-    }
-  });
-  printUserData(); // Para depuración
-}
+    });
+    printUserData(); // Para depuración
+  }
 
   // Método para depuración
   void printUserData() {
