@@ -25,6 +25,7 @@ class _MapPageState extends State<MapPage> {
   double _zoom = 13.0;
   MapController _mapController = MapController();
   String selectedRole = 'Todos';
+  bool showCircle = true; // Controla la visibilidad del círculo
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,6 @@ class _MapPageState extends State<MapPage> {
               themeController.toggleTheme();
             },
           ),
-          // Filtro desplegable de roles
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: DropdownButton<String>(
@@ -82,7 +82,6 @@ class _MapPageState extends State<MapPage> {
             .where((user) => connectedUsers.contains(user.id))
             .toList();
 
-        // Filtrar según el rol seleccionado
         final filteredUsers = _filterUsersByRole(usersAtLocations);
 
         final groupedUsers = _groupUsersByLocation(filteredUsers);
@@ -114,6 +113,19 @@ class _MapPageState extends State<MapPage> {
                       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                   subdomains: ['a', 'b', 'c'],
                 ),
+                if (showCircle)
+                  CircleLayer(
+                    circles: [
+                      CircleMarker(
+                        point: initialLatLng,
+                        color: Colors.blue.withOpacity(0.3),
+                        borderStrokeWidth: 1,
+                        borderColor: Colors.blue,
+                        useRadiusInMeter: true,
+                        radius: 500, // Radio en metros
+                      ),
+                    ],
+                  ),
                 MarkerLayer(markers: markers),
               ],
             ),
@@ -123,6 +135,20 @@ class _MapPageState extends State<MapPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        showCircle = !showCircle;
+                      });
+                    },
+                    heroTag: null,
+                    child: Icon(
+                      showCircle ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    backgroundColor:
+                        isDarkMode ? Colors.orange : Colors.orangeAccent,
+                  ),
+                  const SizedBox(height: 8),
                   FloatingActionButton(
                     onPressed: () {
                       setState(() {
