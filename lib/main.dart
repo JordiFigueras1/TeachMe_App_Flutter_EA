@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screen/chatGeneral.dart';
 import 'package:get/get.dart';
 import '../Widgets/bottomNavigationBar.dart';
 import '../screen/logIn.dart';
@@ -114,11 +115,17 @@ class MyApp extends StatelessWidget {
           GetPage(
             name: '/programar_clase',
             page: () => ProgramarClasePage(),
+          ),GetPage(
+            name: '/chat-general',
+            page: () => const ChatGeneralPage(),
           ),
+
+          
           GetPage(
             name: '/settings_asignaturas',
             page: () => SettingsAsignaturasPage(),
           ),
+          
         ],
 
         localizationsDelegates: [

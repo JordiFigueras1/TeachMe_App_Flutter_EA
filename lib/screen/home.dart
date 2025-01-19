@@ -358,243 +358,242 @@ class _HomePageState extends State<HomePage>
       ),
 body: SingleChildScrollView(
   padding: const EdgeInsets.all(16.0),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
+  child: Stack(  // Usamos un Stack para permitir la colocación de Positioned
     children: [
-      // Sección del calendario y eventos
-      Container(
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(16.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 8.0,
-              offset: Offset(0, 4),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Sección del calendario y eventos
+          Container(
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              borderRadius: BorderRadius.circular(16.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 8.0,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-          ],
-        ),
-        padding: const EdgeInsets.all(16.0),
-        margin: const EdgeInsets.only(bottom: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Fila con el calendario, clases para el día y TodoList
-            Row(
+            padding: const EdgeInsets.all(16.0),
+            margin: const EdgeInsets.only(bottom: 16.0),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Calendario
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  child: GestureDetector(
-                    onDoubleTap: () {
-                      if (_selectedDay != null) {
-                        _showAddEventDialog(context);
-                      }
-                    },
-                    child: TableCalendar(
-                      locale: 'es_ES',
-                      firstDay: DateTime(2000),
-                      lastDay: DateTime(2100),
-                      focusedDay: _focusedDay,
-                      selectedDayPredicate: (day) {
-                        return isSameDay(_selectedDay, day);
-                      },
-                      onDaySelected: (selectedDay, focusedDay) {
-                        setState(() {
-                          _selectedDay = selectedDay;
-                          _focusedDay = focusedDay;
-                        });
-                      },
-                      eventLoader: (day) => _events[day] ?? [],
-                      calendarStyle: CalendarStyle(
-                        selectedDecoration: BoxDecoration(
-                          color: Colors.blueAccent,
-                          shape: BoxShape.circle,
-                        ),
-                        todayDecoration: BoxDecoration(
-                          color: Colors.orangeAccent,
-                          shape: BoxShape.circle,
-                        ),
-                        markerDecoration: BoxDecoration(
-                          color: Colors.redAccent,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      headerStyle: const HeaderStyle(
-                        formatButtonVisible: false,
-                        titleCentered: true,
-                        titleTextStyle: TextStyle(fontSize: 18),
-                      ),
-                      onPageChanged: (focusedDay) {
-                        setState(() {
-                          _focusedDay = focusedDay;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16),
-                // Contenedor de "Clases para el día" + TodoList al lado
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Text(
-                          AppLocalizations.of(context)
-                                  ?.translate('classes_for_day') ??
-                              'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                // Fila con el calendario, clases para el día y TodoList
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Calendario
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.5,
+                      child: GestureDetector(
+                        onDoubleTap: () {
+                          if (_selectedDay != null) {
+                            _showAddEventDialog(context);
+                          }
+                        },
+                        child: TableCalendar(
+                          locale: 'es_ES',
+                          firstDay: DateTime(2000),
+                          lastDay: DateTime(2100),
+                          focusedDay: _focusedDay,
+                          selectedDayPredicate: (day) {
+                            return isSameDay(_selectedDay, day);
+                          },
+                          onDaySelected: (selectedDay, focusedDay) {
+                            setState(() {
+                              _selectedDay = selectedDay;
+                              _focusedDay = focusedDay;
+                            });
+                          },
+                          eventLoader: (day) => _events[day] ?? [],
+                          calendarStyle: CalendarStyle(
+                            selectedDecoration: BoxDecoration(
+                              color: Colors.blueAccent,
+                              shape: BoxShape.circle,
+                            ),
+                            todayDecoration: BoxDecoration(
+                              color: Colors.orangeAccent,
+                              shape: BoxShape.circle,
+                            ),
+                            markerDecoration: BoxDecoration(
+                              color: Colors.redAccent,
+                              shape: BoxShape.circle,
+                            ),
                           ),
+                          headerStyle: const HeaderStyle(
+                            formatButtonVisible: false,
+                            titleCentered: true,
+                            titleTextStyle: TextStyle(fontSize: 18),
+                          ),
+                          onPageChanged: (focusedDay) {
+                            setState(() {
+                              _focusedDay = focusedDay;
+                            });
+                          },
                         ),
                       ),
-                      ListView(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        children: (_events[_selectedDay] ?? [])
-                            .map((event) => ListTile(
-                                  title: Text(event),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.delete,
-                                        color: Colors.red),
-                                    onPressed: () {
-                                      setState(() {
-                                        _events[_selectedDay]?.remove(event);
-                                        if (_events[_selectedDay]
-                                                ?.isEmpty ??
-                                            true) {
-                                          _events.remove(_selectedDay);
-                                        }
-                                      });
-                                      _saveEvents();
-                                    },
-                                  ),
-                                ))
-                            .toList(),
+                    ),
+                    SizedBox(width: 16),
+                    // Contenedor de "Clases para el día" + TodoList al lado
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Text(
+                              AppLocalizations.of(context)
+                                      ?.translate('classes_for_day') ??
+                                  'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          ListView(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            children: (_events[_selectedDay] ?? [])
+                                .map((event) => ListTile(
+                                      title: Text(event),
+                                      trailing: IconButton(
+                                        icon: const Icon(Icons.delete,
+                                            color: Colors.red),
+                                        onPressed: () {
+                                          setState(() {
+                                            _events[_selectedDay]?.remove(event);
+                                            if (_events[_selectedDay]
+                                                    ?.isEmpty ??
+                                                true) {
+                                              _events.remove(_selectedDay);
+                                            }
+                                          });
+                                          _saveEvents();
+                                        },
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    // TodoList al lado derecho
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.25, // ancho reducido
+                      child: TodoListWidget(date: _selectedDay),
+                    ),
+                  ],
                 ),
-                // TodoList al lado derecho
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.25, // ancho reducido
-                  child: TodoListWidget(date: _selectedDay),
+                SizedBox(height: 16),
+              ],
+            ),
+          ),
+
+          // Lista de usuarios conectados
+          Container(
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              borderRadius: BorderRadius.circular(16.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 8.0,
+                  offset: Offset(0, 4),
                 ),
               ],
             ),
-            SizedBox(height: 16),
-
-            // Nueva fila con "Progreso de asignaturas" debajo
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(16.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 8.0,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)
-                                  ?.translate('subjects_progress') ??
-                              'Progreso de las asignaturas:',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 8),
-                        Column(
-                          children: _buildProgressCharts(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-
-      // Lista de usuarios conectados
-      Container(
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(16.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 8.0,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(16.0),
-        margin: const EdgeInsets.only(bottom: 16.0),
-        child: Obx(() {
-          if (connectedUsersController.connectedUsers.isEmpty) {
-            return Center(
-              child: Text(
-                'No hay usuarios conectados.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: theme.textTheme.bodyLarge?.color,
-                ),
-              ),
-            );
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: connectedUsersController.connectedUsers.length,
-            itemBuilder: (context, index) {
-              final userId =
-                  connectedUsersController.connectedUsers[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 10),
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: theme.colorScheme.secondary,
-                    child: Icon(
-                      Icons.person,
-                      color: theme.colorScheme.onSecondary,
-                    ),
-                  ),
-                  title: Text(
-                    'ID: $userId',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+            padding: const EdgeInsets.all(16.0),
+            margin: const EdgeInsets.only(bottom: 16.0),
+            child: Obx(() {
+              if (connectedUsersController.connectedUsers.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No hay usuarios conectados.',
+                    style: TextStyle(
+                      fontSize: 16,
                       color: theme.textTheme.bodyLarge?.color,
                     ),
                   ),
-                  subtitle: Text(
-                    'Estado: Conectado',
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                ),
+                );
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: connectedUsersController.connectedUsers.length,
+                itemBuilder: (context, index) {
+                  final userId =
+                      connectedUsersController.connectedUsers[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: theme.colorScheme.secondary,
+                        child: Icon(
+                          Icons.person,
+                          color: theme.colorScheme.onSecondary,
+                        ),
+                      ),
+                      title: Text(
+                        'ID: $userId',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Estado: Conectado',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                  );
+                },
               );
-            },
-          );
-        }),
+            }),
+          ),
+        ],
+      ),
+
+      // Aquí está el contenedor de "Progreso de asignaturas" con Positioned
+      Positioned(
+        top: 500,  // Ajusta este valor para moverlo hacia abajo o hacia arriba
+        left: 16,  // Ajusta este valor para moverlo hacia la izquierda o derecha
+        child: Container(
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(16.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 8.0,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)?.translate('subjects_progress') ??
+                    'Progreso de las asignaturas:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Column(
+                children: _buildProgressCharts(), // Aquí es donde está tu lista
+              ),
+            ],
+          ),
+        ),
       ),
     ],
   ),
@@ -614,14 +613,29 @@ floatingActionButton: Column(
         tooltip: 'Programar Clase',
       ),
     ),
+    
+    // Botón para ver el mapa
     FloatingActionButton(
       onPressed: () => Get.toNamed('/map'),
       backgroundColor: Theme.of(context).primaryColor,
       child: const Icon(Icons.map),
       tooltip: 'Ver Mapa',
     ),
+    
+    // Botón para el chat general
+    Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: FloatingActionButton(
+        heroTag: 'chat-general', // Hero tag único para el chat general
+        onPressed: () => Get.toNamed('/chat-general'),
+        backgroundColor: Theme.of(context).primaryColor,
+        child: const Icon(Icons.chat),
+        tooltip: 'Chat General',
+      ),
+    ),
   ],
 ),
+
 
 
     );
