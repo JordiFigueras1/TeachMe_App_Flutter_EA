@@ -5,6 +5,7 @@ import '../screen/logIn.dart';
 import '../screen/register.dart';
 import '../screen/user.dart';
 import '../screen/home.dart';
+import '../screen/chatGeneral.dart'; // Cambia la ruta según la ubicación real
 import '../screen/programar_clase.dart';
 import '../screen/settings_general.dart'; // Importa la pantalla de configuración general
 import '../screen/settings_asignaturas.dart'; // Importa la pantalla de configuración de asignaturas
@@ -92,6 +93,10 @@ class MyApp extends StatelessWidget {
           GetPage(
             name: '/perfil',
             page: () => PerfilPage(),
+          ),
+          GetPage(
+            name: '/chat-general',
+            page: () => const ChatGeneralPage(),
           ),
           GetPage(
             name: '/notificaciones',

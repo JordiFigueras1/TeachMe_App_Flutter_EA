@@ -6,7 +6,7 @@ import '../services/notificacionService.dart'; // Importa el servicio de notific
 class SocketController extends GetxController {
   late IO.Socket socket;
   final AuthController authController = Get.find<AuthController>();
-  final NotificacionService notificacionService = NotificacionService(); // Instancia del servicio de notificaciones
+  final NotificacionService notificacionService = NotificacionService();
 
   @override
   void onInit() {
@@ -45,8 +45,14 @@ class SocketController extends GetxController {
       }
     });
 
+    // Listeners para mensajes privados
     socket.on('private-message', (data) {
       _handlePrivateMessage(data);
+    });
+
+    // Listeners para el chat general
+    socket.on('message-general-chat', (data) {
+      _handleGeneralMessage(data);
     });
 
     socket.on('update-user-status', (data) {
@@ -62,13 +68,14 @@ class SocketController extends GetxController {
     });
   }
 
+  // Manejar mensajes privados
   void _handlePrivateMessage(Map<String, dynamic> data) {
     if (data == null) {
       print('Evento private-message recibido sin datos válidos.');
       return;
     }
 
-    print('Mensaje recibido desde el servidor: $data');
+    print('Mensaje privado recibido: $data');
 
     final senderId = data['senderId'] ?? '';
     final receiverId = data['receiverId'] ?? '';
@@ -82,6 +89,53 @@ class SocketController extends GetxController {
     }
   }
 
+  // Manejar mensajes del chat general
+  void _handleGeneralMessage(Map<String, dynamic> data) {
+    if (data == null) {
+      print('Evento message-general-chat recibido sin datos válidos.');
+      return;
+    }
+
+    print('Mensaje del chat general recibido: $data');
+  }
+
+  // Unirse al chat de pares
+  void joinChat(String senderId, String receiverId) {
+    socket.emit('join-chat', {
+      'senderId': senderId,
+      'receiverId': receiverId,
+      'auth-token': authController.getToken,
+    });
+  }
+
+  // Unirse al chat general
+  void joinGeneralChat(String userId) {
+    if (userId.isNotEmpty) {
+      socket.emit('join-general-chat', {'userId': userId});
+      print('Usuario $userId se unió al chat general');
+    }
+  }
+
+  // Salir del chat general
+  void leaveGeneralChat(String userId) {
+    if (userId.isNotEmpty) {
+      socket.emit('leave-general-chat', {'userId': userId});
+      print('Usuario $userId salió del chat general');
+    }
+  }
+
+  // Enviar mensaje en el chat general
+  void sendMessageToGeneralChat(String senderId, String messageContent) {
+    if (senderId.isNotEmpty && messageContent.isNotEmpty) {
+      socket.emit('message-general-chat', {
+        'senderId': senderId,
+        'messageContent': messageContent,
+      });
+      print('Mensaje enviado al chat general: $messageContent');
+    }
+  }
+
+  // Enviar mensaje privado
   void sendMessage(String senderId, String receiverId, String messageContent, String senderName) {
     final messageData = {
       'senderId': senderId,
@@ -107,19 +161,12 @@ class SocketController extends GetxController {
     });
   }
 
-  void joinChat(String senderId, String receiverId) {
-    socket.emit('join-chat', {
-      'senderId': senderId,
-      'receiverId': receiverId,
-      'auth-token': authController.getToken, // Enviar token en el chat
-    });
-  }
-
+  // Desconectar usuario
   void disconnectUser(String userId) {
     if (userId.isNotEmpty) {
       socket.emit('user-disconnected', {
         'userId': userId,
-        'auth-token': authController.getToken, // Envía el token si es necesario
+        'auth-token': authController.getToken,
       });
       socket.clearListeners(); // Limpia todos los eventos asociados
       socket.disconnect();
