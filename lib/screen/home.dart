@@ -205,7 +205,11 @@ class _HomePageState extends State<HomePage>
               Text(
                 AppLocalizations.of(context)?.translate('select_time_label') ??
                     'Select Time:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: GoogleFonts.bebasNeue(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
               ),
 
               // Usamos un contenedor con un tamaño fijo y desplazamiento
@@ -306,7 +310,11 @@ class _HomePageState extends State<HomePage>
                   ),
                   Text(
                     entry.key,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.bebasNeue(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
                   ),
                 ],
               ),
