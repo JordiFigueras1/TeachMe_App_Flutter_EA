@@ -24,6 +24,7 @@ class _MapPageState extends State<MapPage> {
 
   double _zoom = 13.0;
   MapController _mapController = MapController(); // Agregar MapController
+  String selectedRole = 'Todos'; // Agregar variable para el filtro
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +42,26 @@ class _MapPageState extends State<MapPage> {
             onPressed: () {
               themeController.toggleTheme();
             },
+          ),
+          // Filtro desplegable de roles
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: DropdownButton<String>(
+              value: selectedRole,
+              dropdownColor: isDarkMode ? Colors.black : Colors.white,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedRole = newValue!;
+                });
+              },
+              items: <String>['Todos', 'Profesor', 'Alumno']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),
@@ -61,7 +82,10 @@ class _MapPageState extends State<MapPage> {
             .where((user) => connectedUsers.contains(user.id))
             .toList();
 
-        final groupedUsers = _groupUsersByLocation(usersAtLocations);
+        // Filtrar según el rol seleccionado
+        final filteredUsers = _filterUsersByRole(usersAtLocations);
+
+        final groupedUsers = _groupUsersByLocation(filteredUsers);
         final markers =
             _generateMarkersForGroupedUsers(groupedUsers, isDarkMode);
 
@@ -137,6 +161,16 @@ class _MapPageState extends State<MapPage> {
         );
       }),
     );
+  }
+
+  List<UserModel> _filterUsersByRole(List<UserModel> users) {
+    if (selectedRole == 'Profesor') {
+      return users.where((user) => user.isProfesor).toList();
+    } else if (selectedRole == 'Alumno') {
+      return users.where((user) => user.isAlumno).toList();
+    } else {
+      return users; // Devuelve todos los usuarios si no hay filtro
+    }
   }
 
   Map<String, List<UserModel>> _groupUsersByLocation(List<UserModel> users) {
@@ -357,8 +391,6 @@ class _MapPageState extends State<MapPage> {
   }
 
   String _getUserRole(UserModel user) {
-    if (user.isProfesor) return 'Profesor';
-    if (user.isAlumno) return 'Alumno';
-    return 'Sin rol';
+    return user.isProfesor ? 'Profesor' : 'Alumno';
   }
 }
