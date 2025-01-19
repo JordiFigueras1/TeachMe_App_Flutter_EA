@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Widgets/todoListWidget.dart';
+import 'package:flutter_application_1/extensions/HexToColor.dart';
 import 'package:get/get.dart';
 import '../controllers/authController.dart';
 import '../controllers/theme_controller.dart';
@@ -20,14 +22,16 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   final ThemeController themeController = Get.find<ThemeController>();
   final LocaleController localeController = Get.find<LocaleController>();
   final SocketController socketController = Get.find<SocketController>();
   final AuthController authController = Get.find<AuthController>();
-  final ConnectedUsersController connectedUsersController = Get.find<ConnectedUsersController>();
+  final ConnectedUsersController connectedUsersController =
+      Get.find<ConnectedUsersController>();
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   DateTime _focusedDay = DateTime.now();
@@ -35,7 +39,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   Map<DateTime, List<String>> _events = {};
   Map<String, double> _progressData = {};
   String currentTime = "";
-  final TextEditingController _textController = TextEditingController(); // Controlador para la caja de texto
+  final TextEditingController _textController =
+      TextEditingController(); // Controlador para la caja de texto
 
   @override
   void initState() {
@@ -120,12 +125,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           final eventTimeString = parts[1];
           try {
             final eventTime = DateFormat('HH:mm').parse(eventTimeString);
-            if (now.hour == eventTime.hour && now.minute == eventTime.minute && now.second == 0) {
+            if (now.hour == eventTime.hour &&
+                now.minute == eventTime.minute &&
+                now.second == 0) {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(AppLocalizations.of(context)?.translate('notification_title') ?? 'Notification'),
-                  content: Text(AppLocalizations.of(context)?.translate('event_time_message') ?? 'It\'s time for the event: $eventName'),
+                  title: Text(AppLocalizations.of(context)
+                          ?.translate('notification_title') ??
+                      'Notification'),
+                  content: Text(AppLocalizations.of(context)
+                          ?.translate('event_time_message') ??
+                      'It\'s time for the event: $eventName'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -171,21 +182,24 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: Text(AppLocalizations.of(context)?.translate('add_class') ?? 'Add Class'),
-
+          title: Text(AppLocalizations.of(context)?.translate('add_class') ??
+              'Add Class'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: eventController,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)?.translate('class_name_label') ?? 'Class Name',
+                  labelText: AppLocalizations.of(context)
+                          ?.translate('class_name_label') ??
+                      'Class Name',
                 ),
               ),
 
               SizedBox(height: 16),
               Text(
-                AppLocalizations.of(context)?.translate('select_time_label') ?? 'Select Time:',
+                AppLocalizations.of(context)?.translate('select_time_label') ??
+                    'Select Time:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
 
@@ -195,7 +209,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 child: TimePickerSpinner(
                   is24HourMode: true,
                   normalTextStyle: TextStyle(fontSize: 18, color: Colors.grey),
-                  highlightedTextStyle: TextStyle(fontSize: 24, color: Colors.blue),
+                  highlightedTextStyle:
+                      TextStyle(fontSize: 24, color: Colors.blue),
                   spacing: 100,
                   itemHeight: 50,
                   isForce2Digits: true,
@@ -213,14 +228,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text(AppLocalizations.of(context)?.translate('cancel') ?? 'Cancel'),
+              child: Text(AppLocalizations.of(context)?.translate('cancel') ??
+                  'Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
-                _addEvent(eventController.text, TimeOfDay.fromDateTime(selectedTime));
+                _addEvent(
+                    eventController.text, TimeOfDay.fromDateTime(selectedTime));
                 Navigator.pop(context);
               },
-              child: Text(AppLocalizations.of(context)?.translate('save') ?? 'Save'),
+              child: Text(
+                  AppLocalizations.of(context)?.translate('save') ?? 'Save'),
             ),
           ],
         ),
@@ -248,7 +266,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         child: Row(
           children: progressData.entries.map((entry) {
             // Elegir el color basado en el progreso.
-            Color progressColor = entry.value >= 0.8 ? Colors.green : entry.value >= 0.5 ? Colors.orange : Colors.red;
+            Color progressColor = entry.value >= 0.8
+                ? Colors.green
+                : entry.value >= 0.5
+                    ? Colors.orange
+                    : Colors.red;
 
             return Padding(
               padding: const EdgeInsets.only(right: 20.0),
@@ -297,7 +319,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)?.translate('home') ?? 'Inicio'),
+        title:
+            Text(AppLocalizations.of(context)?.translate('home') ?? 'Inicio'),
         backgroundColor: theme.appBarTheme.backgroundColor,
         actions: [
           IconButton(
@@ -334,159 +357,182 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Contenedor con bordes redondeados y sombra para el calendario
-            Container(
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(16.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8.0,
-                    offset: Offset(0, 4), // Sombra sutil
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(16.0),
-              margin: const EdgeInsets.only(bottom: 16.0), // Margen para espaciar el calendario
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.5,
-                    child: GestureDetector(
-                      onDoubleTap: () {
-                        if (_selectedDay != null) {
-                          _showAddEventDialog(context);
-                        }
-                      },
-                      child: TableCalendar(
-                        locale: 'es_ES', // Configurar el calendario en español
-                        firstDay: DateTime(2000),
-                        lastDay: DateTime(2100),
-                        focusedDay: _focusedDay,
-                        selectedDayPredicate: (day) {
-                          return isSameDay(_selectedDay, day);
-                        },
-                        onDaySelected: (selectedDay, focusedDay) {
-                          setState(() {
-                            _selectedDay = selectedDay;
-                            _focusedDay = focusedDay;
-                          });
-                        },
-                        eventLoader: (day) => _events[day] ?? [],
-                        calendarStyle: CalendarStyle(
-                          selectedDecoration: BoxDecoration(
-                            color: Colors.blueAccent,
-                            shape: BoxShape.circle,
-                          ),
-                          todayDecoration: BoxDecoration(
-                            color: Colors.orangeAccent,
-                            shape: BoxShape.circle,
-                          ),
-                          markerDecoration: BoxDecoration(
-                            color: Colors.redAccent,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        headerStyle: const HeaderStyle(
-                          formatButtonVisible: false,
-                          titleCentered: true,
-                          titleTextStyle: TextStyle(fontSize: 18),
-                        ),
-                        onPageChanged: (focusedDay) {
-                          setState(() {
-                            _focusedDay = focusedDay;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Text(
-                            AppLocalizations.of(context)?.translate('classes_for_day') ?? 'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+          padding: const EdgeInsets.all(16.0),
+          child: LayoutBuilder(builder: (context, constraints) {
+            double width = constraints.maxWidth;
+            double height = constraints.maxHeight;
+            return Row(children: [
+              Flexible(
+                  flex: 6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Contenedor con bordes redondeados y sombra para el calendario
+                      Container(
+                        decoration: BoxDecoration(
+                          color: theme.cardColor,
+                          borderRadius: BorderRadius.circular(16.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 8.0,
+                              offset: Offset(0, 4), // Sombra sutil
                             ),
-                          ),
+                          ],
                         ),
-                        ListView(
-                          shrinkWrap: true,
-                          children: (_events[_selectedDay] ?? [] )
-                              .map((event) => ListTile(
-                                    title: Text(event),
-                                    trailing: IconButton(
-                                      icon: const Icon(Icons.delete, color: Colors.red),
-                                      onPressed: () {
-                                        setState(() {
-                                          _events[_selectedDay]?.remove(event);
-                                          if (_events[_selectedDay]?.isEmpty ?? true) {
-                                            _events.remove(_selectedDay);
-                                          }
-                                        });
-                                        _saveEvents();
-                                      },
+                        padding: const EdgeInsets.all(16.0),
+                        margin: const EdgeInsets.only(
+                            bottom: 16.0), // Margen para espaciar el calendario
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.5,
+                              child: GestureDetector(
+                                onDoubleTap: () {
+                                  if (_selectedDay != null) {
+                                    _showAddEventDialog(context);
+                                  }
+                                },
+                                child: TableCalendar(
+                                  locale:
+                                      'es_ES', // Configurar el calendario en español
+                                  firstDay: DateTime(2000),
+                                  lastDay: DateTime(2100),
+                                  focusedDay: _focusedDay,
+                                  selectedDayPredicate: (day) {
+                                    return isSameDay(_selectedDay, day);
+                                  },
+                                  onDaySelected: (selectedDay, focusedDay) {
+                                    setState(() {
+                                      _selectedDay = selectedDay;
+                                      _focusedDay = focusedDay;
+                                    });
+                                  },
+                                  eventLoader: (day) => _events[day] ?? [],
+                                  calendarStyle: CalendarStyle(
+                                    selectedDecoration: BoxDecoration(
+                                      color: Colors.blueAccent,
+                                      shape: BoxShape.circle,
                                     ),
-                                  ))
-                              .toList(),
+                                    todayDecoration: BoxDecoration(
+                                      color: Colors.orangeAccent,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    markerDecoration: BoxDecoration(
+                                      color: Colors.redAccent,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  headerStyle: const HeaderStyle(
+                                    formatButtonVisible: false,
+                                    titleCentered: true,
+                                    titleTextStyle: TextStyle(fontSize: 18),
+                                  ),
+                                  onPageChanged: (focusedDay) {
+                                    setState(() {
+                                      _focusedDay = focusedDay;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Text(
+                                      AppLocalizations.of(context)
+                                              ?.translate('classes_for_day') ??
+                                          'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  ListView(
+                                    shrinkWrap: true,
+                                    children: (_events[_selectedDay] ?? [])
+                                        .map((event) => ListTile(
+                                              title: Text(event),
+                                              trailing: IconButton(
+                                                icon: const Icon(Icons.delete,
+                                                    color: Colors.red),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _events[_selectedDay]
+                                                        ?.remove(event);
+                                                    if (_events[_selectedDay]
+                                                            ?.isEmpty ??
+                                                        true) {
+                                                      _events
+                                                          .remove(_selectedDay);
+                                                    }
+                                                  });
+                                                  _saveEvents();
+                                                },
+                                              ),
+                                            ))
+                                        .toList(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                      ),
 
-            // Contenedor con bordes redondeados y sombra para los gráficos de progreso
-            Container(
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(16.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8.0,
-                    offset: Offset(0, 4), // Sombra sutil
+                      // Contenedor con bordes redondeados y sombra para los gráficos de progreso
+                      Container(
+                        decoration: BoxDecoration(
+                          color: theme.cardColor,
+                          borderRadius: BorderRadius.circular(16.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 8.0,
+                              offset: Offset(0, 4), // Sombra sutil
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            SizedBox(height: 24),
+                            Text(
+                              AppLocalizations.of(context)
+                                      ?.translate('subjects_progress') ??
+                                  'Progreso de las asignaturas:',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 16),
+                            Column(
+                              children: _buildProgressCharts(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )),
+              Flexible(
+                flex: 4, // Esto define el 40% del espacio disponible
+                child: Container(
+                  color: "#0176ff".toColor(opacity: 0.4),
+                  child: Center(
+                    child: TodoListWidget(date: _selectedDay),
                   ),
-                ],
+                ),
               ),
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  SizedBox(height: 24),
-                  Text(
-                    AppLocalizations.of(context)?.translate('subjects_progress') ?? 'Progreso de las asignaturas:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16),
-                  Column(
-                    children: _buildProgressCharts(),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+            ]);
+          })),
     );
   }
 }
-
-            
-            
-              
-             
                    
                   
                 
