@@ -4,6 +4,9 @@ import '../controllers/authController.dart';
 import '../controllers/socketController.dart';
 import '../controllers/connectedUsersController.dart';
 import '../controllers/theme_controller.dart';
+import '../controllers/userModelController.dart';
+import '../controllers/notificacionController.dart'; // Importar el controlador de notificaciones
+import '../screen/notificaciones.dart'; // Asegúrate de que esta ruta sea la correcta
 
 class HomePage extends StatefulWidget {
   @override
@@ -17,6 +20,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final AuthController authController = Get.find<AuthController>();
   final ConnectedUsersController connectedUsersController = Get.find<ConnectedUsersController>();
   final ThemeController themeController = Get.find<ThemeController>();
+  final UserModelController userModelController = Get.find<UserModelController>();
+  final NotificacionController notificacionController = Get.find<NotificacionController>();
 
   @override
   void initState() {
@@ -37,6 +42,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         print('Actualización del estado de usuarios: $data');
         connectedUsersController.updateConnectedUsers(List<String>.from(data));
       });
+
+      // Cargar notificaciones no leídas
+      notificacionController.fetchNotificaciones(authController.getUserId);
     }
   }
 
@@ -80,6 +88,46 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ),
             onPressed: themeController.toggleTheme,
           ),
+          Obx(() {
+            final int notificacionesSinLeer = notificacionController.notificaciones
+                .where((notificacion) => !notificacion.leida)
+                .length;
+
+            return Stack(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.notifications,
+                    color: notificacionesSinLeer > 0 ? Colors.red : theme.iconTheme.color,
+                  ),
+                  onPressed: () {
+                    Get.to(() => NotificacionesPage(userId: userModelController.user.value.id));
+                  },
+                  tooltip: 'Ver notificaciones',
+                ),
+                if (notificacionesSinLeer > 0)
+                  Positioned(
+                    right: 10,
+                    top: 10,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '$notificacionesSinLeer',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
           IconButton(
             icon: const Icon(Icons.person_search), // Ícono de búsqueda de perfiles
             onPressed: () {
@@ -105,7 +153,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 scale: _animation.value,
                 child: Icon(
                   Icons.favorite,
-                  color: theme.primaryColor.withOpacity(themeController.themeMode.value == ThemeMode.dark ? 0.9 : 0.7),
+                  color: theme.primaryColor.withOpacity(
+                      themeController.themeMode.value == ThemeMode.dark ? 0.9 : 0.7),
                   size: 80,
                 ),
               );
@@ -138,11 +187,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: theme.colorScheme.secondary,
-                        child: Icon(
-                          Icons.person,
-                          color: theme.colorScheme.onSecondary,
+                      leading: Hero(
+                        tag: 'user-avatar-$userId', // Asignar un tag único a cada usuario
+                        child: CircleAvatar(
+                          backgroundColor: theme.colorScheme.secondary,
+                          child: Icon(
+                            Icons.person,
+                            color: theme.colorScheme.onSecondary,
+                          ),
                         ),
                       ),
                       title: Text(
@@ -164,11 +216,39 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed('/map'),
-        backgroundColor: theme.primaryColor,
-        child: const Icon(Icons.map),
-        tooltip: 'Ver Mapa',
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Botón para programar clases visible para todos
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0), // Separación del botón de mapa
+            child: FloatingActionButton(
+              heroTag: 'programar-clase', // Hero tag único
+              onPressed: () => Get.toNamed('/programar_clase'),
+              backgroundColor: Theme.of(context).primaryColor,
+              child: const Icon(Icons.add),
+              tooltip: 'Programar Clase',
+            ),
+          ),
+          // Botón para ver el mapa
+          FloatingActionButton(
+            heroTag: 'ver-mapa', // Hero tag único
+            onPressed: () => Get.toNamed('/map'),
+            backgroundColor: Theme.of(context).primaryColor,
+            child: const Icon(Icons.map),
+            tooltip: 'Ver Mapa',
+          ),
+          const SizedBox(height: 8),
+          // Botón para el chat general
+          FloatingActionButton(
+            heroTag: 'chat-general', // Hero tag único para el chat general
+            onPressed: () => Get.toNamed('/chat-general'),
+            backgroundColor: Theme.of(context).primaryColor,
+            child: const Icon(Icons.chat),
+            tooltip: 'Chat General',
+          ),
+        ],
       ),
     );
   }
