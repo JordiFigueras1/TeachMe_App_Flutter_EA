@@ -1,0 +1,38 @@
+[33mb050f53[m[33m ([m[1;36mHEAD[m[33m)[m circulo implementado pero sin funcionalidad
+[33mb4431e9[m version casi acabada de mapas, falta filtrar por distancia
+[33m95f5bf9[m Implementacion de filtro por roles
+[33mfaa9e83[m integracion de conciencia digital zoom in y zoom out
+[33m0fc79ca[m informacion adicional y start chat con usuarios encontrados en el map
+[33me67026e[m mapas funciona con 2 o mas usuarios conectados
+[33m397fe35[m mapa que muestra 2 usuarios solapados sin problema, falla en el tercero
+[33ma639b5e[m informacion del usuario en un clik (solo se muestra un usuario)
+[33m5874be9[m implementacion con radius para mapa
+[33mb5a8eb0[m[33m ([m[1;31morigin/feature/user-profile-ui[m[33m, [m[1;31morigin/feature/Google_Credentials[m[33m)[m Perfil personal y buscar perfiles funcional
+[33meadfe3c[m Detectar perfil hecho
+[33m8967f9f[m[33m ([m[1;31morigin/feature/authentication-ui[m[33m)[m L'usuari pot registrar-se, fer Login i escollir el seu rol en el seu primer log històric
+[33m40642c6[m traduccion funciona en la screen login y register con opcion de boton para cambiar
+[33mc162e41[m El usuario dispone de una interfaz con mejores estilos
+[33m560ca92[m Push previo al merge
+[33mb9aedb6[m Pulleando cambios recientes en de la main
+[33mf35abc0[m[33m ([m[1;31morigin/autor-fecha-chat[m[33m)[m El usuario puede ver el nombre y la fecha en los mensajes del chat
+[33ma9d300c[m Merge branch 'main' of https://github.com/JordiFigueras1/TeachMe_App_Flutter_EA into autor-fecha-chat
+[33m022a9b2[m El usuario guarda sus coordenadas al hacer Login con más precisión
+[33mf534542[m modo nocturno version actualizada
+[33m0550012[m Chat con Autor y Fecha añadidos
+[33m826ea5f[m[33m ([m[1;31morigin/ui-notif[m[33m, [m[1;31morigin/ui-mapas[m[33m)[m El usuario puede usar el mapa con un centro dinámico
+[33m22d3dd9[m El usuario puede ver a los demás usuarios en el mapa
+[33m4374705[m[33m ([m[1;31morigin/ui-notifications[m[33m, [m[1;31morigin/ui-chat[m[33m)[m Chat funcional. Pendiente corregir logOut
+[33mf0d34d0[m Intento de chat rooms robustas
+[33mc18b705[m Primer intento de Chat
+[33m16fe4a4[m Bolita verde cuando buscamos a un usuario conectado en la screen perfil
+[33maec1697[m Intento de poder buscar a los usuarios conectados
+[33mc4b112b[m[33m ([m[1;31morigin/ui-conexion-usuarios[m[33m)[m Merge branch 'ui-conexion-usuarios' of https://github.com/JordiFigueras1/TeachMe_App_Flutter_EA into ui-conexion-usuarios
+[33m2753fa1[m Cambios del homePage
+[33me1bfef6[m Cambios
+[33mdbec47e[m Versionado corregido y comunicacion funcional
+[33m8428f18[m Primera versión
+[33m201fc88[m Adaptado para emulador de android con AndroidStudio
+[33me861668[m Login, Register, getUsers, getAsignaturasDeUsuarioPorId i logOut funcionals. Primera versió App TeachMe
+[33m99c6ac4[m login register
+[33m4f0723d[m primer loggin i register
+[33m0cb9abf[m primer commit

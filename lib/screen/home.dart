@@ -105,7 +105,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 scale: _animation.value,
                 child: Icon(
                   Icons.favorite,
-                  color: theme.primaryColor.withOpacity(themeController.themeMode.value == ThemeMode.dark ? 0.9 : 0.7),
+                  color: theme.primaryColor.withOpacity(
+                      themeController.themeMode.value == ThemeMode.dark ? 0.9 : 0.7),
                   size: 80,
                 ),
               );
@@ -164,11 +165,28 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed('/map'),
-        backgroundColor: theme.primaryColor,
-        child: const Icon(Icons.map),
-        tooltip: 'Ver Mapa',
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Botón para programar clases visible para todos
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0), // Separación del botón de mapa
+            child: FloatingActionButton(
+              onPressed: () => Get.toNamed('/programar_clase'),
+              backgroundColor: Theme.of(context).primaryColor,
+              child: const Icon(Icons.add),
+              tooltip: 'Programar Clase',
+            ),
+          ),
+          // Botón para ver el mapa
+          FloatingActionButton(
+            onPressed: () => Get.toNamed('/map'),
+            backgroundColor: Theme.of(context).primaryColor,
+            child: const Icon(Icons.map),
+            tooltip: 'Ver Mapa',
+          ),
+        ],
       ),
     );
   }
