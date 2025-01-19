@@ -26,6 +26,7 @@ import '../screen/notificaciones.dart'; // Importa la pantalla de notificaciones
 import '../controllers/asignaturaController.dart'; // Importa el controlador de asignaturas
 import 'l10n.dart'; // Asegúrate de tener esta clase generada
 import 'package:flutter_localizations/flutter_localizations.dart'; // Importa las localizaciones globales
+import '../controllers/notificacionController.dart'; // Asegúrate de importar el controlador
 
 void main() {
   // Inicializa los controladores
@@ -33,6 +34,7 @@ void main() {
   Get.put<UserListController>(UserListController());
   Get.put<UserModelController>(UserModelController());
   Get.put(ConnectedUsersController());
+  Get.put(NotificacionController()); // Registra el controlador de notificaciones
   Get.put(SocketController());
   Get.put(ThemeController()); // Registrar el controlador del tema
   Get.put(LocaleController()); // Registrar el controlador de locales
