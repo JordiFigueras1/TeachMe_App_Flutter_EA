@@ -20,6 +20,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 
 
+import '../controllers/theme_controller.dart';
+import '../controllers/userModelController.dart';
+import '../controllers/notificacionController.dart'; // Importar el controlador de notificaciones
+import '../screen/notificaciones.dart'; // Asegúrate de que esta ruta sea la correcta
 
 class HomePage extends StatefulWidget {
   @override
@@ -36,7 +40,11 @@ class _HomePageState extends State<HomePage>
   final AuthController authController = Get.find<AuthController>();
   final ConnectedUsersController connectedUsersController = Get.find<ConnectedUsersController>();
   final AudioPlayer _audioPlayer = AudioPlayer();
-  
+  final TextEditingController _textController =
+      TextEditingController(); // Controlador para la caja de texto
+  final UserModelController userModelController = Get.find<UserModelController>();
+  final NotificacionController notificacionController = Get.find<NotificacionController>();
+
   
 
   DateTime _focusedDay = DateTime.now();
@@ -44,8 +52,6 @@ class _HomePageState extends State<HomePage>
   Map<DateTime, List<String>> _events = {};
   Map<String, double> _progressData = {};
   String currentTime = "";
-  final TextEditingController _textController =
-      TextEditingController(); // Controlador para la caja de texto
 
   @override
   void initState() {
@@ -66,6 +72,9 @@ class _HomePageState extends State<HomePage>
         print('Actualización del estado de usuarios: $data');
         connectedUsersController.updateConnectedUsers(List<String>.from(data));
       });
+
+      // Cargar notificaciones no leídas
+      notificacionController.fetchNotificaciones(authController.getUserId);
     }
 
     _loadEvents();
@@ -326,150 +335,198 @@ class _HomePageState extends State<HomePage>
   }
 
   @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+Widget build(BuildContext context) {
+  final ThemeData theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title:
-            Text(AppLocalizations.of(context)?.translate('home') ?? 'Inicio'),
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        actions: [
-          IconButton(
-            icon: Icon(
-              themeController.themeMode.value == ThemeMode.dark
-                  ? Icons.light_mode
-                  : Icons.dark_mode,
-              color: theme.iconTheme.color,
-            ),
-            onPressed: themeController.toggleTheme,
-          ),
-          IconButton(
-            icon: Icon(Icons.language, color: theme.textTheme.bodyLarge?.color),
-            onPressed: () {
-              if (localeController.currentLocale.value.languageCode == 'es') {
-                localeController.changeLanguage('en');
-              } else {
-                localeController.changeLanguage('es');
-              }
-            },
-          ),
-           // Icono de campanita con contador
-          
-          IconButton(
-            icon: const Icon(Icons.person_search),
-            onPressed: () {
-              Get.toNamed('/perfil');
-            },
-            tooltip: 'Buscar perfiles',
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _logout,
-            tooltip: 'Cerrar sesión',
-          ),
-        ],
+  return Scaffold(
+    backgroundColor: theme.scaffoldBackgroundColor,
+    appBar: AppBar(
+      title: Text(
+        AppLocalizations.of(context)?.translate('home') ?? 'Inicio',
       ),
-body: SingleChildScrollView(
-  padding: const EdgeInsets.all(16.0),
-  child: Stack(  // Usamos un Stack para permitir la colocación de Positioned
-    children: [
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Sección del calendario y eventos
-          Container(
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(16.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 8.0,
-                  offset: Offset(0, 4),
+      backgroundColor: theme.appBarTheme.backgroundColor,
+      actions: [
+        IconButton(
+          icon: Icon(
+            themeController.themeMode.value == ThemeMode.dark
+                ? Icons.light_mode
+                : Icons.dark_mode,
+            color: theme.iconTheme.color,
+          ),
+          onPressed: themeController.toggleTheme,
+        ),
+        Obx(() {
+          final int notificacionesSinLeer = notificacionController.notificaciones
+              .where((notificacion) => !notificacion.leida)
+              .length;
+
+          return Stack(
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.notifications,
+                  color: notificacionesSinLeer > 0
+                      ? Colors.red
+                      : theme.iconTheme.color,
                 ),
-              ],
-            ),
-            padding: const EdgeInsets.all(16.0),
-            margin: const EdgeInsets.only(bottom: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Fila con el calendario, clases para el día y TodoList
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Calendario
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: GestureDetector(
-                        onDoubleTap: () {
-                          if (_selectedDay != null) {
-                            _showAddEventDialog(context);
-                          }
-                        },
-                        child: TableCalendar(
-                          locale: 'es_ES',
-                          firstDay: DateTime(2000),
-                          lastDay: DateTime(2100),
-                          focusedDay: _focusedDay,
-                          selectedDayPredicate: (day) {
-                            return isSameDay(_selectedDay, day);
-                          },
-                          onDaySelected: (selectedDay, focusedDay) {
-                            setState(() {
-                              _selectedDay = selectedDay;
-                              _focusedDay = focusedDay;
-                            });
-                          },
-                          eventLoader: (day) => _events[day] ?? [],
-                          calendarStyle: CalendarStyle(
-                            selectedDecoration: BoxDecoration(
-                              color: Colors.blueAccent,
-                              shape: BoxShape.circle,
-                            ),
-                            todayDecoration: BoxDecoration(
-                              color: Colors.orangeAccent,
-                              shape: BoxShape.circle,
-                            ),
-                            markerDecoration: BoxDecoration(
-                              color: Colors.redAccent,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          headerStyle: const HeaderStyle(
-                            formatButtonVisible: false,
-                            titleCentered: true,
-                            titleTextStyle: TextStyle(fontSize: 18),
-                          ),
-                          onPageChanged: (focusedDay) {
-                            setState(() {
-                              _focusedDay = focusedDay;
-                            });
-                          },
-                        ),
+                onPressed: () {
+                  Get.to(
+                    () => NotificacionesPage(
+                      userId: userModelController.user.value.id,
+                    ),
+                  );
+                },
+                tooltip: 'Ver notificaciones',
+              ),
+              if (notificacionesSinLeer > 0)
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$notificacionesSinLeer',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(width: 16),
-                    // Contenedor de "Clases para el día" + TodoList al lado
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Text(
-                              AppLocalizations.of(context)
-                                      ?.translate('classes_for_day') ??
-                                  'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
-                              style: GoogleFonts.bebasNeue(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                  ),
+                ),
+            ],
+          );
+        }),
+        IconButton(
+          icon: Icon(
+            Icons.language,
+            color: theme.textTheme.bodyLarge?.color,
+          ),
+          onPressed: () {
+            if (localeController.currentLocale.value.languageCode == 'es') {
+              localeController.changeLanguage('en');
+            } else {
+              localeController.changeLanguage('es');
+            }
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.person_search),
+          onPressed: () {
+            Get.toNamed('/perfil');
+          },
+          tooltip: 'Buscar perfiles',
+        ),
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: _logout,
+          tooltip: 'Cerrar sesión',
+        ),
+      ],
+    ),
+    body: SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Sección del calendario y eventos
+              Container(
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(16.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 8.0,
+                      offset: Offset(0, 4),
                     ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(16.0),
+                margin: const EdgeInsets.only(bottom: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Fila con el calendario, clases para el día y TodoList
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Calendario
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          child: GestureDetector(
+                            onDoubleTap: () {
+                              if (_selectedDay != null) {
+                                _showAddEventDialog(context);
+                              }
+                            },
+                            child: TableCalendar(
+                              locale: 'es_ES',
+                              firstDay: DateTime(2000),
+                              lastDay: DateTime(2100),
+                              focusedDay: _focusedDay,
+                              selectedDayPredicate: (day) {
+                                return isSameDay(_selectedDay, day);
+                              },
+                              onDaySelected: (selectedDay, focusedDay) {
+                                setState(() {
+                                  _selectedDay = selectedDay;
+                                  _focusedDay = focusedDay;
+                                });
+                              },
+                              eventLoader: (day) => _events[day] ?? [],
+                              calendarStyle: CalendarStyle(
+                                selectedDecoration: BoxDecoration(
+                                  color: Colors.blueAccent,
+                                  shape: BoxShape.circle,
+                                ),
+                                todayDecoration: BoxDecoration(
+                                  color: Colors.orangeAccent,
+                                  shape: BoxShape.circle,
+                                ),
+                                markerDecoration: BoxDecoration(
+                                  color: Colors.redAccent,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              headerStyle: const HeaderStyle(
+                                formatButtonVisible: false,
+                                titleCentered: true,
+                                titleTextStyle: TextStyle(fontSize: 18),
+                              ),
+                              onPageChanged: (focusedDay) {
+                                setState(() {
+                                  _focusedDay = focusedDay;
+                                });
+                              },
                             ),
                           ),
+                        ),
+                        SizedBox(width: 16),
+                        // Contenedor de "Clases para el día" + TodoList al lado
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Text(
+                                  AppLocalizations.of(context)
+                                          ?.translate('classes_for_day') ??
+                                      'Clases para ${_selectedDay != null ? _selectedDay.toString().split(' ')[0] : 'ningún día'}:',
+                                  style: GoogleFonts.bebasNeue(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ),
                           ListView(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
@@ -488,11 +545,11 @@ body: SingleChildScrollView(
                                               _events.remove(_selectedDay);
                                             }
                                           });
-                                          _saveEvents();
-                                        },
-                                      ),
-                                    ))
-                                .toList(),
+                                        _saveEvents();
+                                            },
+                                          ),
+                                        ))
+                                  .toList(),
                           ),
                         ],
                       ),
@@ -501,180 +558,164 @@ body: SingleChildScrollView(
                     Container(
                       width: MediaQuery.of(context).size.width * 0.25, // ancho reducido
                       child: TodoListWidget(date: _selectedDay),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                    ],
+                ),
+),
+              // Lista de usuarios conectados
+              Container(
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(16.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 8.0,
+                      offset: Offset(0, 4),
                     ),
                   ],
                 ),
-                SizedBox(height: 16),
-              ],
-            ),
+                padding: const EdgeInsets.all(16.0),
+                margin: const EdgeInsets.only(bottom: 16.0),
+                child: Obx(() {
+                  if (connectedUsersController.connectedUsers.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No hay usuarios conectados.',
+                        style: GoogleFonts.bebasNeue(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 16),
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount:
+                        connectedUsersController.connectedUsers.length,
+                    itemBuilder: (context, index) {
+                      final userId =
+                          connectedUsersController.connectedUsers[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          leading: Hero(
+                            tag: 'user-avatar-$userId',
+                            child: CircleAvatar(
+                              backgroundColor:
+                                  theme.colorScheme.secondary,
+                              child: Icon(
+                                Icons.person,
+                                color: theme.colorScheme.onSecondary,
+                              ),
+                            ),
+                          ),
+                          title: Text(
+                            'ID: $userId',
+                            style: GoogleFonts.bebasNeue(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Estado: Conectado',
+                            style: GoogleFonts.bebasNeue(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }),
+              ),
+            ],
           ),
-
-          // Lista de usuarios conectados
-          Container(
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(16.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 8.0,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(16.0),
-            margin: const EdgeInsets.only(bottom: 16.0),
-            child: Obx(() {
-              if (connectedUsersController.connectedUsers.isEmpty) {
-                return Center(
-                  child: Text(
-                    'No hay usuarios conectados.',
+          // Aquí está el contenedor de "Progreso de asignaturas" con Positioned
+          Positioned(
+            top: 500,
+            left: 16,
+            child: Container(
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(16.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 8.0,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)
+                            ?.translate('subjects_progress') ??
+                        'Progreso de las asignaturas:',
                     style: GoogleFonts.bebasNeue(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.blue,
                     ),
                   ),
-                );
-              }
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: connectedUsersController.connectedUsers.length,
-                itemBuilder: (context, index) {
-                  final userId =
-                      connectedUsersController.connectedUsers[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: theme.colorScheme.secondary,
-                        child: Icon(
-                          Icons.person,
-                          color: theme.colorScheme.onSecondary,
-                        ),
-                      ),
-                      title: Text(
-                        'ID: $userId',
-                        style: GoogleFonts.bebasNeue(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
-                      ),
-                      subtitle: Text(
-                        'Estado: Conectado',
-                        style: GoogleFonts.bebasNeue(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            }),
+                  SizedBox(height: 8),
+                  Column(
+                    children: _buildProgressCharts(),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
-
-      // Aquí está el contenedor de "Progreso de asignaturas" con Positioned
-      Positioned(
-        top: 500,  // Ajusta este valor para moverlo hacia abajo o hacia arriba
-        left: 16,  // Ajusta este valor para moverlo hacia la izquierda o derecha
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8.0,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context)?.translate('subjects_progress') ??
-                    'Progreso de las asignaturas:',
-                style: GoogleFonts.bebasNeue(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
-              ),
-              SizedBox(height: 8),
-              Column(
-                children: _buildProgressCharts(), // Aquí es donde está tu lista
-              ),
-            ],
+    ),
+    floatingActionButton: Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: FloatingActionButton(
+            heroTag: 'programar-clase',
+            onPressed: () => Get.toNamed('/programar_clase'),
+            backgroundColor: Theme.of(context).primaryColor,
+            child: const Icon(Icons.add),
+            tooltip: 'Programar Clase',
           ),
         ),
-      ),
-    ],
-  ),
-),
-
-
-
-
-
-
-
-
-
-
-
-
-// Botones flotantes
-floatingActionButton: Column(
-  mainAxisSize: MainAxisSize.min,
-  mainAxisAlignment: MainAxisAlignment.end,
-  children: [
-    Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: FloatingActionButton(
-        onPressed: () => Get.toNamed('/programar_clase'),
-        backgroundColor: Theme.of(context).primaryColor,
-        child: const Icon(Icons.add),
-        tooltip: 'Programar Clase',
-      ),
+        FloatingActionButton(
+          heroTag: 'ver-mapa',
+          onPressed: () => Get.toNamed('/map'),
+          backgroundColor: Theme.of(context).primaryColor,
+          child: const Icon(Icons.map),
+          tooltip: 'Ver Mapa',
+        ),
+        const SizedBox(height: 8),
+        FloatingActionButton(
+          heroTag: 'chat-general',
+          onPressed: () => Get.toNamed('/chat-general'),
+          backgroundColor: Theme.of(context).primaryColor,
+          child: const Icon(Icons.chat),
+          tooltip: 'Chat General',
+        ),
+      ],
     ),
-    
-    // Botón para ver el mapa
-    FloatingActionButton(
-      onPressed: () => Get.toNamed('/map'),
-      backgroundColor: Theme.of(context).primaryColor,
-      child: const Icon(Icons.map),
-      tooltip: 'Ver Mapa',
-    ),
-    
-    // Botón para el chat general
-    Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: FloatingActionButton(
-        heroTag: 'chat-general', // Hero tag único para el chat general
-        onPressed: () => Get.toNamed('/chat-general'),
-        backgroundColor: Theme.of(context).primaryColor,
-        child: const Icon(Icons.chat),
-        tooltip: 'Chat General',
-      ),
-    ),
-  ],
-),
-
-
-
-    );
-    
-  }}
+  );
+}}

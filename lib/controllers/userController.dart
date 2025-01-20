@@ -8,7 +8,8 @@ import 'package:dio/dio.dart' as dio; // Usar siempre el prefijo dio
 
 class UserController extends GetxController {
   final UserService userService = Get.put(UserService());
-  final UserModelController userModelController = Get.find<UserModelController>();
+  final UserModelController userModelController =
+      Get.find<UserModelController>();
 
   final TextEditingController mailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -64,6 +65,7 @@ Future<void> logIn() async {
       final userData = response.data['usuario'] ?? {};
       final userId = userData['id'] ?? '0';
       final token = response.data['token'] ?? '';
+      final locationData = userData['location']?['coordinates'] ?? [0.0, 0.0];
 
       // Validar que los datos críticos estén presentes
       if (userId == '0' || token.isEmpty) {
@@ -103,7 +105,10 @@ Future<void> logIn() async {
         }).toList(),
         asignaturasImparte: userData['asignaturasImparte'] ?? [],
         location: {
-          'coordinates': [position.longitude, position.latitude],
+          'coordinates': [
+            locationData[0] ?? position.longitude,
+            locationData[1] ?? position.latitude
+          ],
         },
       );
 
@@ -133,7 +138,8 @@ Future<void> logIn() async {
     final user = userModelController.user.value;
 
     // Agrega este print para verificar la ruta de navegación
-    print('Redirigiendo a: ${!user.isProfesor && !user.isAlumno ? "/roleSelection" : "/home"}');
+    print(
+        'Redirigiendo a: ${!user.isProfesor && !user.isAlumno ? "/roleSelection" : "/home"}');
 
     if (!user.isProfesor && !user.isAlumno) {
       // Primer inicio de sesión: Redirigir a RoleSelectionPage
@@ -144,10 +150,11 @@ Future<void> logIn() async {
     }
   }
 
-
-  Future<void> updateDisponibilidad(String userId, List<Map<String, String>> disponibilidad) async {
+  Future<void> updateDisponibilidad(
+      String userId, List<Map<String, String>> disponibilidad) async {
     try {
-      final response = await userService.updateDisponibilidad(userId, disponibilidad);
+      final response =
+          await userService.updateDisponibilidad(userId, disponibilidad);
       if (response.statusCode == 200) {
         final userData = response.data['usuario'];
         userModelController.setUser(
@@ -178,7 +185,8 @@ Future<void> logIn() async {
 
   Future<void> fetchUserById(String userId) async {
     try {
-      final dio.Response response = await userService.getUserById(userId); // Usar dio.Response
+      final dio.Response response =
+          await userService.getUserById(userId); // Usar dio.Response
       if (response.statusCode == 200) {
         final userData = response.data;
         if (userData is Map<String, dynamic>) {
@@ -215,38 +223,61 @@ Future<void> logIn() async {
     }
   }
 
-
   Future<void> assignRole(String role) async {
-    try {
-      final userId = Get.find<AuthController>().getUserId;
-      final isProfesor = role == "profesor";
-      final isAlumno = role == "alumno";
+  try {
+    // Obtener el ID del usuario actual desde el AuthController
+    final userId = Get.find<AuthController>().getUserId;
 
-      // Llamada al servicio para actualizar el rol
-      final response = await userService.updateRole(userId, isProfesor, isAlumno);
+    // Determinar los valores de isProfesor e isAlumno en función del rol seleccionado
+    final isProfesor = role == "profesor";
+    final isAlumno = role == "alumno";
 
-      if (response.statusCode == 200) {
-        // Actualizar el modelo del usuario en el controlador
-        userModelController.setUser(
-          id: userModelController.user.value.id,
-          name: userModelController.user.value.name,
-          username: userModelController.user.value.username,
-          mail: userModelController.user.value.mail,
-          password: userModelController.user.value.password,
-          fechaNacimiento: userModelController.user.value.fechaNacimiento,
-          isProfesor: isProfesor,
-          isAlumno: isAlumno,
-          isAdmin: userModelController.user.value.isAdmin,
-          conectado: true,
-        );
-
-        // Navegar al Home después de asignar el rol
-        Get.offAllNamed('/home');
-      } else {
-        Get.snackbar("Error", "No se pudo asignar el rol. Inténtalo de nuevo.");
-      }
-    } catch (e) {
-      Get.snackbar("Error", "Ocurrió un problema: $e");
+    // Verificar que el rol es válido
+    if (!isProfesor && !isAlumno) {
+      throw Exception("Rol inválido seleccionado.");
     }
+
+    // Imprimir los valores enviados al backend para debug
+    print("Rol seleccionado: $role");
+    print("Payload enviado -> isProfesor: $isProfesor, isAlumno: $isAlumno");
+
+    // Llamada al servicio para actualizar el rol
+    final response = await userService.updateRole(userId, isProfesor, isAlumno);
+
+    // Verificar la respuesta del backend
+    if (response.statusCode == 200) {
+      // Actualizar el modelo del usuario con los nuevos datos
+      userModelController.setUser(
+        id: userModelController.user.value.id,
+        name: userModelController.user.value.name,
+        username: userModelController.user.value.username,
+        mail: userModelController.user.value.mail,
+        password: userModelController.user.value.password,
+        fechaNacimiento: userModelController.user.value.fechaNacimiento,
+        isProfesor: isProfesor,
+        isAlumno: isAlumno,
+        isAdmin: userModelController.user.value.isAdmin,
+        conectado: true,
+        foto: userModelController.user.value.foto,
+        descripcion: userModelController.user.value.descripcion,
+        disponibilidad: userModelController.user.value.disponibilidad,
+        asignaturasImparte: userModelController.user.value.asignaturasImparte,
+        location: userModelController.user.value.location,
+      );
+
+      // Mostrar mensaje de éxito y redirigir al Home
+      Get.snackbar("Éxito", "Rol asignado correctamente.");
+      Get.offAllNamed('/home');
+    } else {
+      // Mostrar error si la respuesta no es exitosa
+      Get.snackbar("Error", "No se pudo asignar el rol. Inténtalo de nuevo.");
+      print("Error del servidor: ${response.data}");
+    }
+  } catch (e) {
+    // Manejo de errores
+    Get.snackbar("Error", "Ocurrió un problema: $e");
+    print("Error al asignar el rol: $e");
   }
+}
+
 }
